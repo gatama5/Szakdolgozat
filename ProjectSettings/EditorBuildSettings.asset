@@ -9,6 +9,12 @@ EditorBuildSettings:
     path: Assets/Scenes/Menu_basic.unity
     guid: f75edeaced7bd3142a64ca0d27ed27fb
   - enabled: 1
+    path: Assets/Scenes/Score_screen.unity
+    guid: c57598b877152e040919f99063cc1ff5
+  - enabled: 1
+    path: Assets/Scenes/Menu_startinfos.unity
+    guid: 80e18e82be740264d9c9cd86156159c6
+  - enabled: 1
     path: Assets/Scenes/Test_screen.unity
     guid: d8aa84a618e467940955eccb5df3f43c
   - enabled: 1
@@ -27,6 +33,6 @@ EditorBuildSettings:
     path: Assets/Scenes/Level_5.unity
     guid: f0de114f1674d9c4eaa60cd3da7cf48d
   - enabled: 1
-    path: Assets/Scenes/Score_screen.unity
-    guid: c57598b877152e040919f99063cc1ff5
+    path: Assets/Scenes/Intro_video.unity
+    guid: 49eb2d6dda07ec444963871d5cccf131
   m_configObjects: {}
