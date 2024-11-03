@@ -33,6 +33,11 @@ EditorBuildSettings:
     path: Assets/Scenes/Level_5.unity
     guid: f0de114f1674d9c4eaa60cd3da7cf48d
   - enabled: 1
-    path: Assets/Scenes/Intro_video.unity
+    path: Assets/Scenes/Intro_video_hu.unity
     guid: 49eb2d6dda07ec444963871d5cccf131
-  m_configObjects: {}
+  - enabled: 1
+    path: Assets/Scenes/Intro_video_en.unity
+    guid: c0cb7477e578e7c48bf1c35f6b57501d
+  m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: ab4cc7482da988f43beae959d7c34fce, type: 2}
+    com.unity.localization.settings: {fileID: 11400000, guid: 996e5e01c8412c74d868e613871dfe6e, type: 2}

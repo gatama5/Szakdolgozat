@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: ButtonStringSwitcher Shared Data
+  m_EditorClassIdentifier: 
+  m_TableCollectionName: ButtonStringSwitcher
+  m_TableCollectionNameGuidString: ba40805d5ca65a245a39b54a67db1753
+  m_Entries:
+  - m_Id: 14462496768
+    m_Key: StartButtonSwitcher
+    m_Metadata:
+      m_Items: []
+  - m_Id: 79071555584
+    m_Key: ScoresButtonSwitcher
+    m_Metadata:
+      m_Items: []
+  - m_Id: 136839704576
+    m_Key: ExitButtonSwitcher
+    m_Metadata:
+      m_Items: []
+  - m_Id: 3297717530624
+    m_Key: TitleSwitcher
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13025717792768
+    m_Key: NameSwitch
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13035792510976
+    m_Key: AgeSwitch
+    m_Metadata:
+      m_Items: []
+  - m_Id: 13354672861184
+    m_Key: GenerationSwitch
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14345715593216
+    m_Key: BackButtonSwitch
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 255182433754546200
+  references:
+    version: 2
+    RefIds:
+    - rid: 255182433754546200
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1730633317812
