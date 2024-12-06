@@ -44,11 +44,11 @@ public class WireDragScript : MonoBehaviour
         transform.right = direction * transform.lossyScale.x;
 
         // Kábel nyújtása
-        float dist = Vector2.Distance(transform.TransformPoint(initialLocalPosition), newPosition);
+        float dist = Vector3.Distance(transform.TransformPoint(initialLocalPosition), newPosition);
         //float dist = Vector2.Distance(newPosition, initialLocalPosition);
 
         // A sprite size nyújtása
-        wireEnd.size = new Vector2(dist, wireEnd.size.y);
+        wireEnd.size = new Vector3(dist, wireEnd.size.y);
     }
 
     private Vector3 GetMouseWorldPosition()

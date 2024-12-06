@@ -21,7 +21,6 @@ public class ObjectSpawner_1place : MonoBehaviour
 
     void Start()
     {
-
         // Aszinkron késleltetett spawn ráta
         StartCoroutine(spawnObject(trg));
     }

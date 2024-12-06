@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(CharacterController))] // 
+[RequireComponent(typeof(CharacterController))]
 
 public class FPS_Controller : MonoBehaviour
 {
@@ -20,8 +20,6 @@ public class FPS_Controller : MonoBehaviour
 
     CharacterController characterController;
 
-
-    // Start is called before the first frame update
     void Start()
     {
         characterController = GetComponent<CharacterController>();
@@ -30,14 +28,12 @@ public class FPS_Controller : MonoBehaviour
 
     }
 
-    // Update is called once per frame
     void Update()
     {
         #region Handles Movment
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right = transform.TransformDirection(Vector3.right);
 
-        //Press Left Shift to run
         bool isRunning = Input.GetKey(KeyCode.LeftShift);
         float curSpeedX = canMove ? (isRunning ? runSpeed : walkSpeed) * Input.GetAxis("Vertical") : 0;
         float curSpeedY = canMove ? (isRunning ? runSpeed : walkSpeed) * Input.GetAxis("Horizontal") : 0;
