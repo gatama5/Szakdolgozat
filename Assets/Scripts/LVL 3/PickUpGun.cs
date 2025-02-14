@@ -10,6 +10,10 @@ public class PickUpGun : MonoBehaviour
     public GameObject org_crosshair;
     public GameObject pickUpText;
 
+    public bool isPickedUp = false;
+
+    public object InputSystem { get; private set; }
+
     void Start()
     {
         gunOnPlayer.SetActive(false);
@@ -20,15 +24,16 @@ public class PickUpGun : MonoBehaviour
     {
         pickUpText.SetActive(true);
 
-        if (other.gameObject.tag == "Player")
+        if(!isPickedUp)
         {
-            if (Input.GetKeyUp(KeyCode.E))
+            if (Input.GetKeyDown(KeyCode.E))
             {
                 this.gameObject.SetActive(false);
                 org_crosshair.SetActive(false);
                 gun_crosshair.SetActive(true);
                 gunOnPlayer.SetActive(true);
                 pickUpText.SetActive(false);
+                isPickedUp=true;
             }   
         }
     }

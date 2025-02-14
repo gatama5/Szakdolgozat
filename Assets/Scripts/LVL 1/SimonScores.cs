@@ -6,7 +6,7 @@ using UnityEngine.SocialPlatforms.Impl;
 public class SimonScores : MonoBehaviour
 {
     [SerializeField] int score_points = 0;
-    [SerializeField] int highscore_point = 0;
+    [SerializeField] public int highscore_point = 0;
 
     private void Start()
     {

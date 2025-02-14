@@ -13,18 +13,20 @@ public class SimonGameManager : MonoBehaviour
 
     [SerializeField] int pickNumber = 0;
     [SerializeField] SimonScores score;
+    [SerializeField]  public bool isShowing = false;
+    [SerializeField]  public bool isEnded = false;
 
     void Start()
     {
-        ResetGame();
+        //ResetGame();
         SetButtonIndex();
-        StartCoroutine("PlayGame");
+        //StartCoroutine("PlayGame");
     }
 
-    private void Awake()
-    {
-        SetButtonIndex();
-    }
+    //private void Awake()
+    //{
+    //    SetButtonIndex();
+    //}
 
     void SetButtonIndex() 
     {
@@ -34,17 +36,18 @@ public class SimonGameManager : MonoBehaviour
         }
     }
 
-    IEnumerator PlayGame()
+    public IEnumerator PlayGame()
     {
+        isShowing = true;
         pickNumber = 0;
         yield return new WaitForSeconds(pickDelay);
-
         foreach (var buttonIndex in buttons_Order)
         {
             buttons[buttonIndex].PressButton();
             yield return new WaitForSeconds(pickDelay);
         }
         PickRandomColor();
+        isShowing = false;
     }
 
     void PickRandomColor()
@@ -56,21 +59,24 @@ public class SimonGameManager : MonoBehaviour
 
     public void PlayerPick(int btn_index)
     {
-
-        if (buttons_Order[pickNumber] == btn_index)
+        if (!isShowing)
         {
-            pickNumber++;
-            if (pickNumber == buttons_Order.Count)
+            if (buttons_Order[pickNumber] == btn_index)
             {
-                score.Set(pickNumber); // update the player score
-                StartCoroutine("PlayGame");
+                pickNumber++;
+                if (pickNumber == buttons_Order.Count)
+                {
+                    score.Set(pickNumber); // update the player score
+                    StartCoroutine("PlayGame");
+                }
             }
-        }
-        else
-        {
-            ResetGame();
-            StartCoroutine("PlayGame");
-            //GameOver();
+            else
+            {
+                isEnded = true;
+                //ResetGame();
+                //StartCoroutine("PlayGame");
+                //GameOver();
+            }
         }
     }
 
@@ -82,11 +88,4 @@ public class SimonGameManager : MonoBehaviour
         buttons_Order.Clear();
     }
 
-    //public void GameOver()
-    //{
-    //    for (int i = 0; i < buttons.Length; i++)
-    //    {
-    //        buttons[i].enabled = false;
-    //    }
-    //}
 }

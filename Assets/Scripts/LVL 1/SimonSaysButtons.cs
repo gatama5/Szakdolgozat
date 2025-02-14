@@ -14,6 +14,8 @@ public class SimonSaysButton : MonoBehaviour
     private float next_clickTime = 0f;
     [SerializeField] SimonGameManager gameManager;
 
+
+
     public int ButtonIndex { get; set; }
 
     private void Awake()
@@ -29,11 +31,14 @@ public class SimonSaysButton : MonoBehaviour
 
      void OnMouseDown()
     {
-        if (Input.GetMouseButtonDown(0) && Time.time >= next_clickTime)
+        if (gameManager.isShowing == false)
         {
-            next_clickTime = Time.time + clickRate;
-            gameManager.PlayerPick(ButtonIndex);
-            PressButton();
+            if (Input.GetMouseButtonDown(0) && Time.time >= next_clickTime)
+            {
+                next_clickTime = Time.time + clickRate;
+                gameManager.PlayerPick(ButtonIndex);
+                PressButton();
+            }        
         }
     }
 

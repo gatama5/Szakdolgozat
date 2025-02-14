@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Diagnostics;
+using System;
 
 public class ButtonsForMaze : MonoBehaviour
 {
@@ -16,6 +18,9 @@ public class ButtonsForMaze : MonoBehaviour
     private float timeInLabyrinth = 0f;
     private bool timerActive = false;
     public bool playerInMaze = false;
+    Stopwatch sw = new Stopwatch();
+
+    public TimeSpan score_time;
 
     void Start()
     {
@@ -29,10 +34,10 @@ public class ButtonsForMaze : MonoBehaviour
 
     void Update()
     {
-        if (timerActive)
-        {
-            timeInLabyrinth += Time.deltaTime;
-        }
+        //if (timerActive)
+        //{
+        //    timeInLabyrinth += Time.deltaTime;
+        //}
     }
 
     private void SetInitialButtonColors()
@@ -56,29 +61,52 @@ public class ButtonsForMaze : MonoBehaviour
         if (buttonsParent != null)
             buttonsParent.SetActive(true);
 
-        // Idõzítõ indítása
-        timerActive = true;
-        timeInLabyrinth = 0f; // Idõzítõ nullázása amikor kezdõdik a játék
-        Debug.Log("Maze challenge started! Timer is running.");
+        //// Idõzítõ indítása
+        
+        sw.Start();
+
+        //timerActive = true;
+        //timeInLabyrinth = 0f; // Idõzítõ nullázása amikor kezdõdik a játék
+        UnityEngine.Debug.Log("Maze challenge started! Timer is running.");
     }
 
     public void OnButtonPress(GameObject pressedButton)
     {
-        Debug.Log(pressedButton.name);
-        pressedButton.GetComponent<MeshRenderer>().material.color = activated;
-        buttonSound.Play();
-        if (pressedButton == goodButton)
+        if (playerInMaze)
         {
-            doorstate = true;
-            timerActive = false;
-            Debug.Log($"Gratulálok! Teljesítetted a feladatot! Idõd: {timeInLabyrinth:F2} másodperc");
+            UnityEngine.Debug.Log(pressedButton.name);
+            pressedButton.GetComponent<MeshRenderer>().material.color = activated;
+            buttonSound.Play();
+            if (pressedButton == goodButton)
+            {
+                //doorstate = true;
+                //timerActive = false;
+                //UnityEngine.Debug.Log($"Gratulálok! Teljesítetted a feladatot! Idõd: {timeInLabyrinth:F2} másodperc");
+                GoodButtonPress();
+
+            }
+            else
+            {
+                BadButtonPress(pressedButton);
+                //doorstate = false;
+                //UnityEngine.Debug.Log("Rossz gomb! Próbáld újra!");
+            }
         }
-        else
-        {
-            doorstate = false;
-            Debug.Log("Rossz gomb! Próbáld újra!");
-        }
-        //Destroy(pressedButton);
+    }
+
+    public void GoodButtonPress() 
+    {
+        sw.Stop();
+        TimeSpan timeTaken = sw.Elapsed;
+        score_time = timeTaken;
+        UnityEngine.Debug.Log($"Gratulálok! Teljesítetted a feladatot! Idõd: " + timeTaken + " másodperc");
+        sw.Reset();
+    }
+
+    public void BadButtonPress(GameObject pressedButton)
+    {
+        UnityEngine.Debug.Log($"Rossz gomb keress tovább!");
+        pressedButton.active = false;
     }
 
     public bool GetDoorState()

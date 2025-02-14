@@ -3,6 +3,7 @@ using UnityEngine.UIElements;
 using System;
 using UnityEngine.VFX;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Gun : MonoBehaviour
 {
@@ -16,6 +17,8 @@ public class Gun : MonoBehaviour
     private float nextFireTime = 0f;
 
     public float src_volume = 0.5f;
+
+    public ObjectSpawner_1place osp_1place;
 
     public void Start()
     {
@@ -47,7 +50,7 @@ public class Gun : MonoBehaviour
                 Transform targetFront = hit.transform;  
                 Vector2 hitPointLocal = targetFront.InverseTransformPoint(hitPointWorld);
                 Debug.Log("Találati pont a target_front közepéhez képest: " + Math.Round(hitPointLocal.x * 10, 2)  + " " + Math.Round(hitPointLocal.y * 10, 2));
-
+                osp_1place.hitPlace_fromMiddle.Add("X: " + (Math.Round(hitPointLocal.x * 10, 2).ToString() + " Y: " + (Math.Round(hitPointLocal.y * 10, 2)).ToString())); //találati hely elmentése
                 Target target = hit.transform.GetComponent<Target>();
                 if (target != null)
                 {

@@ -4,8 +4,10 @@ using UnityEngine;
 
 public class SimonGameStartButton : MonoBehaviour
 {
-    [SerializeField] SimonGameManager gm;
-    [SerializeField] SimonSaysButton[] buttons;
+     public SimonGameManager gm;
+     public SimonSaysButton[] buttons;
+     public AudioSource src;
+     [SerializeField] public float start_delay = 3f;
 
     void OnMouseDown()
     {
@@ -13,7 +15,9 @@ public class SimonGameStartButton : MonoBehaviour
         //{
         //    buttons[i].GetComponent<MeshRenderer>().material.color = buttons[i].defaultColor;
         //}
+        src.Play();
+        gm.isEnded = false;
         gm.ResetGame();
-        gm.StartCoroutine("PlayGame");
+        gm.StartCoroutine(gm.PlayGame());
     }
 }
