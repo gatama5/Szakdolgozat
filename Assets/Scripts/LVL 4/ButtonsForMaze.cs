@@ -16,7 +16,7 @@ public class ButtonsForMaze : MonoBehaviour
 
     private bool doorstate = false;
     private float timeInLabyrinth = 0f;
-    private bool timerActive = false;
+    //private bool timerActive = false;
     public bool playerInMaze = false;
     Stopwatch sw = new Stopwatch();
 
@@ -106,7 +106,8 @@ public class ButtonsForMaze : MonoBehaviour
     public void BadButtonPress(GameObject pressedButton)
     {
         UnityEngine.Debug.Log($"Rossz gomb keress tovább!");
-        pressedButton.active = false;
+        pressedButton.SetActive(false);
+        //pressedButton.active = false;
     }
 
     public bool GetDoorState()
@@ -123,7 +124,7 @@ public class ButtonsForMaze : MonoBehaviour
     public void ResetMaze()
     {
         playerInMaze = false;
-        timerActive = false;
+        //timerActive = false;
         timeInLabyrinth = 0f;
         doorstate = false;
         SetInitialButtonColors();
