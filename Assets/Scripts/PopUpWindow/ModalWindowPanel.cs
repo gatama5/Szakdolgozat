@@ -1,32 +1,49 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ModalWindowPanel : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI title_text;
-    [SerializeField] private TextMeshProUGUI content_text;
-    [SerializeField] private TextMeshProUGUI apply_btn_text;
-    [SerializeField] Button apply_btn;
-    //[SerializeField] Canvas panel;
+
+    [SerializeField] private Button apply_btn;
+    [SerializeField] public GameObject modalWindow; // A bezárandó ablak GameObject-je
+    [SerializeField] public TriggerZoneForWindow trg_zone;
+    //public FPS_Controller playerController;
+
+
 
     private Action onApplyAction;
+    ui_c ui_c;
 
-    public void Confirm()
+    private void Awake()
     {
-        onApplyAction?.Invoke();
-        //panel.gameObject.SetActive(false);
+        apply_btn.onClick.AddListener(CloseModalButton);
+        //trg_zone = GetComponent<TriggerZoneForWindow>();
     }
 
-    public void ShowAsHero(string title, string message, Action confirmAction) 
-    {
-        title_text.text = title;
-        content_text.text = message;
-        onApplyAction = confirmAction;
+    //public void Confirm()
+    //{
+    //    onApplyAction?.Invoke();
+    //    ui_c.Instance.Close();
+    //}
 
+    public void CloseModalButton()
+    {
+        if (modalWindow != null)
+        {
+            modalWindow.SetActive(false);
+            if (trg_zone != null)
+            {
+                trg_zone.OnApplyPressed();
+            }
+        }
+    }
+
+    public void ShowAsHero()
+    {
+        Debug.Log("megjelenítés");
+        ui_c.Instance.Show();
     }
 
 }

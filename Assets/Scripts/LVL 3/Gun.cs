@@ -22,6 +22,7 @@ public class Gun : MonoBehaviour
 
     public void Start()
     {
+        osp_1place = new ObjectSpawner_1place();
         src.volume = src_volume;
 
     }

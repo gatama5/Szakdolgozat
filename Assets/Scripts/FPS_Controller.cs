@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -53,5 +54,27 @@ public class FPS_Controller : MonoBehaviour
         }
 
         #endregion
+
+        #region Mouse Hide/Show
+
+        if (Input.GetKey(KeyCode.H))
+        {
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+        else if (Input.GetKey(KeyCode.J))
+        {
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.Confined;
+        }
+
+        #endregion
+
+        
+    }
+
+    public void canMoveAgain()
+    {
+        canMove = true;
     }
 }

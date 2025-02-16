@@ -21,6 +21,11 @@ public class SimonGameManager : MonoBehaviour
         //ResetGame();
         SetButtonIndex();
         //StartCoroutine("PlayGame");
+
+        //for (int i = 0; i < buttons.Length; i++)
+        //{
+        //    buttons[i].enabled = false;
+        //}
     }
 
     //private void Awake()

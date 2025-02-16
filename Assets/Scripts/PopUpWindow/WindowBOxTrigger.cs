@@ -9,12 +9,13 @@ public class WindowBOxTrigger : MonoBehaviour
     public string message;
     public bool triggerOnEnable;
 
-    public void OnEnable() 
+    public void OnEnable()
     {
-        if (!triggerOnEnable)
+        if (!triggerOnEnable || ui_c.Instance == null)
         {
             return;
         }
-        UIController.Instance.modalwindow.ShowAsHero(title, message, null);
+        ui_c.Instance.modalwindow.ShowAsHero();
     }
+
 }
