@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -16,8 +17,35 @@ public class SimonGameManager : MonoBehaviour
     [SerializeField]  public bool isShowing = false;
     [SerializeField]  public bool isEnded = false;
 
+    //[SerializeField] public GameObject door;
+    //[SerializeField] public GameObject doorknob;
+
+
+    //public Tuple<Vector3, Quaternion> door_start_pos =
+    // new Tuple<Vector3, Quaternion>(
+    //     new Vector3(13.21f, 2.32f, 6.26f),
+    //     new Quaternion(0, -0.707103193f, 0, 0.707110405f)
+    // );
+
+    //public Tuple<Vector3, Quaternion> door_open_pos =
+    //    new Tuple<Vector3, Quaternion>(
+    //         new Vector3(16.44f, 2.32f, 3.75f),
+    //         new Quaternion(0, -1, 0, 5.30f)
+    //   );
+
+
+    //public Tuple<Vector3, Quaternion> door_knob_start = new Tuple<Vector3, Quaternion>(new Vector3(10.72f, 6.48f, 6.26f), new Quaternion(0, -0.70f, 0, 0.70f));
+    //public Tuple<Vector3, Quaternion> door_knob_open = new Tuple<Vector3, Quaternion>(new Vector3(16.5f, 6.4000001f, 0.109999999f), new Quaternion(0, -0.00617052522f, 0, 0.999981046f));
+
+
     void Start()
     {
+        //door.transform.position = door_start_pos.Item1;
+        //door.transform.rotation = door_start_pos.Item2;
+        //doorknob.transform.position = door_knob_start.Item1;
+        //doorknob.transform.rotation = door_knob_start.Item2;
+        
+
         //ResetGame();
         SetButtonIndex();
         //StartCoroutine("PlayGame");
@@ -57,7 +85,7 @@ public class SimonGameManager : MonoBehaviour
 
     void PickRandomColor()
     {
-       int rnd = Random.Range(0, buttons.Length);
+        int rnd = UnityEngine.Random.Range(0, buttons.Length);
        buttons[rnd].PressButton();
         buttons_Order.Add(rnd);
     }
@@ -78,6 +106,11 @@ public class SimonGameManager : MonoBehaviour
             else
             {
                 isEnded = true;
+
+                //door.transform.position = door_open_pos.Item1;
+                //door.transform.rotation = door_open_pos.Item2;
+                //doorknob.transform.position = door_knob_open.Item1;
+                //doorknob.transform.rotation = door_knob_open.Item2;
                 //ResetGame();
                 //StartCoroutine("PlayGame");
                 //GameOver();

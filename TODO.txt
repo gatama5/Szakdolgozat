@@ -1,4 +1,1 @@
-SIMON mondja játéknál:
 
-- GameOver funkció megadása (gombok ne legyenek elérhetőek, a színe fakuljon ki, ne rögzítsen adatokat)
--Start gomb megadása ( csak akkor induljon el a játék ha megnyomja a felhasználó, GameOver-nél csak akkor induljon el amikor meg lett nyomva)
