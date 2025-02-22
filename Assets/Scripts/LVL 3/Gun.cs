@@ -13,6 +13,9 @@ public class Gun : MonoBehaviour
     public Camera fpsCam;
     public AudioSource src;
 
+    
+     List<Tuple<double, double>> hitpoints = new List<Tuple<double, double>>(); // találatok
+
     public float fireRate = 1f;  // A lövésenkénti szünet (másodpercben)
     private float nextFireTime = 0f;
 
@@ -52,6 +55,7 @@ public class Gun : MonoBehaviour
                 Vector2 hitPointLocal = targetFront.InverseTransformPoint(hitPointWorld);
                 Debug.Log("Találati pont a target_front közepéhez képest: " + Math.Round(hitPointLocal.x * 10, 2)  + " " + Math.Round(hitPointLocal.y * 10, 2));
                 osp_1place.hitPlace_fromMiddle.Add("X: " + (Math.Round(hitPointLocal.x * 10, 2).ToString() + " Y: " + (Math.Round(hitPointLocal.y * 10, 2)).ToString())); //találati hely elmentése
+                hitpoints.Add(new Tuple<double, double>(Math.Round(hitPointLocal.x * 10, 2),Math.Round(hitPointLocal.y * 10, 2)));
                 Target target = hit.transform.GetComponent<Target>();
                 if (target != null)
                 {

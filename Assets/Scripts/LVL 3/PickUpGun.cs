@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PickUpGun : MonoBehaviour
@@ -9,10 +6,9 @@ public class PickUpGun : MonoBehaviour
     public GameObject gun_crosshair;
     public GameObject org_crosshair;
     public GameObject pickUpText;
-
     public bool isPickedUp = false;
 
-    public object InputSystem { get; private set; }
+    private bool isInRange = false;
 
     void Start()
     {
@@ -20,27 +16,40 @@ public class PickUpGun : MonoBehaviour
         pickUpText.SetActive(false);
     }
 
-    private void OnTriggerStay(Collider other)
+    void Update()
     {
-        pickUpText.SetActive(true);
-
-        if(!isPickedUp)
+        // Ha a játékos hatótávon belül van és megnyomja az E gombot
+        if (isInRange && !isPickedUp && Input.GetKeyDown(KeyCode.E))
         {
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                this.gameObject.SetActive(false);
-                org_crosshair.SetActive(false);
-                gun_crosshair.SetActive(true);
-                gunOnPlayer.SetActive(true);
-                pickUpText.SetActive(false);
-                isPickedUp=true;
-            }   
+            PickUpWeapon();
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            isInRange = true;
+            pickUpText.SetActive(true);
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        pickUpText.SetActive(false);
+        if (other.CompareTag("Player"))
+        {
+            isInRange = false;
+            pickUpText.SetActive(false);
+        }
     }
 
+    private void PickUpWeapon()
+    {
+        this.gameObject.SetActive(false);
+        org_crosshair.SetActive(false);
+        gun_crosshair.SetActive(true);
+        gunOnPlayer.SetActive(true);
+        pickUpText.SetActive(false);
+        isPickedUp = true;
+    }
 }

@@ -59,7 +59,7 @@ public class TriggerZoneForWindow : MonoBehaviour
         {
             // Fixáljuk a pozíciót és forgást amíg a Modal Window aktív
             player.transform.position = fixedPosition;
-            player.transform.rotation = fixedRotation;
+            //player.transform.rotation = fixedRotation;
         }
     }
 

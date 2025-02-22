@@ -10,12 +10,18 @@ public class SimonGameManager : MonoBehaviour
     [SerializeField] SimonSaysButton[] buttons;
     [SerializeField] SimonGameStartButton startButton;
     [SerializeField] List<int> buttons_Order;
-    [SerializeField] float pickDelay = 1f;
-
+    [SerializeField] float initialPickDelay = 1f; // Kezdeti késleltetés
+    [SerializeField] float minPickDelay = 0.3f;   // Minimum késleltetés
+    [SerializeField] float speedIncreaseRate = 0.05f; // Mennyivel gyorsuljon körönként
+    private float currentPickDelay;
     [SerializeField] int pickNumber = 0;
     [SerializeField] SimonScores score;
     [SerializeField]  public bool isShowing = false;
     [SerializeField]  public bool isEnded = false;
+
+    // Gomb használati követés
+    private Dictionary<int, int> buttonUsageCount = new Dictionary<int, int>();
+
 
     //[SerializeField] public GameObject door;
     //[SerializeField] public GameObject doorknob;
@@ -44,22 +50,21 @@ public class SimonGameManager : MonoBehaviour
         //door.transform.rotation = door_start_pos.Item2;
         //doorknob.transform.position = door_knob_start.Item1;
         //doorknob.transform.rotation = door_knob_start.Item2;
-        
-
-        //ResetGame();
+        isEnded = false;
         SetButtonIndex();
-        //StartCoroutine("PlayGame");
+        currentPickDelay = initialPickDelay;
+        InitializeButtonUsage();
 
-        //for (int i = 0; i < buttons.Length; i++)
-        //{
-        //    buttons[i].enabled = false;
-        //}
     }
 
-    //private void Awake()
-    //{
-    //    SetButtonIndex();
-    //}
+
+    void InitializeButtonUsage()
+    {
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            buttonUsageCount[i] = 0;
+        }
+    }
 
     void SetButtonIndex() 
     {
@@ -73,57 +78,99 @@ public class SimonGameManager : MonoBehaviour
     {
         isShowing = true;
         pickNumber = 0;
-        yield return new WaitForSeconds(pickDelay);
+        yield return new WaitForSeconds(currentPickDelay);
+
         foreach (var buttonIndex in buttons_Order)
         {
             buttons[buttonIndex].PressButton();
-            yield return new WaitForSeconds(pickDelay);
+            yield return new WaitForSeconds(currentPickDelay);
         }
+
         PickRandomColor();
+
+        // Gyorsítás minden sikeres kör után
+        currentPickDelay = Mathf.Max(minPickDelay,
+            initialPickDelay - (speedIncreaseRate * buttons_Order.Count));
+
         isShowing = false;
     }
 
     void PickRandomColor()
     {
-        int rnd = UnityEngine.Random.Range(0, buttons.Length);
-       buttons[rnd].PressButton();
-        buttons_Order.Add(rnd);
+        // Megtaláljuk a legkevésbé használt gombokat
+        int minUsage = int.MaxValue;
+        foreach (var usage in buttonUsageCount.Values)
+        {
+            minUsage = Mathf.Min(minUsage, usage);
+        }
+
+        // Összegyûjtjük a legkevésbé használt gombok indexeit
+        List<int> leastUsedButtons = new List<int>();
+        foreach (var kvp in buttonUsageCount)
+        {
+            if (kvp.Value == minUsage)
+            {
+                leastUsedButtons.Add(kvp.Key);
+            }
+        }
+
+        // Véletlenszerûen választunk a legkevésbé használt gombok közül
+        int selectedIndex = leastUsedButtons[UnityEngine.Random.Range(0, leastUsedButtons.Count)];
+
+        // Növeljük a használati számlálót
+        buttonUsageCount[selectedIndex]++;
+
+        buttons[selectedIndex].PressButton();
+        buttons_Order.Add(selectedIndex);
     }
+
 
     public void PlayerPick(int btn_index)
     {
-        if (!isShowing)
+
+        if (!isShowing && buttons_Order.Count > 0 && !isEnded)
         {
             if (buttons_Order[pickNumber] == btn_index)
             {
                 pickNumber++;
                 if (pickNumber == buttons_Order.Count)
                 {
-                    score.Set(pickNumber); // update the player score
+                    score.Set(buttons_Order.Count); // update the player score
                     StartCoroutine("PlayGame");
                 }
             }
             else
             {
                 isEnded = true;
-
-                //door.transform.position = door_open_pos.Item1;
-                //door.transform.rotation = door_open_pos.Item2;
-                //doorknob.transform.position = door_knob_open.Item1;
-                //doorknob.transform.rotation = door_knob_open.Item2;
-                //ResetGame();
-                //StartCoroutine("PlayGame");
-                //GameOver();
+                GameOver();
+                // Game over logic here
             }
         }
     }
 
+    private void GameOver()
+    {
+        score.CheckForNewHighscore(); // Ellenõrizzük, hogy új highscore született-e
+        Debug.Log($"Game Over! Final score: {score.GetCurrentScore()}");
+    }
+
+
+    //public void ResetGame()
+    //{
+    //    score.CheckForNewHighscore();
+    //    score.Set();
+    //    buttons_Order.Clear();
+    //    currentPickDelay = initialPickDelay;
+    //    InitializeButtonUsage(); // Újraindítjuk a gomb használati számlálót
+    //}
 
     public void ResetGame()
     {
-        score.CheckForNewHighscore();
-        score.Set();
+        score.ResetScore(); // Új játék kezdésekor nullázzuk a pontszámot
         buttons_Order.Clear();
+        currentPickDelay = initialPickDelay;
+        InitializeButtonUsage();
+        isEnded = false;
     }
 
 }

@@ -1,45 +1,127 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
 public class NextGameColliderScript : MonoBehaviour
 {
-    Vector3 game1_startPos = new Vector3(-58.56f, 0.54f, 7.49f);
-    Vector3 game2_startPos = new Vector3(-68.96f, 0.54f, 7.49f);
-    Vector3 game3_startPos = new Vector3(-79.87f, 0.54f, 7.49f);
-    Vector3 game4_startPos = new Vector3(-92.23f, 0.54f, 5.08f);
-
-    [SerializeField] private Collider c;
-    [SerializeField] private int level = 0;
-    private List<Vector3> level_vectors = new List<Vector3>();
-
+    private static int currentLevel = 0;
     [SerializeField] private GameObject player;
+    [SerializeField] private int thisLevelIndex;
+    [SerializeField] private SimonGameManager simonGame; // Simon játék referencia
+    [SerializeField] private ObjectSpawner_1place shootingGame; // Lövöldözõs játék referencia
 
-    void Start()
+    private static Vector3[] levelPositions = new Vector3[] {
+        new Vector3(-58.56f, 0.54f, 7.49f),  // 1. szint
+        new Vector3(-68.96f, 0.54f, 7.49f),  // 2. szint
+        new Vector3(-79.87f, 0.54f, 7.49f),  // 3. szint
+        new Vector3(-92.23f, 0.54f, 5.08f)   // 4. szint
+    };
+
+    private void Start()
     {
-        // Inicializálás
-        level_vectors.Add(game1_startPos);
-        level_vectors.Add(game2_startPos);
-        level_vectors.Add(game3_startPos);
-        level_vectors.Add(game4_startPos);
-
-        // Játékos kezdõ pozíció beállítása
-        if (player != null)
+        if (player == null)
         {
-            player.transform.position = game1_startPos;
+            Debug.LogWarning("Player reference is not set in NextGameColliderScript!");
+            return;
+        }
+
+        if (currentLevel == 0)
+        {
+            player.transform.position = levelPositions[0];
+        }
+
+        // Ellenõrizzük a játékok referenciáit
+        if (thisLevelIndex == 0 && simonGame == null)
+        {
+            Debug.LogError("Simon Game Manager reference is missing from the first level collider!");
+        }
+        if (thisLevelIndex == 2 && shootingGame == null) // 3. szint ellenõrzése
+        {
+            Debug.LogError("Shooting Game reference is missing from the third level collider!");
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Player"))
+        if (!other.gameObject.CompareTag("Player") || thisLevelIndex != currentLevel)
+            return;
+
+        bool canProceed = true;
+
+        // Elsõ szint - Simon játék ellenõrzése
+        if (thisLevelIndex == 0)
         {
-            // Ellenõrizzük, hogy van-e következõ szint
-            if (level < level_vectors.Count - 1)
+            if (simonGame == null)
             {
-                level++; // Szint léptetése
-                player.transform.position = level_vectors[level]; // Teleportálás
+                Debug.LogError("Simon Game Manager reference is missing!");
+                return;
+            }
+            if (!simonGame.isEnded)
+            {
+                canProceed = false;
+                Debug.Log("Complete the Simon Says game first!");
             }
         }
+
+        // Harmadik szint - Lövöldözõs játék ellenõrzése
+        else if (thisLevelIndex == 2)
+        {
+            if (shootingGame == null)
+            {
+                Debug.LogError("Shooting Game reference is missing!");
+                return;
+            }
+            if (shootingGame.hit_times.Count == 0) // Ha még nincs találat, nem játszott
+            {
+                canProceed = false;
+                Debug.Log("Complete at least one round of the Shooting game first!");
+            }
+        }
+
+        if (!canProceed)
+        {
+            // Visszalökjük a játékost
+            Vector3 pushBackPosition = player.transform.position + (player.transform.forward * -2f);
+            if (player.GetComponent<CharacterController>() != null)
+            {
+                player.GetComponent<CharacterController>().enabled = false;
+                player.transform.position = pushBackPosition;
+                player.GetComponent<CharacterController>().enabled = true;
+            }
+            else
+            {
+                player.transform.position = pushBackPosition;
+            }
+            return;
+        }
+
+        // Ha idáig eljutottunk, akkor továbbléphetünk
+        MoveToNextLevel();
+    }
+
+    private void MoveToNextLevel()
+    {
+        if (currentLevel < levelPositions.Length - 1)
+        {
+            currentLevel++;
+            Vector3 newPos = levelPositions[currentLevel];
+            if (player.GetComponent<CharacterController>() != null)
+            {
+                player.GetComponent<CharacterController>().enabled = false;
+                player.transform.position = newPos;
+                player.GetComponent<CharacterController>().enabled = true;
+            }
+            else
+            {
+                player.transform.position = newPos;
+            }
+        }
+    }
+
+    public static int GetCurrentLevel()
+    {
+        return currentLevel;
+    }
+
+    public static void ResetLevels()
+    {
+        currentLevel = 0;
     }
 }
