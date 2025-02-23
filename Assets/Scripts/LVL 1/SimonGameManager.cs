@@ -10,19 +10,17 @@ public class SimonGameManager : MonoBehaviour
     [SerializeField] SimonSaysButton[] buttons;
     [SerializeField] SimonGameStartButton startButton;
     [SerializeField] List<int> buttons_Order;
-    [SerializeField] float initialPickDelay = 1f; // Kezdeti késleltetés
-    [SerializeField] float minPickDelay = 0.3f;   // Minimum késleltetés
-    [SerializeField] float speedIncreaseRate = 0.05f; // Mennyivel gyorsuljon körönként
+    [SerializeField] float initialPickDelay = 1f;
+    [SerializeField] float minPickDelay = 0.3f;
+    [SerializeField] float speedIncreaseRate = 0.05f;
     private float currentPickDelay;
     [SerializeField] int pickNumber = 0;
     [SerializeField] SimonScores score;
-    [SerializeField]  public bool isShowing = false;
-    [SerializeField]  public bool isEnded = false;
+    [SerializeField] public bool isShowing = false;
+    [SerializeField] public bool isEnded = false;
 
-    // Gomb használati követés
     private Dictionary<int, int> buttonUsageCount = new Dictionary<int, int>();
-
-
+    private SQLiteDBScript dbManager;
     //[SerializeField] public GameObject door;
     //[SerializeField] public GameObject doorknob;
 
@@ -44,17 +42,32 @@ public class SimonGameManager : MonoBehaviour
     //public Tuple<Vector3, Quaternion> door_knob_open = new Tuple<Vector3, Quaternion>(new Vector3(16.5f, 6.4000001f, 0.109999999f), new Quaternion(0, -0.00617052522f, 0, 0.999981046f));
 
 
+    //void Start()
+    //{
+    //    //door.transform.position = door_start_pos.Item1;
+    //    //door.transform.rotation = door_start_pos.Item2;
+    //    //doorknob.transform.position = door_knob_start.Item1;
+    //    //doorknob.transform.rotation = door_knob_start.Item2;
+    //    isEnded = false;
+    //    SetButtonIndex();
+    //    currentPickDelay = initialPickDelay;
+    //    InitializeButtonUsage();
+
+    //}
+
     void Start()
     {
-        //door.transform.position = door_start_pos.Item1;
-        //door.transform.rotation = door_start_pos.Item2;
-        //doorknob.transform.position = door_knob_start.Item1;
-        //doorknob.transform.rotation = door_knob_start.Item2;
         isEnded = false;
         SetButtonIndex();
         currentPickDelay = initialPickDelay;
         InitializeButtonUsage();
 
+        // Megkeressük az adatbázis managert
+        dbManager = FindObjectOfType<SQLiteDBScript>();
+        if (dbManager == null)
+        {
+            Debug.LogWarning("SQLiteDBScript nem található! Az eredmények nem lesznek mentve.");
+        }
     }
 
 
@@ -148,25 +161,44 @@ public class SimonGameManager : MonoBehaviour
         }
     }
 
+    //private void GameOver()
+    //{
+    //    score.CheckForNewHighscore(); // Ellenõrizzük, hogy új highscore született-e
+    //    Debug.Log($"Game Over! Final score: {score.GetCurrentScore()}");
+    //}
+
+
     private void GameOver()
     {
-        score.CheckForNewHighscore(); // Ellenõrizzük, hogy új highscore született-e
-        Debug.Log($"Game Over! Final score: {score.GetCurrentScore()}");
+        int finalScore = score.GetCurrentScore();
+        score.CheckForNewHighscore();
+        Debug.Log($"Game Over! Final score: {finalScore}");
+
+        // Adatbázis mentés
+        SaveScoreToDatabase(finalScore);
+    }
+
+    private void SaveScoreToDatabase(int finalScore)
+    {
+        if (dbManager != null)
+        {
+            try
+            {
+                // Frissítjük a Simon játék pontszámát az adatbázisban
+                dbManager.UpdateSimonScore(finalScore);
+                Debug.Log($"Simon játék pontszám sikeresen mentve: {finalScore}");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Hiba történt a pontszám mentése közben: {e.Message}");
+            }
+        }
     }
 
 
-    //public void ResetGame()
-    //{
-    //    score.CheckForNewHighscore();
-    //    score.Set();
-    //    buttons_Order.Clear();
-    //    currentPickDelay = initialPickDelay;
-    //    InitializeButtonUsage(); // Újraindítjuk a gomb használati számlálót
-    //}
-
     public void ResetGame()
     {
-        score.ResetScore(); // Új játék kezdésekor nullázzuk a pontszámot
+        score.ResetScore();
         buttons_Order.Clear();
         currentPickDelay = initialPickDelay;
         InitializeButtonUsage();

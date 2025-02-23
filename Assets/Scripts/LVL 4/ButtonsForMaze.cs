@@ -132,4 +132,10 @@ public class ButtonsForMaze : MonoBehaviour
         if (buttonsParent != null)
             buttonsParent.SetActive(false);
     }
+
+    public void ResetScore()
+    {
+        score_time = TimeSpan.Zero;
+        // Egyéb szükséges nullázások
+    }
 }

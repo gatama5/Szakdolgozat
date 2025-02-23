@@ -23,6 +23,7 @@ public class FPS_Controller : MonoBehaviour
 
     void Start()
     {
+        //Debug.Log(Application.persistentDataPath); DB path
         characterController = GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;

@@ -14,6 +14,9 @@ public class PlayBefore_screen_script : MonoBehaviour
     [SerializeField] private TMP_InputField ageInput;
     [SerializeField] private TextMeshProUGUI genDisplayBox;
 
+    private SQLiteDBScript dbManager;
+    private static int currentPlayerId = 1;
+
     private LoacalisationManagerScript locManager;
     //public Animator transition;
 
@@ -28,9 +31,18 @@ public class PlayBefore_screen_script : MonoBehaviour
         ageInput = transform.Find("InputFields/Age_input").GetComponent<TMP_InputField>();
         genDisplayBox = transform.Find("Texts/Gen_display_box").GetComponent<TextMeshProUGUI>();
 
+
         if (ageInput == null || genDisplayBox == null)
         {
             Debug.LogError("Hiányzó komponensek a hierarchiában!");
+            return;
+        }
+
+        dbManager = FindObjectOfType<SQLiteDBScript>();
+
+        if (dbManager == null)
+        {
+            Debug.LogError("SQLiteDBScript nem található!");
             return;
         }
 
@@ -38,6 +50,65 @@ public class PlayBefore_screen_script : MonoBehaviour
         ageInput.onValueChanged.AddListener(UpdateGeneration);
 
         UpdateStartButtonState();
+    }
+
+    private void Load_PlayVideoSceen()
+    {
+        if (areAllFieldsFilled)
+        {
+            // Adatok mentése az adatbázisba
+            SavePlayerData();
+
+            // Scene betöltése
+            if (locManager.getLocal() == 1)
+            {
+                SceneManager.LoadScene(9);
+            }
+            if (locManager.getLocal() == 0)
+            {
+                SceneManager.LoadScene(10);
+            }
+        }
+    }
+
+    private void SavePlayerData()
+    {
+        try
+        {
+            string playerName = nameInput.text;
+            string playerEmail = emailInput.text;
+            int playerAge = int.Parse(ageInput.text);
+            string generation = genDisplayBox.text;
+
+            // Kezdeti értékek (késõbb frissítésre kerülnek)
+            int simonScore = 0;
+            double mazeTime = 0;
+            int shootingScore = 0;
+
+            // Adatok mentése
+            dbManager.InsertPlayerData(
+                currentPlayerId,
+                playerName,
+                playerAge,
+                playerEmail,
+                generation,
+                simonScore,
+                mazeTime,
+                shootingScore
+            );
+
+            // ID növelése a következõ játékoshoz
+            currentPlayerId++;
+
+            // Játékos ID mentése a késõbbi frissítésekhez
+            PlayerPrefs.SetInt("CurrentPlayerId", currentPlayerId - 1);
+            PlayerPrefs.Save();
+
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Hiba az adatok mentése során: {e.Message}");
+        }
     }
 
     private void ValidateInput(string text)
@@ -105,18 +176,18 @@ public class PlayBefore_screen_script : MonoBehaviour
         startButton.interactable = areAllFieldsFilled;
     }
 
-    private void Load_PlayVideoSceen()
-    {
+    //private void Load_PlayVideoSceen()
+    //{
 
-        if (locManager.getLocal() == 1) 
-        {
-            SceneManager.LoadScene(9);
-        }
-        if (locManager.getLocal() == 0) 
-        {
-            SceneManager.LoadScene(10);
-        }
-    }
+    //    if (locManager.getLocal() == 1) 
+    //    {
+    //        SceneManager.LoadScene(9);
+    //    }
+    //    if (locManager.getLocal() == 0) 
+    //    {
+    //        SceneManager.LoadScene(10);
+    //    }
+    //}
 
     private void GoToMainMenu()
     {
