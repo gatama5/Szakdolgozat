@@ -15,7 +15,9 @@ public class PlayBefore_screen_script : MonoBehaviour
     [SerializeField] private TextMeshProUGUI genDisplayBox;
 
     private SQLiteDBScript dbManager;
-    private static int currentPlayerId = 1;
+
+    // Remove the static currentPlayerId as it's now handled by the database
+    // private static int currentPlayerId = 1;
 
     private LoacalisationManagerScript locManager;
     //public Animator transition;
@@ -30,7 +32,6 @@ public class PlayBefore_screen_script : MonoBehaviour
 
         ageInput = transform.Find("InputFields/Age_input").GetComponent<TMP_InputField>();
         genDisplayBox = transform.Find("Texts/Gen_display_box").GetComponent<TextMeshProUGUI>();
-
 
         if (ageInput == null || genDisplayBox == null)
         {
@@ -85,9 +86,8 @@ public class PlayBefore_screen_script : MonoBehaviour
             double mazeTime = 0;
             int shootingScore = 0;
 
-            // Adatok mentése
+            // Adatok mentése - Now using the updated method without playerID
             dbManager.InsertPlayerData(
-                currentPlayerId,
                 playerName,
                 playerAge,
                 playerEmail,
@@ -97,13 +97,10 @@ public class PlayBefore_screen_script : MonoBehaviour
                 shootingScore
             );
 
-            // ID növelése a következõ játékoshoz
-            currentPlayerId++;
+            // Már nem kell növelni az ID-t, mert az adatbázis automatikusan kezeli
+            // PlayerPrefs.SetInt() most már a dbManager.InsertPlayerData() metódusban történik
 
-            // Játékos ID mentése a késõbbi frissítésekhez
-            PlayerPrefs.SetInt("CurrentPlayerId", currentPlayerId - 1);
-            PlayerPrefs.Save();
-
+            Debug.Log("Játékos adatok sikeresen elmentve!");
         }
         catch (System.Exception e)
         {
@@ -176,22 +173,8 @@ public class PlayBefore_screen_script : MonoBehaviour
         startButton.interactable = areAllFieldsFilled;
     }
 
-    //private void Load_PlayVideoSceen()
-    //{
-
-    //    if (locManager.getLocal() == 1) 
-    //    {
-    //        SceneManager.LoadScene(9);
-    //    }
-    //    if (locManager.getLocal() == 0) 
-    //    {
-    //        SceneManager.LoadScene(10);
-    //    }
-    //}
-
     private void GoToMainMenu()
     {
         SceneManager.LoadScene(0);
     }
-
 }

@@ -1,3 +1,4 @@
+
 using TMPro;
 using System.Collections.Generic;
 using UnityEngine;
@@ -37,7 +38,11 @@ public class ScoreManager : MonoBehaviour
     {
         InitializeUITexts();
         UpdateAllScores();
+
+        // Debug log - ellenõrizzük, hogy a ScoreManager megtalálta-e az összes szükséges komponenst
+        Debug.Log($"ScoreManager initialized with: objectSpawner={objectSpawner != null}, gunscript={gunscript != null}, dbManager={dbManager != null}");
     }
+
     private void ResetScoresBasedOnLevel()
     {
         int currentLevel = NextGameColliderScript.GetCurrentLevel();
@@ -85,12 +90,23 @@ public class ScoreManager : MonoBehaviour
         if (mazeScore != null)
             mazeScore.text = currentLevel > 1 ? mazeScore.text : "Maze Score: 0";
     }
+
     void Update()
     {
         if (objectSpawner != null && objectSpawner.hit_times != null && shootingScore != null)
         {
+            // Ellenõrizzük, hogy változott-e a találatok száma
             if (objectSpawner.hit_times.Count != shootingTimes.Count)
             {
+                Debug.Log($"Hit times count changed: {objectSpawner.hit_times.Count} vs {shootingTimes.Count}");
+                UpdateShootingScores();
+            }
+
+            // Ellenõrizzük a hitPlace_fromMiddle listát is
+            if (objectSpawner.hitPlace_fromMiddle != null &&
+                objectSpawner.hitPlace_fromMiddle.Count != hitPositions.Count)
+            {
+                Debug.Log($"Hit positions count changed: {objectSpawner.hitPlace_fromMiddle.Count} vs {hitPositions.Count}");
                 UpdateShootingScores();
             }
         }
@@ -133,81 +149,42 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
-    //private void UpdateShootingScores()
-    //{
-    //    if (objectSpawner == null || shootingScore == null) return;
-
-    //    try
-    //    {
-    //        if (objectSpawner.hit_times != null)
-    //            shootingTimes = new List<double>(objectSpawner.hit_times);
-
-    //        if (objectSpawner.hitPlace_fromMiddle != null)
-    //            hitPositions = new List<string>(objectSpawner.hitPlace_fromMiddle);
-
-    //        if (shootingTimes.Count == 0)
-    //        {
-    //            shootingScore.SetText("No hits recorded yet");
-    //            return;
-    //        }
-
-    //        double currentBestTime = shootingTimes.Min();
-    //        if (currentBestTime < bestTime)
-    //        {
-    //            bestTime = currentBestTime;
-    //            bestTimeIndex = shootingTimes.IndexOf(bestTime);
-
-    //            // Adatbázis frissítése a legjobb eredménnyel
-    //            if (dbManager != null && shootingTimes.Count > 0 && bestTimeIndex >= 0)
-    //            {
-    //                string[] coordinates = hitPositions[bestTimeIndex].Split(',');
-    //                if (coordinates.Length == 2 &&
-    //                    double.TryParse(coordinates[0], out double hitX) &&
-    //                    double.TryParse(coordinates[1], out double hitY))
-    //                {
-    //                    dbManager.UpdateShootingScore(shootingTimes.Count, bestTime, hitX, hitY);
-    //                }
-    //            }
-    //        }
-
-    //        string bestPosition = bestTimeIndex >= 0 && bestTimeIndex < hitPositions.Count ?
-    //            hitPositions[bestTimeIndex] : "N/A";
-
-    //        string lastTime = shootingTimes.Count > 0 ?
-    //            shootingTimes[shootingTimes.Count - 1].ToString("F2") : "N/A";
-
-    //        string lastPosition = hitPositions.Count > 0 ?
-    //            hitPositions[hitPositions.Count - 1] : "N/A";
-
-    //        string displayText = string.Format(
-    //            "Best Shot:\nTime: {0:F2} sec\nPosition: {1}\n\nLast Shot:\nTime: {2}\nPosition: {3}\n\nTotal Hits: {4}",
-    //            bestTime,
-    //            bestPosition,
-    //            lastTime,
-    //            lastPosition,
-    //            shootingTimes.Count
-    //        );
-
-    //        shootingScore.SetText(displayText);
-    //    }
-    //    catch (System.Exception e)
-    //    {
-    //        Debug.LogError($"Error in UpdateShootingScores: {e.Message}");
-    //        shootingScore.SetText("Score updating...");
-    //    }
-    //}
-
     private void UpdateShootingScores()
     {
-        if (objectSpawner == null || shootingScore == null) return;
+        if (objectSpawner == null || shootingScore == null)
+        {
+            Debug.LogWarning("UpdateShootingScores: objectSpawner or shootingScore is null");
+            return;
+        }
 
         try
         {
+            // Adatok másolása és ellenõrzése
             if (objectSpawner.hit_times != null)
+            {
                 shootingTimes = new List<double>(objectSpawner.hit_times);
+                Debug.Log($"Copied {shootingTimes.Count} hit times from objectSpawner");
+            }
+            else
+            {
+                Debug.LogError("objectSpawner.hit_times is null!");
+            }
 
             if (objectSpawner.hitPlace_fromMiddle != null)
+            {
                 hitPositions = new List<string>(objectSpawner.hitPlace_fromMiddle);
+                Debug.Log($"Copied {hitPositions.Count} hit positions from objectSpawner");
+
+                // Debug: Minden pozíció kiírása
+                for (int i = 0; i < hitPositions.Count; i++)
+                {
+                    Debug.Log($"Hit position {i}: {hitPositions[i]}");
+                }
+            }
+            else
+            {
+                Debug.LogError("objectSpawner.hitPlace_fromMiddle is null!");
+            }
 
             if (shootingTimes.Count == 0)
             {
@@ -220,6 +197,7 @@ public class ScoreManager : MonoBehaviour
             {
                 bestTime = currentBestTime;
                 bestTimeIndex = shootingTimes.IndexOf(bestTime);
+                Debug.Log($"New best time: {bestTime} at index {bestTimeIndex}");
             }
 
             // Format the display text with proper position values
@@ -230,10 +208,12 @@ public class ScoreManager : MonoBehaviour
             if (bestTimeIndex >= 0 && bestTimeIndex < hitPositions.Count)
             {
                 displayText.AppendLine($"Position: {hitPositions[bestTimeIndex]}");
+                Debug.Log($"Best shot position: {hitPositions[bestTimeIndex]}");
             }
             else
             {
                 displayText.AppendLine("Position: N/A");
+                Debug.LogWarning($"Best shot position unavailable. bestTimeIndex={bestTimeIndex}, hitPositions.Count={hitPositions.Count}");
             }
 
             displayText.AppendLine("\nLast Shot:");
@@ -242,15 +222,18 @@ public class ScoreManager : MonoBehaviour
             if (hitPositions.Count > 0)
             {
                 displayText.AppendLine($"Position: {hitPositions[hitPositions.Count - 1]}");
+                Debug.Log($"Last shot position: {hitPositions[hitPositions.Count - 1]}");
             }
             else
             {
                 displayText.AppendLine("Position: N/A");
+                Debug.LogWarning("Last shot position unavailable. hitPositions is empty.");
             }
 
             displayText.AppendLine($"\nTotal Hits: {shootingTimes.Count}");
 
             shootingScore.SetText(displayText.ToString());
+            Debug.Log($"Updated shooting score text: {shootingScore.text}");
 
             // Update database with each shot
             if (dbManager != null)
@@ -259,33 +242,52 @@ public class ScoreManager : MonoBehaviour
                 {
                     if (i < hitPositions.Count)
                     {
-                        string[] coordinates = hitPositions[i].Split(',');
+                        string[] coordinates = hitPositions[i].Split('|');
                         if (coordinates.Length == 2)
                         {
                             if (double.TryParse(coordinates[0], out double hitX) &&
                                 double.TryParse(coordinates[1], out double hitY))
                             {
+                                Debug.Log($"Sending to database: shot {i + 1}, time={shootingTimes[i]}, X={hitX}, Y={hitY}");
                                 dbManager.UpdateShootingScore(i + 1, shootingTimes[i], hitX, hitY);
                             }
+                            else
+                            {
+                                Debug.LogError($"Failed to parse coordinates: {hitPositions[i]}");
+                            }
+                        }
+                        else
+                        {
+                            Debug.LogError($"Invalid coordinate format: {hitPositions[i]}, expected format: X,Y");
                         }
                     }
+                    else
+                    {
+                        Debug.LogWarning($"Missing position data for shot {i + 1}");
+                    }
                 }
+            }
+            else
+            {
+                Debug.LogError("dbManager is null, cannot update database!");
             }
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"Error in UpdateShootingScores: {e.Message}");
-            shootingScore.SetText("Score updating...");
+            Debug.LogError($"Error in UpdateShootingScores: {e.Message}\n{e.StackTrace}");
+            shootingScore.SetText("Score updating error...");
         }
     }
 
     public void RefreshScores()
     {
+        Debug.Log("RefreshScores called");
         UpdateAllScores();
     }
 
     public void RestartCurrentGame()
     {
+        Debug.Log("RestartCurrentGame called");
         ResetScoresBasedOnLevel();
         InitializeUITexts();
         UpdateAllScores();

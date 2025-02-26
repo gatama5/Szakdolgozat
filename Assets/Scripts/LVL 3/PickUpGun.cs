@@ -52,4 +52,15 @@ public class PickUpGun : MonoBehaviour
         pickUpText.SetActive(false);
         isPickedUp = true;
     }
+
+    public void DorpWeapon() 
+    {
+        this.gameObject.SetActive(true);
+        org_crosshair.SetActive(true);
+        gun_crosshair.SetActive(false);
+        gunOnPlayer.SetActive(false);
+        pickUpText.SetActive(true);
+        isPickedUp = false;
+    }
+
 }
