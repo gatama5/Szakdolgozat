@@ -14,30 +14,56 @@ public class ButtonsForMaze : MonoBehaviour
     public AudioSource buttonSound;
     public GameObject buttonsParent;
 
+    [Header("UI Elements")]
+    public TextMeshProUGUI timerText; // Make sure to assign this in the Inspector
+
     private bool doorstate = false;
-    private float timeInLabyrinth = 0f;
-    //private bool timerActive = false;
+    //private float timeInLabyrinth = 0f;
+    private bool timerActive = false;
     public bool playerInMaze = false;
     Stopwatch sw = new Stopwatch();
-
     public TimeSpan score_time;
+
+    private ScoreManager scoreManager;
 
     void Start()
     {
+        // Find ScoreManager
+        scoreManager = FindObjectOfType<ScoreManager>();
+
+        // Initialize timer text
+        if (timerText != null)
+        {
+            timerText.text = "Time: 00:00.00";
+        }
+        else
+        {
+            UnityEngine.Debug.LogError("Timer Text is not assigned in ButtonsForMaze!");
+        }
+
         // Kezdetben a gombok és szöveg rejtve
         if (buttonsParent != null)
             buttonsParent.SetActive(false);
-
 
         SetInitialButtonColors();
     }
 
     void Update()
     {
-        //if (timerActive)
-        //{
-        //    timeInLabyrinth += Time.deltaTime;
-        //}
+        // Update timer display if active
+        if (timerActive && sw.IsRunning)
+        {
+            score_time = sw.Elapsed;
+            UpdateTimerDisplay();
+        }
+    }
+
+    private void UpdateTimerDisplay()
+    {
+        if (timerText != null)
+        {
+            timerText.text = string.Format("Time: {0:mm\\:ss\\.ff}", score_time);
+        }
     }
 
     private void SetInitialButtonColors()
@@ -56,18 +82,20 @@ public class ButtonsForMaze : MonoBehaviour
 
     public void StartMazeChallenge()
     {
+        // Reset timer
+        sw.Reset();
 
         // Gombok megjelenítése
         if (buttonsParent != null)
             buttonsParent.SetActive(true);
 
-        //// Idõzítõ indítása
-        
+        // Idõzítõ indítása
         sw.Start();
-
-        //timerActive = true;
-        //timeInLabyrinth = 0f; // Idõzítõ nullázása amikor kezdõdik a játék
+        timerActive = true;
         UnityEngine.Debug.Log("Maze challenge started! Timer is running.");
+
+        // Make sure the timer display is initialized
+        UpdateTimerDisplay();
     }
 
     public void OnButtonPress(GameObject pressedButton)
@@ -77,37 +105,42 @@ public class ButtonsForMaze : MonoBehaviour
             UnityEngine.Debug.Log(pressedButton.name);
             pressedButton.GetComponent<MeshRenderer>().material.color = activated;
             buttonSound.Play();
+
             if (pressedButton == goodButton)
             {
-                //doorstate = true;
-                //timerActive = false;
-                //UnityEngine.Debug.Log($"Gratulálok! Teljesítetted a feladatot! Idõd: {timeInLabyrinth:F2} másodperc");
                 GoodButtonPress();
-
             }
             else
             {
                 BadButtonPress(pressedButton);
-                //doorstate = false;
-                //UnityEngine.Debug.Log("Rossz gomb! Próbáld újra!");
             }
         }
     }
 
-    public void GoodButtonPress() 
+    public void GoodButtonPress()
     {
         sw.Stop();
-        TimeSpan timeTaken = sw.Elapsed;
-        score_time = timeTaken;
-        UnityEngine.Debug.Log($"Gratulálok! Teljesítetted a feladatot! Idõd: " + timeTaken + " másodperc");
-        sw.Reset();
+        timerActive = false;
+        score_time = sw.Elapsed;
+
+        // Format time for logging
+        string formattedTime = string.Format("{0:mm\\:ss\\.ff}", score_time);
+        UnityEngine.Debug.Log($"Gratulálok! Teljesítetted a feladatot! Idõd: {formattedTime}");
+
+        // Final timer update
+        UpdateTimerDisplay();
+
+        // Update score in ScoreManager
+        if (scoreManager != null)
+        {
+            scoreManager.RefreshScores();
+        }
     }
 
     public void BadButtonPress(GameObject pressedButton)
     {
         UnityEngine.Debug.Log($"Rossz gomb keress tovább!");
         pressedButton.SetActive(false);
-        //pressedButton.active = false;
     }
 
     public bool GetDoorState()
@@ -117,25 +150,43 @@ public class ButtonsForMaze : MonoBehaviour
 
     public float GetCompletionTime()
     {
-        return timeInLabyrinth;
+        return (float)score_time.TotalSeconds;
     }
 
     // Reset függvény hozzáadása, ha szükséges újrakezdeni a játékot
     public void ResetMaze()
     {
         playerInMaze = false;
-        //timerActive = false;
-        timeInLabyrinth = 0f;
+        //timeInLabyrinth = 0f;
+        timerActive = false;
         doorstate = false;
-        SetInitialButtonColors();
 
+        // Reset timer
+        sw.Reset();
+        score_time = TimeSpan.Zero;
+        if (timerText != null)
+        {
+            timerText.text = "Time: 00:00.00";
+        }
+
+        // Reset buttons
+        SetInitialButtonColors();
         if (buttonsParent != null)
             buttonsParent.SetActive(false);
+
+        // Re-enable all buttons that might have been disabled
+        foreach (GameObject button in badButtons)
+        {
+            button.SetActive(true);
+        }
     }
 
     public void ResetScore()
     {
         score_time = TimeSpan.Zero;
-        // Egyéb szükséges nullázások
+        if (timerText != null)
+        {
+            timerText.text = "Time: 00:00.00";
+        }
     }
 }

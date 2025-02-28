@@ -167,9 +167,11 @@ public class SQLiteDBScript : MonoBehaviour
         }
     }
 
-    public void UpdateMazeTime(double completionTime)
+    public void UpdateMazeTime(double completionTime, string formattedTime)
     {
         int currentPlayerId = PlayerPrefs.GetInt("CurrentPlayerId", 1);
+
+        UnityEngine.Debug.Log($"Updating maze time in database: Player ID={currentPlayerId}, Time={formattedTime}");
 
         using (var connection = new SqliteConnection(dbPath))
         {
@@ -178,15 +180,41 @@ public class SQLiteDBScript : MonoBehaviour
                 connection.Open();
                 using (var command = connection.CreateCommand())
                 {
+                    // First, try to convert the table schema to allow for text format
+                    try
+                    {
+                        command.CommandText = "ALTER TABLE MainDB MODIFY COLUMN MazeCompleteTime TEXT";
+                        command.ExecuteNonQuery();
+                        UnityEngine.Debug.Log("Database schema updated to store time as text");
+                    }
+                    catch (Exception ex)
+                    {
+                        // If alter table fails, we'll continue with the current schema
+                        UnityEngine.Debug.Log($"Continuing with existing schema: {ex.Message}");
+                    }
+
+                    // Now update the time - try to store as formatted string if possible
                     command.CommandText = "UPDATE MainDB SET MazeCompleteTime = @Time WHERE PlayerID = @PlayerID";
-                    command.Parameters.AddWithValue("@Time", completionTime);
+
+                    // Try to use the formatted string value first, fall back to double if needed
+                    try
+                    {
+                        command.Parameters.AddWithValue("@Time", formattedTime);
+                    }
+                    catch
+                    {
+                        // If we can't use string format, fall back to double
+                        command.Parameters.AddWithValue("@Time", completionTime);
+                    }
+
                     command.Parameters.AddWithValue("@PlayerID", currentPlayerId);
-                    command.ExecuteNonQuery();
+                    int rowsAffected = command.ExecuteNonQuery();
+                    UnityEngine.Debug.Log($"Database update result: {rowsAffected} rows affected");
                 }
             }
             catch (Exception ex)
             {
-                Debug.LogError($"Error updating maze time: {ex.Message}");
+                UnityEngine.Debug.LogError($"Error updating maze time: {ex.Message}");
             }
             finally
             {

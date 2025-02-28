@@ -16,11 +16,8 @@ public class PlayBefore_screen_script : MonoBehaviour
 
     private SQLiteDBScript dbManager;
 
-    // Remove the static currentPlayerId as it's now handled by the database
-    // private static int currentPlayerId = 1;
 
     private LoacalisationManagerScript locManager;
-    //public Animator transition;
 
     private bool areAllFieldsFilled = false;
 
@@ -63,11 +60,11 @@ public class PlayBefore_screen_script : MonoBehaviour
             // Scene betöltése
             if (locManager.getLocal() == 1)
             {
-                SceneManager.LoadScene(9);
+                SceneManager.LoadScene(4);
             }
             if (locManager.getLocal() == 0)
             {
-                SceneManager.LoadScene(10);
+                SceneManager.LoadScene(5);
             }
         }
     }

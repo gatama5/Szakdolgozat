@@ -138,13 +138,19 @@ public class ScoreManager : MonoBehaviour
     {
         if (mazeScore != null && maze_scr != null)
         {
-            double currentTime = maze_scr.score_time.TotalMinutes + ((maze_scr.score_time.Seconds % 60) / 100.0);
-            mazeScore.SetText($"Maze Score: {currentTime}");
+            // Format the time for display
+            string formattedTime = string.Format("{0:mm\\:ss\\.ff}", maze_scr.score_time);
+            mazeScore.SetText($"Maze Score: {formattedTime}");
 
-            // Adatbázis frissítése csak ha van érvényes idõ
-            if (dbManager != null && currentTime > 0)
+            // Calculate time in minutes for database (original format)
+            double currentTime = maze_scr.score_time.TotalMinutes;
+
+            // Check if we have a valid time
+            if (dbManager != null && maze_scr.score_time.TotalSeconds > 0)
             {
-                dbManager.UpdateMazeTime(currentTime);
+                Debug.Log($"Updating maze score in database: {formattedTime}");
+                // Pass both the numeric value and the formatted string
+                dbManager.UpdateMazeTime(currentTime, formattedTime);
             }
         }
     }
