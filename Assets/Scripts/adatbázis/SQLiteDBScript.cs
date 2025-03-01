@@ -1,3 +1,5 @@
+//OLD SQLITE DB MANAGER
+
 //using System;
 //using System.Data;
 //using System.IO;
@@ -321,6 +323,8 @@
 //}
 
 
+//NEW DB SQLITE MANAGER SCRIPT
+
 using UnityEngine;
 using System.Data;
 using Mono.Data.Sqlite;
@@ -337,6 +341,9 @@ public class SQLiteDBScript : MonoBehaviour
 
     void Awake()
     {
+        // Az adatbázis keresztül vitelének biztosítása
+        DontDestroyOnLoad(this.gameObject);
+
         // Az adatbázis fájl elérési útja
         string dbPath = Application.persistentDataPath + "/game_scores.db";
         connectionString = "URI=file:" + dbPath;
@@ -345,6 +352,17 @@ public class SQLiteDBScript : MonoBehaviour
 
         // Adatbázis inicializálása
         InitializeDatabase();
+
+        // PlayerPrefs-bõl az azonosító visszaállítása, ha van
+        if (PlayerPrefs.HasKey("CurrentPlayerID"))
+        {
+            int savedPlayerID = PlayerPrefs.GetInt("CurrentPlayerID");
+            if (savedPlayerID > 0)
+            {
+                SetCurrentPlayerID(savedPlayerID);
+                Debug.Log($"Restored player ID from PlayerPrefs: {currentPlayerID}");
+            }
+        }
     }
 
     void InitializeDatabase()
@@ -523,89 +541,62 @@ public class SQLiteDBScript : MonoBehaviour
                     Debug.Log($"Added player details for player ID: {currentPlayerID}");
                 }
 
-                // Simon játék inicializáló pontszám
-                using (IDbCommand dbCmd = dbConnection.CreateCommand())
+                // Simon játék inicializáló pontszám - ONLY IF NOT ZERO
+                if (simonScore > 0)
                 {
-                    dbCmd.CommandText = "INSERT INTO SimonScores (PlayerID, Score) VALUES (@id, @score)";
+                    using (IDbCommand dbCmd = dbConnection.CreateCommand())
+                    {
+                        dbCmd.CommandText = "INSERT INTO SimonScores (PlayerID, Score) VALUES (@id, @score)";
 
-                    IDbDataParameter idParam = dbCmd.CreateParameter();
-                    idParam.ParameterName = "@id";
-                    idParam.Value = currentPlayerID;
-                    dbCmd.Parameters.Add(idParam);
+                        IDbDataParameter idParam = dbCmd.CreateParameter();
+                        idParam.ParameterName = "@id";
+                        idParam.Value = currentPlayerID;
+                        dbCmd.Parameters.Add(idParam);
 
-                    IDbDataParameter scoreParam = dbCmd.CreateParameter();
-                    scoreParam.ParameterName = "@score";
-                    scoreParam.Value = simonScore;
-                    dbCmd.Parameters.Add(scoreParam);
+                        IDbDataParameter scoreParam = dbCmd.CreateParameter();
+                        scoreParam.ParameterName = "@score";
+                        scoreParam.Value = simonScore;
+                        dbCmd.Parameters.Add(scoreParam);
 
-                    dbCmd.ExecuteNonQuery();
-                    Debug.Log($"Initialized Simon score for player ID: {currentPlayerID}");
+                        dbCmd.ExecuteNonQuery();
+                        Debug.Log($"Initialized Simon score for player ID: {currentPlayerID}");
+                    }
                 }
 
-                // Labirintus játék inicializáló idõ
-                string formattedTime = string.Format("{0:mm\\:ss\\.ff}", TimeSpan.FromMinutes(mazeTime));
-                using (IDbCommand dbCmd = dbConnection.CreateCommand())
+                // Labirintus játék inicializáló idõ - ONLY IF NOT ZERO
+                if (mazeTime > 0)
                 {
-                    dbCmd.CommandText = "INSERT INTO MazeScores (PlayerID, CompletionTime, FormattedTime) VALUES (@id, @time, @formatted)";
+                    string formattedTime = string.Format("{0:mm\\:ss\\.ff}", TimeSpan.FromMinutes(mazeTime));
+                    using (IDbCommand dbCmd = dbConnection.CreateCommand())
+                    {
+                        dbCmd.CommandText = "INSERT INTO MazeScores (PlayerID, CompletionTime, FormattedTime) VALUES (@id, @time, @formatted)";
 
-                    IDbDataParameter idParam = dbCmd.CreateParameter();
-                    idParam.ParameterName = "@id";
-                    idParam.Value = currentPlayerID;
-                    dbCmd.Parameters.Add(idParam);
+                        IDbDataParameter idParam = dbCmd.CreateParameter();
+                        idParam.ParameterName = "@id";
+                        idParam.Value = currentPlayerID;
+                        dbCmd.Parameters.Add(idParam);
 
-                    IDbDataParameter timeParam = dbCmd.CreateParameter();
-                    timeParam.ParameterName = "@time";
-                    timeParam.Value = mazeTime;
-                    dbCmd.Parameters.Add(timeParam);
+                        IDbDataParameter timeParam = dbCmd.CreateParameter();
+                        timeParam.ParameterName = "@time";
+                        timeParam.Value = mazeTime;
+                        dbCmd.Parameters.Add(timeParam);
 
-                    IDbDataParameter formattedParam = dbCmd.CreateParameter();
-                    formattedParam.ParameterName = "@formatted";
-                    formattedParam.Value = formattedTime;
-                    dbCmd.Parameters.Add(formattedParam);
+                        IDbDataParameter formattedParam = dbCmd.CreateParameter();
+                        formattedParam.ParameterName = "@formatted";
+                        formattedParam.Value = formattedTime;
+                        dbCmd.Parameters.Add(formattedParam);
 
-                    dbCmd.ExecuteNonQuery();
-                    Debug.Log($"Initialized Maze time for player ID: {currentPlayerID}");
+                        dbCmd.ExecuteNonQuery();
+                        Debug.Log($"Initialized Maze time for player ID: {currentPlayerID}");
+                    }
                 }
 
                 // Lövöldözõs játék session létrehozása
                 currentShootingSessionID = StartNewShootingSession(currentPlayerID);
                 Debug.Log($"Started new shooting session with ID: {currentShootingSessionID} for player: {currentPlayerID}");
 
-                // Alapértelmezett lövés hozzáadása a session-höz
-                using (IDbCommand dbCmd = dbConnection.CreateCommand())
-                {
-                    dbCmd.CommandText = @"
-                    INSERT INTO ShootingScores (SessionID, ShotNumber, ReactionTime, PositionX, PositionY) 
-                    VALUES (@sessionID, @shotNumber, @time, @posX, @posY)";
-
-                    IDbDataParameter sessionParam = dbCmd.CreateParameter();
-                    sessionParam.ParameterName = "@sessionID";
-                    sessionParam.Value = currentShootingSessionID;
-                    dbCmd.Parameters.Add(sessionParam);
-
-                    IDbDataParameter shotParam = dbCmd.CreateParameter();
-                    shotParam.ParameterName = "@shotNumber";
-                    shotParam.Value = 0; // Kezdeti lövés száma
-                    dbCmd.Parameters.Add(shotParam);
-
-                    IDbDataParameter timeParam = dbCmd.CreateParameter();
-                    timeParam.ParameterName = "@time";
-                    timeParam.Value = 0.0; // Kezdeti reakcióidõ
-                    dbCmd.Parameters.Add(timeParam);
-
-                    IDbDataParameter posXParam = dbCmd.CreateParameter();
-                    posXParam.ParameterName = "@posX";
-                    posXParam.Value = 0.0; // Kezdeti X pozíció
-                    dbCmd.Parameters.Add(posXParam);
-
-                    IDbDataParameter posYParam = dbCmd.CreateParameter();
-                    posYParam.ParameterName = "@posY";
-                    posYParam.Value = 0.0; // Kezdeti Y pozíció
-                    dbCmd.Parameters.Add(posYParam);
-
-                    dbCmd.ExecuteNonQuery();
-                    Debug.Log($"Initialized Shooting score for session {currentShootingSessionID}");
-                }
+                // NE adjunk hozzá alapértelmezett lövést
+                // A lövéseket csak tényleges játék során rögzítsük
 
                 return currentPlayerID;
             }
@@ -679,6 +670,32 @@ public class SQLiteDBScript : MonoBehaviour
             {
                 dbConnection.Open();
 
+                // ELLENÕRIZZÜK, HOGY VAN-E MÁR AKTÍV SESSION
+                using (IDbCommand checkCmd = dbConnection.CreateCommand())
+                {
+                    checkCmd.CommandText = @"
+                SELECT SessionID FROM ShootingSessions 
+                WHERE PlayerID = @playerID 
+                ORDER BY StartedAt DESC LIMIT 1";
+
+                    IDbDataParameter playerParam = checkCmd.CreateParameter();
+                    playerParam.ParameterName = "@playerID";
+                    playerParam.Value = playerID;
+                    checkCmd.Parameters.Add(playerParam);
+
+                    object result = checkCmd.ExecuteScalar();
+
+                    // Ha van már session, akkor használjuk azt
+                    if (result != null && result != DBNull.Value)
+                    {
+                        int existingSessionID = Convert.ToInt32(result);
+                        Debug.Log($"Using existing shooting session with ID: {existingSessionID} for player: {playerID}");
+                        currentShootingSessionID = existingSessionID;
+                        return existingSessionID;
+                    }
+                }
+
+                // Ha nincs még session, akkor hozzunk létre
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
                 {
                     dbCmd.CommandText = "INSERT INTO ShootingSessions (PlayerID) VALUES (@playerID); SELECT last_insert_rowid();";
@@ -723,6 +740,31 @@ public class SQLiteDBScript : MonoBehaviour
             {
                 dbConnection.Open();
 
+                // ELLENÕRIZZÜK, HOGY LÉTEZIK-E MÁR UGYANILYEN PONTSZÁM
+                using (IDbCommand checkCmd = dbConnection.CreateCommand())
+                {
+                    checkCmd.CommandText = "SELECT COUNT(*) FROM SimonScores WHERE PlayerID = @playerID AND Score = @score";
+
+                    IDbDataParameter playerParam = checkCmd.CreateParameter();
+                    playerParam.ParameterName = "@playerID";
+                    playerParam.Value = currentPlayerID;
+                    checkCmd.Parameters.Add(playerParam);
+
+                    IDbDataParameter scoreParam = checkCmd.CreateParameter();
+                    scoreParam.ParameterName = "@score";
+                    scoreParam.Value = score;
+                    checkCmd.Parameters.Add(scoreParam);
+
+                    int count = Convert.ToInt32(checkCmd.ExecuteScalar());
+
+                    // Ha már létezik ilyen pontszám, ne adjunk hozzá újat
+                    if (count > 0)
+                    {
+                        Debug.Log($"Score {score} for player {currentPlayerID} already exists, skipping update");
+                        return false;
+                    }
+                }
+
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
                 {
                     dbCmd.CommandText = "INSERT INTO SimonScores (PlayerID, Score) VALUES (@playerID, @score)";
@@ -765,11 +807,43 @@ public class SQLiteDBScript : MonoBehaviour
             return false;
         }
 
+        // NE ENGEDÉLYEZZÜK A NULLÁS IDÕKET
+        if (completionTime <= 0)
+        {
+            Debug.LogWarning("Cannot update Maze time: Invalid completion time (zero or negative)");
+            return false;
+        }
+
         try
         {
             using (IDbConnection dbConnection = new SqliteConnection(connectionString))
             {
                 dbConnection.Open();
+
+                // ELLENÕRIZZÜK, HOGY LÉTEZIK-E MÁR UGYANILYEN IDÕ
+                using (IDbCommand checkCmd = dbConnection.CreateCommand())
+                {
+                    checkCmd.CommandText = "SELECT COUNT(*) FROM MazeScores WHERE PlayerID = @playerID AND CompletionTime = @time";
+
+                    IDbDataParameter playerParam = checkCmd.CreateParameter();
+                    playerParam.ParameterName = "@playerID";
+                    playerParam.Value = currentPlayerID;
+                    checkCmd.Parameters.Add(playerParam);
+
+                    IDbDataParameter timeParam = checkCmd.CreateParameter();
+                    timeParam.ParameterName = "@time";
+                    timeParam.Value = completionTime;
+                    checkCmd.Parameters.Add(timeParam);
+
+                    int count = Convert.ToInt32(checkCmd.ExecuteScalar());
+
+                    // Ha már létezik ilyen idõ, ne adjunk hozzá újat
+                    if (count > 0)
+                    {
+                        Debug.Log($"Time {completionTime} for player {currentPlayerID} already exists, skipping update");
+                        return false;
+                    }
+                }
 
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
                 {
@@ -837,11 +911,37 @@ public class SQLiteDBScript : MonoBehaviour
             {
                 dbConnection.Open();
 
+                // ELLENÕRIZZÜK, HOGY A LÖVÉS MÁR SZEREPEL-E AZ ADATBÁZISBAN
+                using (IDbCommand checkCmd = dbConnection.CreateCommand())
+                {
+                    checkCmd.CommandText = "SELECT COUNT(*) FROM ShootingScores WHERE SessionID = @sessionID AND ShotNumber = @shotNumber";
+
+                    IDbDataParameter sessionParam = checkCmd.CreateParameter();
+                    sessionParam.ParameterName = "@sessionID";
+                    sessionParam.Value = currentShootingSessionID;
+                    checkCmd.Parameters.Add(sessionParam);
+
+                    IDbDataParameter shotParam = checkCmd.CreateParameter();
+                    shotParam.ParameterName = "@shotNumber";
+                    shotParam.Value = shotNumber;
+                    checkCmd.Parameters.Add(shotParam);
+
+                    int count = Convert.ToInt32(checkCmd.ExecuteScalar());
+
+                    // Ha már létezik ilyen lövés, ne adjunk hozzá újat
+                    if (count > 0)
+                    {
+                        Debug.Log($"Shot {shotNumber} for session {currentShootingSessionID} already exists, skipping update");
+                        return false;
+                    }
+                }
+
+                // Ha még nem létezik, akkor adjuk hozzá
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
                 {
                     dbCmd.CommandText = @"
-                    INSERT INTO ShootingScores (SessionID, ShotNumber, ReactionTime, PositionX, PositionY) 
-                    VALUES (@sessionID, @shotNumber, @time, @posX, @posY)";
+                INSERT INTO ShootingScores (SessionID, ShotNumber, ReactionTime, PositionX, PositionY) 
+                VALUES (@sessionID, @shotNumber, @time, @posX, @posY)";
 
                     IDbDataParameter sessionParam = dbCmd.CreateParameter();
                     sessionParam.ParameterName = "@sessionID";

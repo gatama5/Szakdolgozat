@@ -1,3 +1,5 @@
+//OLD DB SCOREMANAGER
+
 //using TMPro;
 //using System.Collections.Generic;
 //using UnityEngine;
@@ -335,6 +337,8 @@
 //}
 
 
+//NEW DB SCORE MANAGER
+
 using TMPro;
 using System.Collections.Generic;
 using UnityEngine;
@@ -365,11 +369,26 @@ public class ScoreManager : MonoBehaviour
     private double bestTime = double.MaxValue;
     private int bestTimeIndex = -1;
 
+    private static int lastSavedShotIndex = -1;
+
     List<Tuple<double, double>> hitpoints = new List<Tuple<double, double>>();
+
 
     void Awake()
     {
         dbManager = FindObjectOfType<SQLiteDBScript>();
+
+        // Ellenõrizzük, hogy van-e érvényes játékos azonosító
+        if (dbManager != null && dbManager.GetCurrentPlayerID() <= 0)
+        {
+            if (PlayerPrefs.HasKey("CurrentPlayerID"))
+            {
+                int savedPlayerID = PlayerPrefs.GetInt("CurrentPlayerID");
+                dbManager.SetCurrentPlayerID(savedPlayerID);
+                Debug.Log($"ScoreManager restored player ID from PlayerPrefs: {savedPlayerID}");
+            }
+        }
+
         ResetScoresBasedOnLevel();
     }
 
@@ -501,10 +520,28 @@ public class ScoreManager : MonoBehaviour
             if (dbManager != null && FindObjectOfType<SimonGameManager>() != null &&
                 FindObjectOfType<SimonGameManager>().isEnded)
             {
-                dbManager.UpdateSimonScore(currentHighScore);
+                // Ellenõrizzük hogy van-e érvényes játékos azonosító
+                if (dbManager.GetCurrentPlayerID() <= 0 && PlayerPrefs.HasKey("CurrentPlayerID"))
+                {
+                    int savedPlayerID = PlayerPrefs.GetInt("CurrentPlayerID");
+                    dbManager.SetCurrentPlayerID(savedPlayerID);
+                    Debug.Log($"Restored player ID before updating Simon score: {savedPlayerID}");
+                }
+
+                if (dbManager.GetCurrentPlayerID() > 0)
+                {
+                    dbManager.UpdateSimonScore(currentHighScore);
+                    Debug.Log($"Simon pontszám sikeresen frissítve: {currentHighScore}");
+                }
+                else
+                {
+                    Debug.LogWarning("Nem sikerült a Simon pontszám frissítése: Nincs aktív játékos");
+                }
             }
         }
     }
+
+
     private void UpdateMazeScore()
     {
         if (mazeScore != null && maze_scr != null)
@@ -617,9 +654,10 @@ public class ScoreManager : MonoBehaviour
             // Update database with most recent shot
             if (dbManager != null)
             {
-                // Csak az újonnan hozzáadott lövést vesszük figyelembe
+                // CSAK AKKOR FRISSÍTSÜNK, HA ÚJ LÖVÉS TÖRTÉNT
                 int lastIndex = shootingTimes.Count - 1;
-                if (lastIndex >= 0 && lastIndex < hitPositions.Count)
+
+                if (lastIndex > lastSavedShotIndex && lastIndex >= 0 && lastIndex < hitPositions.Count)
                 {
                     string[] coordinates = hitPositions[lastIndex].Split('|');
                     if (coordinates.Length == 2)
@@ -628,7 +666,11 @@ public class ScoreManager : MonoBehaviour
                             double.TryParse(coordinates[1], out double hitY))
                         {
                             Debug.Log($"Sending to database: shot {lastIndex + 1}, time={shootingTimes[lastIndex]}, X={hitX}, Y={hitY}");
-                            dbManager.UpdateShootingScore(lastIndex + 1, shootingTimes[lastIndex], hitX, hitY);
+                            bool success = dbManager.UpdateShootingScore(lastIndex + 1, shootingTimes[lastIndex], hitX, hitY);
+                            if (success)
+                            {
+                                lastSavedShotIndex = lastIndex;
+                            }
                         }
                         else
                         {
@@ -642,7 +684,7 @@ public class ScoreManager : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning($"Missing position data for shot {lastIndex + 1}");
+                    Debug.Log($"Shot already saved or missing position data for shot {lastIndex + 1}");
                 }
             }
             else

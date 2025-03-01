@@ -42,18 +42,6 @@ public class SimonGameManager : MonoBehaviour
     //public Tuple<Vector3, Quaternion> door_knob_open = new Tuple<Vector3, Quaternion>(new Vector3(16.5f, 6.4000001f, 0.109999999f), new Quaternion(0, -0.00617052522f, 0, 0.999981046f));
 
 
-    //void Start()
-    //{
-    //    //door.transform.position = door_start_pos.Item1;
-    //    //door.transform.rotation = door_start_pos.Item2;
-    //    //doorknob.transform.position = door_knob_start.Item1;
-    //    //doorknob.transform.rotation = door_knob_start.Item2;
-    //    isEnded = false;
-    //    SetButtonIndex();
-    //    currentPickDelay = initialPickDelay;
-    //    InitializeButtonUsage();
-
-    //}
 
     void Start()
     {
@@ -178,15 +166,58 @@ public class SimonGameManager : MonoBehaviour
         SaveScoreToDatabase(finalScore);
     }
 
+    //private void SaveScoreToDatabase(int finalScore)
+    //{
+    //    if (dbManager != null)
+    //    {
+    //        try
+    //        {
+    //            // Frissítjük a Simon játék pontszámát az adatbázisban
+    //            dbManager.UpdateSimonScore(finalScore);
+    //            Debug.Log($"Simon játék pontszám sikeresen mentve: {finalScore}");
+    //        }
+    //        catch (Exception e)
+    //        {
+    //            Debug.LogError($"Hiba történt a pontszám mentése közben: {e.Message}");
+    //        }
+    //    }
+    //}
+
     private void SaveScoreToDatabase(int finalScore)
     {
-        if (dbManager != null)
+        if (dbManager != null && finalScore > 0) // NE MENTSÜK A NULLÁS PONTSZÁMOT
         {
             try
             {
-                // Frissítjük a Simon játék pontszámát az adatbázisban
-                dbManager.UpdateSimonScore(finalScore);
-                Debug.Log($"Simon játék pontszám sikeresen mentve: {finalScore}");
+                // Ellenõrizzük, hogy van-e érvényes játékos azonosító
+                int playerID = dbManager.GetCurrentPlayerID();
+
+                // Ha nincs érvényes azonosító, próbáljuk meg visszaállítani a PlayerPrefs-bõl
+                if (playerID <= 0 && PlayerPrefs.HasKey("CurrentPlayerID"))
+                {
+                    playerID = PlayerPrefs.GetInt("CurrentPlayerID");
+                    dbManager.SetCurrentPlayerID(playerID);
+                    Debug.Log($"Restored player ID from PlayerPrefs: {playerID}");
+                }
+
+                // Ellenõrizzük újra, hogy van-e érvényes azonosító
+                if (dbManager.GetCurrentPlayerID() > 0)
+                {
+                    // Frissítjük a Simon játék pontszámát az adatbázisban
+                    bool success = dbManager.UpdateSimonScore(finalScore);
+                    if (success)
+                    {
+                        Debug.Log($"Simon játék pontszám sikeresen mentve: {finalScore}");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Simon játék pontszám már létezik vagy nem sikerült menteni. (PlayerID: {playerID}, Score: {finalScore})");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("Nem sikerült a pontszám mentése: Nincs aktív játékos azonosító");
+                }
             }
             catch (Exception e)
             {
