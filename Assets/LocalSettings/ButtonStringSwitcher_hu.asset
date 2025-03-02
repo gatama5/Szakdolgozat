@@ -50,6 +50,52 @@ MonoBehaviour:
     m_Localized: Vissza
     m_Metadata:
       m_Items: []
+  - m_Id: 43114169137074176
+    m_Localized: Rendben
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43113941210206208
+    m_Localized: Simon Mondja
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43114134395654144
+    m_Localized: "Teszteld a mem\xF3ri\xE1d a klasszikus Simon mondja j\xE1t\xE9kkal!
+      \nA j\xE1t\xE9k sor\xE1n a sz\xEDnes gombok egy sorozatban fognak felvillanni.
+      Figyelj alaposan, v\xE1rd meg am\xEDg a teljes sorozat lefut, majd ism\xE9teld
+      meg pontosan ugyanazt a sorrendet a gombok megnyom\xE1s\xE1val. A k\xF6r minden
+      sikeres ism\xE9tl\xE9s ut\xE1n nehezedik, egyre hosszabb sorozatot kell megjegyezned.
+      \nMeddig tudsz eljutni?\nNyomd meg a z\xF6ld Start gombot \xE9s der\xEDtsd
+      ki!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43117958858510336
+    m_Localized: "C\xE9lbal\xF6v\u0151 j\xE1t\xE9k"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43118011807404032
+    m_Localized: "Ebben a j\xE1t\xE9kt\xEDpusban c\xE9lpontokra kell l\u0151n\xF6d,
+      amelyek megjelennek el\u0151tted.\nM\xE9rni fogjuk az id\u0151 k\xF6z\xF6tt,
+      ami a c\xE9lpont felbukkan\xE1sa \xE9s a l\xF6v\xE9sed k\xF6z\xF6tt telik el,
+      ez lesz a pontsz\xE1mod.\nT\xF6bb c\xE9lpont fog megjelenni ugyanazon a helyen.\nEl\u0151sz\xF6r
+      fel kell venned a fegyvert az \"E\" billenty\u0171vel, amikor megjelenik a
+      sz\xF6veg.\nMiut\xE1n n\xE1lad van a fegyver, csak nyomd meg a \"Start\" gombot
+      \xE9s kezdheted a j\xE1t\xE9kot.\nSok szerencs\xE9t, kacsavad\xE1sz."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43119131602685952
+    m_Localized: "Labirintus j\xE1t\xE9k bemutat\xE1sa"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43119133993439232
+    m_Localized: "K\xE9szen \xE1llsz egy izgalmas labirintus kih\xEDv\xE1sra?\nEl\u0151sz\xF6r
+      navig\xE1lj \xE1t a labirintuson, \xE9s \xE9rd el a v\xE9g\xE9t. Amikor c\xE9lba
+      \xE9rt\xE9l, beindul az id\u0151m\xE9r\u0151 \xE9s \xF6t gomb jelenik meg -
+      de csak egy k\xF6z\xFCl\xFCk a helyes v\xE1laszt\xE1s! N\xE9gy csapda \xE9s
+      egy ki\xFAt... Vajon megtal\xE1lod a helyes gombot, miel\u0151tt lej\xE1r az
+      id\u0151? Mutasd meg, milyen gyors a gondolkod\xE1sod \xE9s milyen j\xF3 az
+      \xF6szt\xF6n\xF6d! \nA labirintus r\xE1d v\xE1r!\n"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

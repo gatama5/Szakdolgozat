@@ -50,6 +50,67 @@ MonoBehaviour:
     m_Localized: Back
     m_Metadata:
       m_Items: []
+  - m_Id: 43114169137074176
+    m_Localized: Apply
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43113941210206208
+    m_Localized: Simon Say's game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43114134395654144
+    m_Localized: 'Test your memory with the classic Simon game!
+
+      During gameplay,
+      the colored buttons will flash in a sequence. Watch carefully, wait until the
+      entire sequence is complete, then repeat the exact same order by pressing the
+      buttons. The game gets more challenging after each successful round, with increasingly
+      longer sequences to remember.
+
+      How far can you go? Press the Start button
+      and find out!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43117958858510336
+    m_Localized: Shooting game introductionf
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43118011807404032
+    m_Localized: 'In this type of game, you will shoot targets that will appear in
+      front of you.
+
+      We will measure the time between the pop up and the shoot
+      and this wil be your score.
+
+      There will be multiple target on the same
+      spot.
+
+      First you have to pick up the gun with the "E" key when the text
+      appears.
+
+      When you have the gun just press the "Start" button and start
+      playing.
+
+      Good luck duckhunter.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43119131602685952
+    m_Localized: Maze Game introducing
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43119133993439232
+    m_Localized: 'Are you ready for an exciting maze challenge?
+
+      First, navigate
+      through the maze and reach the end. When you arrive at your destination, the
+      timer will start and five buttons will appear - but only one of them is the
+      right choice! Four traps and one way out... Can you find the correct button
+      before time runs out? Show off how quick your thinking is and how good your
+      instincts are!
+
+      The maze awaits you!'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

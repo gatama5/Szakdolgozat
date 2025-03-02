@@ -47,6 +47,34 @@ MonoBehaviour:
     m_Key: BackButtonSwitch
     m_Metadata:
       m_Items: []
+  - m_Id: 43113941210206208
+    m_Key: SimonHeaderSwitcher
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43114134395654144
+    m_Key: SimonContentSwitcher
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43114169137074176
+    m_Key: ApplyButtonSwitcher
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43117958858510336
+    m_Key: ShootingGameHeaderSwitcher
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43118011807404032
+    m_Key: ShootingGameContentSwitcher
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43119131602685952
+    m_Key: MazeScoreHeaderSwitcher
+    m_Metadata:
+      m_Items: []
+  - m_Id: 43119133993439232
+    m_Key: MazeScoreContentSwitcher
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

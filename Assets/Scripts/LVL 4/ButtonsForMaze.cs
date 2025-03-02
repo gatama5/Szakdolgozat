@@ -1,3 +1,4 @@
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -25,11 +26,19 @@ public class ButtonsForMaze : MonoBehaviour
     public TimeSpan score_time;
 
     private ScoreManager scoreManager;
+    private JSONDataSaver jsonDataSaver; // Added reference to the JSONDataSaver
 
     void Start()
     {
         // Find ScoreManager
         scoreManager = FindObjectOfType<ScoreManager>();
+
+        // Find JSONDataSaver
+        jsonDataSaver = FindObjectOfType<JSONDataSaver>();
+        if (jsonDataSaver == null)
+        {
+            UnityEngine.Debug.LogWarning("JSONDataSaver not found in scene. Player data will not be backed up after maze completion.");
+        }
 
         // Initialize timer text
         if (timerText != null)
@@ -134,6 +143,13 @@ public class ButtonsForMaze : MonoBehaviour
         if (scoreManager != null)
         {
             scoreManager.RefreshScores();
+        }
+
+        // Backup player data after maze completion
+        if (jsonDataSaver != null)
+        {
+            UnityEngine.Debug.Log("Maze completed, backing up player data to JSON...");
+            jsonDataSaver.OnMazeGameCompleted();
         }
     }
 

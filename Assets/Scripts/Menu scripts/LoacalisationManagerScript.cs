@@ -10,10 +10,24 @@ public class LoacalisationManagerScript : MonoBehaviour
 
     private bool active = false;
 
+    public static LoacalisationManagerScript Instance { get; private set; }
+
+    private void Awake()
+    {
+        // Ha már létezik egy példány, akkor eltávolítjuk ezt
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        // Egyébként eltároljuk a referenciát
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+
     void Start()
     {
-        //int ID = PlayerPrefs.GetInt("LocaleKey", 0);
-        
         ChangeLocale(getLocal());
     }
 
