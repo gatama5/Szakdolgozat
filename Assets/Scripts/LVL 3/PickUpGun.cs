@@ -1,4 +1,4 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 
 public class PickUpGun : MonoBehaviour
 {
@@ -18,7 +18,7 @@ public class PickUpGun : MonoBehaviour
 
     void Update()
     {
-        // Ha a j·tÈkos hatÛt·von bel¸l van Ès megnyomja az E gombot
+        // Ha a j–±t–πkos hat—Ét–±von bel—ål van –πs megnyomja az E gombot
         if (isInRange && !isPickedUp && Input.GetKeyDown(KeyCode.E))
         {
             PickUpWeapon();
@@ -53,7 +53,7 @@ public class PickUpGun : MonoBehaviour
         isPickedUp = true;
     }
 
-    public void DorpWeapon() 
+    public void DorpWeapon()
     {
         this.gameObject.SetActive(true);
         org_crosshair.SetActive(true);

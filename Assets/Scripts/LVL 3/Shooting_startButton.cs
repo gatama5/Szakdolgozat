@@ -1,7 +1,7 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro; // TextMeshPro névtér hozzáadása
+using TMPro; // TextMeshPro nĞ¹vtĞ¹r hozzĞ±adĞ±sa
 
 public class Shooting_startButton : MonoBehaviour
 {
@@ -12,7 +12,7 @@ public class Shooting_startButton : MonoBehaviour
     [SerializeField] public float startDelay = 3f;
     [SerializeField] private bool showCountdown = true;
 
-    // TextMeshPro szövegdoboz referencia
+    // TextMeshPro szÑ†vegdoboz referencia
     [SerializeField] private TextMeshProUGUI countdownText;
     [SerializeField] private Canvas canva;
 
@@ -21,7 +21,7 @@ public class Shooting_startButton : MonoBehaviour
 
     public bool isPlaying = false;
 
-    void Start() 
+    void Start()
     {
         canva.enabled = false;
         isPlaying = false;
@@ -37,21 +37,21 @@ public class Shooting_startButton : MonoBehaviour
         }
         else
         {
-            // Hibaüzenet megjelenítése a szövegdobozban
+            // HibaÑŒzenet megjelenĞ½tĞ¹se a szÑ†vegdobozban
             if (countdownText != null)
             {
-                countdownText.text = "Kérem vegye fel a fegyvert a kezdéshez!";
+                countdownText.text = "KĞ¹rem vegye fel a fegyvert a kezdĞ¹shez!";
             }
             else
             {
-                Debug.Log("Kérem vegye fel a fegyvert a kezdéshez!");
+                Debug.Log("KĞ¹rem vegye fel a fegyvert a kezdĞ¹shez!");
             }
         }
     }
 
     public IEnumerator StartPlay()
     {
-        // Visszaszámlálás megjelenítése
+        // VisszaszĞ±mlĞ±lĞ±s megjelenĞ½tĞ¹se
         float remainingTime = startDelay;
         canva.enabled = true;
         while (remainingTime > 0)
@@ -72,7 +72,7 @@ public class Shooting_startButton : MonoBehaviour
 
     }
 
-    // Szöveg törlése késleltetéssel
+    // SzÑ†veg tÑ†rlĞ¹se kĞ¹sleltetĞ¹ssel
     private IEnumerator ClearTextAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);

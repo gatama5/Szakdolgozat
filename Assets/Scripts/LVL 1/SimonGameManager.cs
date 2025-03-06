@@ -197,7 +197,6 @@ public class SimonGameManager : MonoBehaviour
                 {
                     playerID = PlayerPrefs.GetInt("CurrentPlayerID");
                     dbManager.SetCurrentPlayerID(playerID);
-                    Debug.Log($"Restored player ID from PlayerPrefs: {playerID}");
                 }
 
                 // Ellenõrizzük újra, hogy van-e érvényes azonosító
@@ -205,18 +204,7 @@ public class SimonGameManager : MonoBehaviour
                 {
                     // Frissítjük a Simon játék pontszámát az adatbázisban
                     bool success = dbManager.UpdateSimonScore(finalScore);
-                    if (success)
-                    {
-                        Debug.Log($"Simon játék pontszám sikeresen mentve: {finalScore}");
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"Simon játék pontszám már létezik vagy nem sikerült menteni. (PlayerID: {playerID}, Score: {finalScore})");
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning("Nem sikerült a pontszám mentése: Nincs aktív játékos azonosító");
+                    
                 }
             }
             catch (Exception e)

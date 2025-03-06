@@ -1,20 +1,20 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro; // TextMeshPro nÈvtÈr hozz·ad·sa
+using TMPro; // TextMeshPro n–πvt–πr hozz–±ad–±sa
 
 public class RandomSpawner_StartButton : MonoBehaviour
 {
     public ObjectSpawner objSpawner;       // Referencia a random ObjectSpawner-re
-    public GameObject targetPrefab;         // A cÈlpont objektum, amit spawnolni fogunk
-    public PickUpGun pickUpGun;            // Referencia a fegyver felvÈtelhez
-    public AudioSource audioSource;         // Hang forr·s a gomb megnyom·s·hoz
+    public GameObject targetPrefab;         // A c–πlpont objektum, amit spawnolni fogunk
+    public PickUpGun pickUpGun;            // Referencia a fegyver felv–πtelhez
+    public AudioSource audioSource;         // Hang forr–±s a gomb megnyom–±s–±hoz
     public Gun gunScript;                   // Referencia a Gun script-hez
 
-    [SerializeField] public float startDelay = 3f;    // KÈsleltetÈs a j·tÈk indÌt·sa elıtt
-    [SerializeField] private bool showCountdown = true;    // Visszasz·ml·l·s mutat·sa
+    [SerializeField] public float startDelay = 3f;    // K–πsleltet–πs a j–±t–πk ind–Ωt–±sa el—Ött
+    [SerializeField] private bool showCountdown = true;    // Visszasz–±ml–±l–±s mutat–±sa
 
-    // TextMeshPro szˆvegdoboz referencia
+    // TextMeshPro sz—Üvegdoboz referencia
     [SerializeField] private TextMeshProUGUI countdownText;
     [SerializeField] private Canvas countdownCanvas;
 
@@ -22,20 +22,20 @@ public class RandomSpawner_StartButton : MonoBehaviour
 
     void Start()
     {
-        // Kikapcsoljuk a visszasz·ml·lÛ canvas-t
+        // Kikapcsoljuk a visszasz–±ml–±l—É canvas-t
         if (countdownCanvas != null)
         {
             countdownCanvas.enabled = false;
         }
         isPlaying = false;
 
-        // Ha nem adtunk meg referenci·t, keress¸k meg az objektumokat
+        // Ha nem adtunk meg referenci–±t, keress—åk meg az objektumokat
         if (objSpawner == null)
         {
             objSpawner = FindObjectOfType<ObjectSpawner>();
             if (objSpawner == null)
             {
-                Debug.LogError("Nem tal·lhatÛ ObjectSpawner objektum a j·tÈkban!");
+                Debug.LogError("Nem tal–±lhat—É ObjectSpawner objektum a j–±t–πkban!");
             }
         }
 
@@ -44,7 +44,7 @@ public class RandomSpawner_StartButton : MonoBehaviour
             pickUpGun = FindObjectOfType<PickUpGun>();
             if (pickUpGun == null)
             {
-                Debug.LogWarning("Nem tal·lhatÛ PickUpGun objektum a j·tÈkban!");
+                Debug.LogWarning("Nem tal–±lhat—É PickUpGun objektum a j–±t–πkban!");
             }
         }
 
@@ -56,13 +56,13 @@ public class RandomSpawner_StartButton : MonoBehaviour
 
     private void OnMouseDown()
     {
-        // Lej·tszuk a hang effektet
+        // Lej–±tszuk a hang effektet
         if (audioSource != null)
         {
             audioSource.Play();
         }
 
-        // Ellenırizz¸k, hogy fel van-e vÈve a fegyver
+        // Ellen—Örizz—åk, hogy fel van-e v–πve a fegyver
         if (pickUpGun != null && pickUpGun.isPickedUp)
         {
             isPlaying = true;
@@ -70,48 +70,48 @@ public class RandomSpawner_StartButton : MonoBehaviour
         }
         else
         {
-            // Hiba¸zenet megjelenÌtÈse a szˆvegdobozban
+            // Hiba—åzenet megjelen–Ωt–πse a sz—Üvegdobozban
             if (countdownText != null)
             {
-                countdownText.text = "KÈrem vegye fel a fegyvert a kezdÈshez!";
-                // Canvas bekapcsol·sa, hogy l·tszÛdjon a szˆveg
+                countdownText.text = "K–πrem vegye fel a fegyvert a kezd–πshez!";
+                // Canvas bekapcsol–±sa, hogy l–±tsz—Édjon a sz—Üveg
                 if (countdownCanvas != null)
                 {
                     countdownCanvas.enabled = true;
                 }
-                // KÈsleltetve elt¸ntetj¸k a hiba¸zenetet
+                // K–πsleltetve elt—åntetj—åk a hiba—åzenetet
                 StartCoroutine(ClearTextAfterDelay(2f));
             }
             else
             {
-                Debug.Log("KÈrem vegye fel a fegyvert a kezdÈshez!");
+                Debug.Log("K–πrem vegye fel a fegyvert a kezd–πshez!");
             }
         }
     }
 
     public IEnumerator StartPlay()
     {
-        // Be·llÌtjuk a megfelelı ÈrtÈkeket az ObjectSpawner-ben
+        // Be–±ll–Ωtjuk a megfelel—Ö –πrt–πkeket az ObjectSpawner-ben
         if (objSpawner != null && targetPrefab != null)
         {
             objSpawner.target = targetPrefab;
 
-            // Ha van be·llÌtva referencia a pickUpGun komponensre, ·tadjuk az ObjectSpawner-nek is
+            // Ha van be–±ll–Ωtva referencia a pickUpGun komponensre, –±tadjuk az ObjectSpawner-nek is
             if (pickUpGun != null)
             {
                 objSpawner.pickUpGun = pickUpGun;
             }
 
-            // ÷sszekapcsoljuk a Gun script-et az ObjectSpawner-rel
+            // –¶sszekapcsoljuk a Gun script-et az ObjectSpawner-rel
             if (gunScript != null)
             {
-                // Adjunk hozz· egy referenci·t a gunScript-ben, hogy tudja, melyik ObjectSpawner-t haszn·lja
-                gunScript.osp_1place = null; // Null·zzuk, mivel nem 1place-t haszn·lunk
+                // Adjunk hozz–± egy referenci–±t a gunScript-ben, hogy tudja, melyik ObjectSpawner-t haszn–±lja
+                //gunScript.osp_1place = null; // Null–±zzuk, mivel nem 1place-t haszn–±lunk
                 gunScript.pck_gun = pickUpGun;
             }
         }
 
-        // Visszasz·ml·l·s megjelenÌtÈse
+        // Visszasz–±ml–±l–±s megjelen–Ωt–πse
         float remainingTime = startDelay;
         if (countdownCanvas != null)
         {
@@ -128,7 +128,7 @@ public class RandomSpawner_StartButton : MonoBehaviour
             remainingTime -= 1f;
         }
 
-        // Tˆrˆlj¸k a visszasz·ml·l·s szˆvegÈt
+        // T—Ür—Ülj—åk a visszasz–±ml–±l–±s sz—Üveg–πt
         if (showCountdown && countdownText != null)
         {
             countdownText.text = "";
@@ -138,38 +138,36 @@ public class RandomSpawner_StartButton : MonoBehaviour
             }
         }
 
-        // ElindÌtjuk a vÈletlenszer˚ cÈlpont gener·l·st
+        // Elind–Ωtjuk a v–πletlenszer—ã c–πlpont gener–±l–±st
         if (objSpawner != null)
         {
-            // Le·llÌtjuk az esetleg m·r futÛ koroutinokat, hogy ne legyen duplik·ciÛ
+            // Le–±ll–Ωtjuk az esetleg m–±r fut—É koroutinokat, hogy ne legyen duplik–±ci—É
             objSpawner.StopAllCoroutines();
 
-            Debug.Log("A cÈlpontok spawnol·s·nak indÌt·sa...");
-
-            // Ellenırizz¸k, hogy a target prefab be lett-e ·llÌtva
+            // Ellen—Örizz—åk, hogy a target prefab be lett-e –±ll–Ωtva
             if (targetPrefab == null && objSpawner.target != null)
             {
                 targetPrefab = objSpawner.target;
-                Debug.Log("Target prefab be·llÌtva az ObjectSpawner-bıl: " + targetPrefab.name);
+                Debug.Log("Target prefab be–±ll–Ωtva az ObjectSpawner-b—Öl: " + targetPrefab.name);
             }
 
             if (targetPrefab != null)
             {
-                // ElindÌtjuk a cÈlpontok spawnol·s·t
+                // Elind–Ωtjuk a c–πlpontok spawnol–±s–±t
                 objSpawner.StartCoroutine(objSpawner.spawnObject(targetPrefab));
             }
             else
             {
-                Debug.LogError("Nincs be·llÌtva target prefab a spawnolandÛ objektumhoz!");
+                Debug.LogError("Nincs be–±ll–Ωtva target prefab a spawnoland—É objektumhoz!");
             }
         }
         else
         {
-            Debug.LogError("Nincs be·llÌtva az ObjectSpawner referencia!");
+            Debug.LogError("Nincs be–±ll–Ωtva az ObjectSpawner referencia!");
         }
     }
 
-    // Szˆveg tˆrlÈse kÈsleltetÈssel
+    // Sz—Üveg t—Ürl–πse k–πsleltet–πssel
     private IEnumerator ClearTextAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
@@ -178,7 +176,7 @@ public class RandomSpawner_StartButton : MonoBehaviour
             countdownText.text = "";
         }
 
-        // Ha nincs szˆveg, elrejthetj¸k a canvas-t is
+        // Ha nincs sz—Üveg, elrejthetj—åk a canvas-t is
         if (countdownCanvas != null && string.IsNullOrEmpty(countdownText.text))
         {
             countdownCanvas.enabled = false;

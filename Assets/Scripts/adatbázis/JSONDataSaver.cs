@@ -521,8 +521,7 @@ public class JSONDataSaver : MonoBehaviour
         {
             if (isError)
                 Debug.LogError($"[JSONDataSaver] {message}");
-            else
-                Debug.Log($"[JSONDataSaver] {message}");
+            
         }
     }
 

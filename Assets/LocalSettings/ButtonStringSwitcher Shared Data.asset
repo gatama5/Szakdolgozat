@@ -75,6 +75,10 @@ MonoBehaviour:
     m_Key: MazeScoreContentSwitcher
     m_Metadata:
       m_Items: []
+  - m_Id: 43202043480084480
+    m_Key: PickUpTextSwitcher
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

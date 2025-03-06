@@ -1,4 +1,4 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -7,10 +7,10 @@ using Unity.VisualScripting;
 using System.Security.Cryptography;
 public class ObjectSpawner_1place : MonoBehaviour
 {
-    public int numberToSpawn = 5; // H·ny objektumot spawnoljunk
-    public GameObject trg; // A spawnolandÛ target objektum
-    public GameObject quad; // A Quad, amelynek a kˆzepÈre spawnoljuk az objektumot
-    //public float spawnDelay = 2.0f; // Spawnol·sok kˆzˆtt eltelt idı (mp-ben)
+    public int numberToSpawn = 5; // H–±ny objektumot spawnoljunk
+    public GameObject trg; // A spawnoland—É target objektum
+    public GameObject quad; // A Quad, amelynek a k—Üzep–πre spawnoljuk az objektumot
+    //public float spawnDelay = 2.0f; // Spawnol–±sok k—Üz—Ütt eltelt id—Ö (mp-ben)
     public GameObject spawned;
     public bool isSpawned = false;
     public float timer = 0f;
@@ -18,7 +18,7 @@ public class ObjectSpawner_1place : MonoBehaviour
     public List<double> hit_times = new List<double>();
     public List<string> hitPlace_fromMiddle = new List<string>();
 
-    // Sz·ml·lÛ a megsemmisÌtett targetek sz·mol·s·ra
+    // Sz–±ml–±l—É a megsemmis–Ωtett targetek sz–±mol–±s–±ra
     private int destroyedTargets = 0;
 
     // Referencia a PickUpGun komponensre
@@ -34,7 +34,7 @@ public class ObjectSpawner_1place : MonoBehaviour
         }
     }
 
-    // Objektum spawnol·sa a Quad kˆzepÈre
+    // Objektum spawnol–±sa a Quad k—Üzep–πre
     public IEnumerator spawnObject(GameObject obj)
     {
         // Reset the counter at the beginning of a new spawn session
@@ -43,12 +43,12 @@ public class ObjectSpawner_1place : MonoBehaviour
         float randomNumber = UnityEngine.Random.Range(2f, 5f);
         for (int i = 0; i < numberToSpawn; i++)
         {
-            // A Quad kˆzÈppontj·nak lekÈrÈse
+            // A Quad k—Üz–πppontj–±nak lek–πr–πse
             Vector3 fit_quad = quad.transform.position;
-            // Objektum lÈtrehoz·sa a Quad kˆzÈppontj·ban
+            // Objektum l–πtrehoz–±sa a Quad k—Üz–πppontj–±ban
             spawned = Instantiate(obj, fit_quad, quad.transform.rotation);
             isSpawned = true;
-            yield return new WaitForSeconds(randomNumber); // KÈsleltetÈs a kˆvetkezı spawn elıtt
+            yield return new WaitForSeconds(randomNumber); // K–πsleltet–πs a k—Üvetkez—Ö spawn el—Ött
         }
     }
 
@@ -56,27 +56,27 @@ public class ObjectSpawner_1place : MonoBehaviour
     {
         if (obj.IsDestroyed())
         {
-            Debug.Log("Tal·lat! Idı spawn Ès tal·lat kˆzˆtt: " + Math.Round(timer, 2) + " mp");
-            hit_times.Add(Math.Round(timer, 2)); // idı elmentÈse
+            Debug.Log("Tal–±lat! Id—Ö spawn –πs tal–±lat k—Üz—Ütt: " + Math.Round(timer, 2) + " mp");
+            hit_times.Add(Math.Round(timer, 2)); // id—Ö elment–πse
             timer = 0f;
             isSpawned = false;
 
-            // Nˆvelj¸k a megsemmisÌtett targetek sz·m·t
+            // N—Üvelj—åk a megsemmis–Ωtett targetek sz–±m–±t
             destroyedTargets++;
 
-            // Ellenırizz¸k, hogy minden target el lett-e tal·lva
+            // Ellen—Örizz—åk, hogy minden target el lett-e tal–±lva
             if (destroyedTargets >= numberToSpawn)
             {
-                Debug.Log("Minden target eltal·lva! Fegyver ledob·sa...");
+                Debug.Log("Minden target eltal–±lva! Fegyver ledob–±sa...");
 
-                // Ha a pickUpGun referencia lÈtezik, hÌvjuk meg a DropWeapon() metÛdust
+                // Ha a pickUpGun referencia l–πtezik, h–Ωvjuk meg a DropWeapon() met—Édust
                 if (pickUpGun != null)
                 {
                     pickUpGun.DorpWeapon();
                 }
                 else
                 {
-                    Debug.LogError("Nincs be·llÌtva a pickUpGun referencia az ObjectSpawner_1place szkriptben!");
+                    Debug.LogError("Nincs be–±ll–Ωtva a pickUpGun referencia az ObjectSpawner_1place szkriptben!");
                 }
             }
         }

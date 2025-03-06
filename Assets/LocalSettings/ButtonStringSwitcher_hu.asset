@@ -96,6 +96,10 @@ MonoBehaviour:
       \xF6szt\xF6n\xF6d! \nA labirintus r\xE1d v\xE1r!\n"
     m_Metadata:
       m_Items: []
+  - m_Id: 43202043480084480
+    m_Localized: "\"E\" a felv\xE9telhez"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

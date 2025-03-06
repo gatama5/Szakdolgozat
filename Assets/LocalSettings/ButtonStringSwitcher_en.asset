@@ -111,6 +111,10 @@ MonoBehaviour:
       The maze awaits you!'
     m_Metadata:
       m_Items: []
+  - m_Id: 43202043480084480
+    m_Localized: '"E" to pick up'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

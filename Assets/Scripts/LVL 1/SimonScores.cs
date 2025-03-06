@@ -26,7 +26,6 @@ public class SimonScores : MonoBehaviour
     public void Set(int newScore)
     {
         score_points = newScore;
-        Debug.Log($"Score updated to: {score_points}");
         onScoreChanged.Invoke(score_points);
         CheckForNewHighscore();
     }
@@ -35,7 +34,6 @@ public class SimonScores : MonoBehaviour
     public void AddPoint()
     {
         score_points++;
-        Debug.Log($"Score increased to: {score_points}");
         onScoreChanged.Invoke(score_points);
         CheckForNewHighscore();
     }
@@ -43,7 +41,6 @@ public class SimonScores : MonoBehaviour
     private void LoadHighScore()
     {
         highscore_point = PlayerPrefs.GetInt(HIGHSCORE_KEY, 0);
-        Debug.Log($"Loaded highscore: {highscore_point}");
         onHighScoreChanged.Invoke(highscore_point);
     }
 
@@ -51,7 +48,6 @@ public class SimonScores : MonoBehaviour
     {
         PlayerPrefs.SetInt(HIGHSCORE_KEY, highscore_point);
         PlayerPrefs.Save();
-        Debug.Log($"Saved highscore: {highscore_point}");
     }
 
     public void CheckForNewHighscore()
@@ -60,7 +56,6 @@ public class SimonScores : MonoBehaviour
         {
             highscore_point = score_points;
             SaveHighScore();
-            Debug.Log($"New highscore achieved: {highscore_point}!");
             onHighScoreChanged.Invoke(highscore_point);
         }
     }
@@ -69,7 +64,6 @@ public class SimonScores : MonoBehaviour
     {
         PlayerPrefs.DeleteKey(HIGHSCORE_KEY);
         highscore_point = 0;
-        Debug.Log("Highscore cleared");
         onHighScoreChanged.Invoke(highscore_point);
     }
 

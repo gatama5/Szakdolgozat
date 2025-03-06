@@ -165,7 +165,6 @@ public class PlayBefore_screen_script : MonoBehaviour
             PlayerPrefs.SetInt("CurrentPlayerID", playerId);
             PlayerPrefs.Save();
 
-            Debug.Log("Játékos adatok sikeresen elmentve! Player ID: " + playerId);
             return true;
         }
         catch (System.Exception e)

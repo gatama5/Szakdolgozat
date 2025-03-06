@@ -1,46 +1,48 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
 
 public class ObjectSpawner : MonoBehaviour
 {
-    [Tooltip("H·ny target objektumot spawnoljon")]
+    [Tooltip("H–±ny target objektumot spawnoljon")]
     public int numberToSpawn = 5;
 
-    [Tooltip("A spawnolandÛ target objektum")]
+    [Tooltip("A spawnoland—É target objektum")]
     public GameObject target;
 
-    [Tooltip("A quad, aminek a ter¸letÈn bel¸l spawnolunk")]
+    [Tooltip("A quad, aminek a ter—ålet–πn bel—ål spawnolunk")]
     public GameObject quad;
 
-    [Tooltip("V·rakoz·si idı a kˆvetkezı target spawnol·s·ig")]
+    [Tooltip("V–±rakoz–±si id—Ö a k—Üvetkez—Ö target spawnol–±s–±ig")]
     public float spawnDelay = 2.0f;
 
-    [Tooltip("Minim·lis t·vols·g kÈt target kˆzˆtt")]
+    [Tooltip("Minim–±lis t–±vols–±g k–πt target k—Üz—Ütt")]
     public float minDistanceBetweenTargets = 1.0f;
 
-    // Tal·latok ideje Ès helyei
+    // Tal–±latok ideje –πs helyei
     public List<double> hit_times = new List<double>();
     public List<string> hitPlace_fromMiddle = new List<string>();
 
     // Referencia a PickUpGun komponensre
     public PickUpGun pickUpGun;
 
-    // Priv·t v·ltozÛk a target kezelÈshez
+    // Priv–±t v–±ltoz—Ék a target kezel–πshez
     private List<GameObject> activeTargets = new List<GameObject>();
-    private int destroyedTargets = 0;
+
+    // M—Édos–Ωtva private-r—Él public-ra, hogy k–Ωv—ålr—Öl is el–πrhet—Ö legyen
+    public int destroyedTargets = 0;
 
     void Start()
     {
-        // Inicializ·ljuk a list·kat
+        // Inicializ–±ljuk a list–±kat
         hit_times = new List<double>();
         hitPlace_fromMiddle = new List<string>();
     }
 
     void Update()
     {
-        // Ellenırizz¸k a megsemmisÌtett targeteket
+        // Ellen—Örizz—åk a megsemmis–Ωtett targeteket
         CheckDestroyedTargets();
     }
 
@@ -48,7 +50,7 @@ public class ObjectSpawner : MonoBehaviour
     {
         bool anyDestroyed = false;
 
-        // VÈgigmegy¸nk a list·n Ès elt·volÌtjuk a null elemeket (megsemmisÌtett objektumok)
+        // V–πgigmegy—ånk a list–±n –πs elt–±vol–Ωtjuk a null elemeket (megsemmis–Ωtett objektumok)
         for (int i = activeTargets.Count - 1; i >= 0; i--)
         {
             if (activeTargets[i] == null)
@@ -59,14 +61,12 @@ public class ObjectSpawner : MonoBehaviour
             }
         }
 
-        // Ha minden target megsemmis¸lt, akkor ledobjuk a fegyvert
+        // Ha minden target megsemmis—ålt, akkor ledobjuk a fegyvert
         if (anyDestroyed && activeTargets.Count == 0 && destroyedTargets >= numberToSpawn)
         {
-            Debug.Log("Minden target megsemmis¸lt! ÷sszesen: " + destroyedTargets);
 
             if (pickUpGun != null)
             {
-                Debug.Log("Fegyver ledob·sa...");
                 pickUpGun.DorpWeapon();
             }
         }
@@ -74,47 +74,48 @@ public class ObjectSpawner : MonoBehaviour
 
     public IEnumerator spawnObject(GameObject targetObject)
     {
-        // Ellenırizz¸k, hogy van-e targetObject
+        // Ellen—Örizz—åk, hogy van-e targetObject
         if (targetObject == null)
         {
-            Debug.LogError("Nincs megadva target objektum a spawnol·shoz!");
             yield break;
         }
 
-        // Ellenırizz¸k, hogy van-e quad
+        // Ellen—Örizz—åk, hogy van-e quad
         if (quad == null)
         {
-            Debug.LogError("Nincs megadva quad a spawnol·shoz!");
             yield break;
         }
 
-        // Ellenırizz¸k, hogy a quadnak van-e MeshCollider komponense
+        // Ellen—Örizz—åk, hogy a quadnak van-e MeshCollider komponense
         MeshCollider meshCollider = quad.GetComponent<MeshCollider>();
         if (meshCollider == null)
         {
-            Debug.LogError("A quadnak nincs MeshCollider komponense!");
             yield break;
         }
 
-        Debug.Log("Target spawnol·s indÌt·sa: " + numberToSpawn + " darab");
-
-        // Resetelj¸k a sz·ml·lÛkat
+        // Resetelj—åk a sz–±ml–±l—Ékat
         destroyedTargets = 0;
         activeTargets.Clear();
 
-        // Spawnoljuk a megadott sz·m˙ objektumot
+        // Spawnoljuk a megadott sz–±m—ä objektumot
         for (int i = 0; i < numberToSpawn; i++)
         {
-            // Keres¸nk egy megfelelı pozÌciÛt
+            // Keres—ånk egy megfelel—Ö poz–Ωci—Ét
             Vector3 spawnPosition = FindValidSpawnPosition(meshCollider);
 
             // Spawnoljuk az objektumot
             GameObject spawnedTarget = Instantiate(targetObject, spawnPosition, quad.transform.rotation);
+
+            // Gy—Öz—Ödj—ånk meg r—Éla, hogy a target-nek van Target komponense
+            Target targetComponent = spawnedTarget.GetComponentInChildren<Target>();
+            if (targetComponent == null)
+            {
+                targetComponent = spawnedTarget.AddComponent<Target>();
+            }
+
             activeTargets.Add(spawnedTarget);
 
-            Debug.Log("Target lÈtrehozva: " + (i + 1) + "/" + numberToSpawn + " pozÌciÛ: " + spawnPosition);
-
-            // VÈletlenszer˚ v·rakoz·s a kˆvetkezı spawnol·sig
+            // V–πletlenszer—ã v–±rakoz–±s a k—Üvetkez—Ö spawnol–±sig
             float randomDelay = UnityEngine.Random.Range(spawnDelay * 0.75f, spawnDelay * 1.25f);
             yield return new WaitForSeconds(randomDelay);
         }
@@ -128,24 +129,19 @@ public class ObjectSpawner : MonoBehaviour
         int attempts = 0;
         const int maxAttempts = 30;
 
-        // AlapÈrtelmezett ÈrtÈk az unassigned v·ltozÛ hib·nak elker¸lÈsÈre
+        // Alap–πrtelmezett –πrt–πk az unassigned v–±ltoz—É hib–±nak elker—ål–πs–πre
         position = new Vector3(quad.transform.position.x, quad.transform.position.y, quad.transform.position.z);
 
         while (!positionValid && attempts < maxAttempts)
         {
-            // Gener·lunk egy vÈletlen pozÌciÛt a Quad hat·rain bel¸l
+            // Gener–±lunk egy v–πletlen poz–Ωci—Ét a Quad hat–±rain bel—ål
             quadX = UnityEngine.Random.Range(collider.bounds.min.x, collider.bounds.max.x);
             quadY = UnityEngine.Random.Range(collider.bounds.min.y, collider.bounds.max.y);
             position = new Vector3(quadX, quadY, quad.transform.position.z);
 
-            // Ellenırizz¸k, hogy elÈg t·vol van-e minden m·s aktÌv targettıl
+            // Ellen—Örizz—åk, hogy el–πg t–±vol van-e minden m–±s akt–Ωv targett—Öl
             positionValid = IsPositionValid(position);
             attempts++;
-        }
-
-        if (attempts >= maxAttempts)
-        {
-            Debug.LogWarning("Nem siker¸lt megfelelı pozÌciÛt tal·lni " + maxAttempts + " prÛb·lkoz·s ut·n!");
         }
 
         return position;
