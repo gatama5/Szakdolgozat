@@ -51,7 +51,15 @@ public class Shooting_startButton : MonoBehaviour
 
     public IEnumerator StartPlay()
     {
-        // Visszaszбmlбlбs megjelenнtйse
+        // Első lépés: játéktípus adatainak resetelése a Shooting játékhoz (szint=2)
+        ScoreManager scoreManager = FindObjectOfType<ScoreManager>();
+        if (scoreManager != null)
+        {
+            // Meghívjuk a Reset függvényt a Shooting játékhoz (2-es szint)
+            scoreManager.ResetGameTypeData(2);
+        }
+
+        // Visszaszámlálás megjelenítése
         float remainingTime = startDelay;
         canva.enabled = true;
         while (remainingTime > 0)
@@ -68,8 +76,25 @@ public class Shooting_startButton : MonoBehaviour
         {
             StartCoroutine(ClearTextAfterDelay(0));
         }
-        obj_s_1p.StartCoroutine(obj_s_1p.spawnObject(trg));
 
+        // Célpontok spawnolásának elindítása
+        if (obj_s_1p != null && trg != null)
+        {
+            // Biztosítjuk, hogy a korábban futó coroutine-ok le legyenek állítva
+            obj_s_1p.StopAllCoroutines();
+
+            // Ellenőrizzük, hogy a pickUpGun referencia be van-e állítva
+            if (pug != null)
+            {
+                obj_s_1p.pickUpGun = pug;
+            }
+
+            obj_s_1p.StartCoroutine(obj_s_1p.spawnObject(trg));
+        }
+        else
+        {
+            Debug.LogError("Hiányzó objektum referenciák a Shooting játékhoz!");
+        }
     }
 
     // Szцveg tцrlйse kйsleltetйssel

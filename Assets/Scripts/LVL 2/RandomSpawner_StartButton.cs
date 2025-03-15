@@ -91,27 +91,35 @@ public class RandomSpawner_StartButton : MonoBehaviour
 
     public IEnumerator StartPlay()
     {
-        // Beбllнtjuk a megfelelх йrtйkeket az ObjectSpawner-ben
+        // Első lépés: játéktípus adatainak resetelése a Target játékhoz (szint=1)
+        ScoreManager scoreManager = FindObjectOfType<ScoreManager>();
+        if (scoreManager != null)
+        {
+            // Meghívjuk a Reset függvényt a Target játékhoz (1-es szint)
+            scoreManager.ResetGameTypeData(1);
+        }
+
+        // Beállítjuk a megfelelő értékeket az ObjectSpawner-ben
         if (objSpawner != null && targetPrefab != null)
         {
             objSpawner.target = targetPrefab;
 
-            // Ha van beбllнtva referencia a pickUpGun komponensre, бtadjuk az ObjectSpawner-nek is
+            // Ha van beállítva referencia a pickUpGun komponensre, átadjuk az ObjectSpawner-nek is
             if (pickUpGun != null)
             {
                 objSpawner.pickUpGun = pickUpGun;
             }
 
-            // Цsszekapcsoljuk a Gun script-et az ObjectSpawner-rel
+            // Összekapcsoljuk a Gun script-et az ObjectSpawner-rel
             if (gunScript != null)
             {
-                // Adjunk hozzб egy referenciбt a gunScript-ben, hogy tudja, melyik ObjectSpawner-t hasznбlja
-                //gunScript.osp_1place = null; // Nullбzzuk, mivel nem 1place-t hasznбlunk
+                // Adjunk hozzá egy referenciát a gunScript-ben, hogy tudja, melyik ObjectSpawner-t használja
+                //gunScript.osp_1place = null; // Nullázzuk, mivel nem 1place-t használunk
                 gunScript.pck_gun = pickUpGun;
             }
         }
 
-        // Visszaszбmlбlбs megjelenнtйse
+        // Visszaszámlálás megjelenítése
         float remainingTime = startDelay;
         if (countdownCanvas != null)
         {
@@ -128,7 +136,7 @@ public class RandomSpawner_StartButton : MonoBehaviour
             remainingTime -= 1f;
         }
 
-        // Tцrцljьk a visszaszбmlбlбs szцvegйt
+        // Töröljük a visszaszámlálás szövegét
         if (showCountdown && countdownText != null)
         {
             countdownText.text = "";
@@ -138,32 +146,32 @@ public class RandomSpawner_StartButton : MonoBehaviour
             }
         }
 
-        // Elindнtjuk a vйletlenszerы cйlpont generбlбst
+        // Elindítjuk a véletlenszerű célpont generálást
         if (objSpawner != null)
         {
-            // Leбllнtjuk az esetleg mбr futу koroutinokat, hogy ne legyen duplikбciу
+            // Leállítjuk az esetleg már futó koroutinokat, hogy ne legyen duplikáció
             objSpawner.StopAllCoroutines();
 
-            // Ellenхrizzьk, hogy a target prefab be lett-e бllнtva
+            // Ellenőrizzük, hogy a target prefab be lett-e állítva
             if (targetPrefab == null && objSpawner.target != null)
             {
                 targetPrefab = objSpawner.target;
-                Debug.Log("Target prefab beбllнtva az ObjectSpawner-bхl: " + targetPrefab.name);
+                Debug.Log("Target prefab beállítva az ObjectSpawner-ből: " + targetPrefab.name);
             }
 
             if (targetPrefab != null)
             {
-                // Elindнtjuk a cйlpontok spawnolбsбt
+                // Elindítjuk a célpontok spawnolását
                 objSpawner.StartCoroutine(objSpawner.spawnObject(targetPrefab));
             }
             else
             {
-                Debug.LogError("Nincs beбllнtva target prefab a spawnolandу objektumhoz!");
+                Debug.LogError("Nincs beállítva target prefab a spawnolandó objektumhoz!");
             }
         }
         else
         {
-            Debug.LogError("Nincs beбllнtva az ObjectSpawner referencia!");
+            Debug.LogError("Nincs beállítva az ObjectSpawner referencia!");
         }
     }
 

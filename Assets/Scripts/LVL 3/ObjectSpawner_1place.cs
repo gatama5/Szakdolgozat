@@ -7,23 +7,20 @@ using Unity.VisualScripting;
 using System.Security.Cryptography;
 public class ObjectSpawner_1place : MonoBehaviour
 {
-    public int numberToSpawn = 5; // Hбny objektumot spawnoljunk
-    public GameObject trg; // A spawnolandу target objektum
-    public GameObject quad; // A Quad, amelynek a kцzepйre spawnoljuk az objektumot
-    //public float spawnDelay = 2.0f; // Spawnolбsok kцzцtt eltelt idх (mp-ben)
+    public int numberToSpawn = 5; // Hány objektumot spawnoljunk
+    public GameObject trg; // A spawnolandó target objektum
+    public GameObject quad; // A Quad, amelynek a közepére spawnoljuk az objektumot
+    //public float spawnDelay = 2.0f; // Spawnolások között eltelt idő (mp-ben)
     public GameObject spawned;
     public bool isSpawned = false;
     public float timer = 0f;
     private Target target_script;
     public List<double> hit_times = new List<double>();
     public List<string> hitPlace_fromMiddle = new List<string>();
-
-    // Szбmlбlу a megsemmisнtett targetek szбmolбsбra
+    // Számláló a megsemmisített targetek számolására
     private int destroyedTargets = 0;
-
     // Referencia a PickUpGun komponensre
     public PickUpGun pickUpGun;
-
     void Update()
     {
         //target_script = spawned.GetComponent<Target>();
@@ -56,29 +53,66 @@ public class ObjectSpawner_1place : MonoBehaviour
     {
         if (obj.IsDestroyed())
         {
-            Debug.Log("Talбlat! Idх spawn йs talбlat kцzцtt: " + Math.Round(timer, 2) + " mp");
-            hit_times.Add(Math.Round(timer, 2)); // idх elmentйse
+            Debug.Log("Találat! Idő spawn és találat között: " + Math.Round(timer, 2) + " mp");
+            hit_times.Add(Math.Round(timer, 2)); // idő elmentése
+
+            // Itt mentjük rögtön az adatbázisba, közvetlenül
+            SaveHitToDatabase(Math.Round(timer, 2), 0, 0);
+
             timer = 0f;
             isSpawned = false;
-
-            // Nцveljьk a megsemmisнtett targetek szбmбt
+            // Növeljük a megsemmisített targetek számát
             destroyedTargets++;
-
-            // Ellenхrizzьk, hogy minden target el lett-e talбlva
+            // Ellenőrizzük, hogy minden target el lett-e találva
             if (destroyedTargets >= numberToSpawn)
             {
-                Debug.Log("Minden target eltalбlva! Fegyver ledobбsa...");
-
-                // Ha a pickUpGun referencia lйtezik, hнvjuk meg a DropWeapon() metуdust
+                Debug.Log("Minden target eltalálva! Fegyver ledobása...");
+                // Ha a pickUpGun referencia létezik, hívjuk meg a DropWeapon() metódust
                 if (pickUpGun != null)
                 {
                     pickUpGun.DorpWeapon();
                 }
                 else
                 {
-                    Debug.LogError("Nincs beбllнtva a pickUpGun referencia az ObjectSpawner_1place szkriptben!");
+                    Debug.LogError("Nincs beállítva a pickUpGun referencia az ObjectSpawner_1place szkriptben!");
                 }
             }
+        }
+    }
+
+
+    private void SaveHitToDatabase(double hitTime, double posX, double posY)
+    {
+        SQLiteDBScript dbManager = FindObjectOfType<SQLiteDBScript>();
+        if (dbManager != null)
+        {
+            // MINDIG ellenőrizzük, hogy a pozíció nem nulla-e
+            if (posX == 0 && posY == 0 && hitPlace_fromMiddle.Count > 0)
+            {
+                // Vegyük a legutolsó pozíciót a hitPlace_fromMiddle listából
+                string lastPos = hitPlace_fromMiddle[hitPlace_fromMiddle.Count - 1];
+                string[] coordinates = lastPos.Split('|');
+                if (coordinates.Length == 2)
+                {
+                    double.TryParse(coordinates[0], out posX);
+                    double.TryParse(coordinates[1], out posY);
+                    Debug.Log($"Pozíció felülírva a hitPlace_fromMiddle-ből: ({posX},{posY})");
+                }
+            }
+
+            // Ellenőrizzük, hogy létezik-e már session
+            if (dbManager.GetCurrentShootingSessionID() <= 0)
+            {
+                dbManager.StartNewShootingSession(dbManager.GetCurrentPlayerID());
+            }
+
+            // Mentjük az adatot Shooting típusként
+            dbManager.UpdateShootingScore(hit_times.Count, hitTime, posX, posY);
+            Debug.Log($"Shooting adat elmentve az adatbázisba: idő={hitTime}, pozíció=({posX},{posY}), sorszám={hit_times.Count}");
+        }
+        else
+        {
+            Debug.LogError("Nem található SQLiteDBScript a jelenetben! Adat nem menthető.");
         }
     }
 }

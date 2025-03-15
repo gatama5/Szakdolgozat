@@ -33,6 +33,8 @@ public class ObjectSpawner : MonoBehaviour
     // Mуdosнtva private-rуl public-ra, hogy kнvьlrхl is elйrhetх legyen
     public int destroyedTargets = 0;
 
+    private List<float> spawnTimes = new List<float>();
+
     void Start()
     {
         // Inicializбljuk a listбkat
@@ -46,25 +48,55 @@ public class ObjectSpawner : MonoBehaviour
         CheckDestroyedTargets();
     }
 
+
     private void CheckDestroyedTargets()
     {
         bool anyDestroyed = false;
 
-        // Vйgigmegyьnk a listбn йs eltбvolнtjuk a null elemeket (megsemmisнtett objektumok)
+        // Végigmegyünk a listán és eltávolítjuk a null elemeket (megsemmisített objektumok)
         for (int i = activeTargets.Count - 1; i >= 0; i--)
         {
             if (activeTargets[i] == null)
             {
+                // Record the hit time (time since spawn) if we can determine it
+                if (i < spawnTimes.Count && spawnTimes[i] > 0)
+                {
+                    double hitTime = Math.Round(Time.time - spawnTimes[i], 2);
+
+                    // Ellenőrizzük, hogy ez a találat már benne van-e a listában
+                    bool alreadyExists = false;
+                    foreach (double time in hit_times)
+                    {
+                        if (Math.Abs(time - hitTime) < 0.01) // Kis tolerancia az időbeli eltérésre
+                        {
+                            alreadyExists = true;
+                            Debug.Log($"Duplikált találat kihagyva: {hitTime}");
+                            break;
+                        }
+                    }
+
+                    // Csak akkor mentjük el, ha még nincs a listában
+                    if (!alreadyExists)
+                    {
+                        hit_times.Add(hitTime);
+                        Debug.Log("Találat feldolgozva! Idő spawn és találat között: " + hitTime + " mp");
+
+                        // Ez itt a kritikus rész - Ne húzzuk ki kommentbe, tényleg csak akkor mentünk, 
+                        // ha nem duplikált a találat és biztosan új
+                    }
+                }
+
                 activeTargets.RemoveAt(i);
+                if (i < spawnTimes.Count)
+                    spawnTimes.RemoveAt(i);
                 destroyedTargets++;
                 anyDestroyed = true;
             }
         }
 
-        // Ha minden target megsemmisьlt, akkor ledobjuk a fegyvert
+        // Ha minden target megsemmisült, akkor ledobjuk a fegyvert
         if (anyDestroyed && activeTargets.Count == 0 && destroyedTargets >= numberToSpawn)
         {
-
             if (pickUpGun != null)
             {
                 pickUpGun.DorpWeapon();
@@ -72,41 +104,76 @@ public class ObjectSpawner : MonoBehaviour
         }
     }
 
+    private void SaveHitToDatabase(double hitTime, double posX, double posY)
+    {
+        SQLiteDBScript dbManager = FindObjectOfType<SQLiteDBScript>();
+        if (dbManager != null)
+        {
+            // Pozíció felülírása, ha szükséges
+            if (posX == 0 && posY == 0 && hitPlace_fromMiddle.Count > 0)
+            {
+                string lastPos = hitPlace_fromMiddle[hitPlace_fromMiddle.Count - 1];
+                string[] coordinates = lastPos.Split('|');
+                if (coordinates.Length == 2)
+                {
+                    double.TryParse(coordinates[0], out posX);
+                    double.TryParse(coordinates[1], out posY);
+                    Debug.Log($"Pozíció felülírva a hitPlace_fromMiddle-ből: ({posX},{posY})");
+                }
+            }
+
+            // Eldöntjük, hogy ez a találat szerepel-e már az adatbázisban
+            // Egyszerűbb megoldás - az UpdateTargetScore metódusban kezeljük a duplikáció ellenőrzést
+
+            // Meghatározzuk a lövés számát
+            int shotNumber = hit_times.Count;
+
+            // Mentés az adatbázisba
+            dbManager.UpdateTargetScore(shotNumber, hitTime, posX, posY);
+            Debug.Log($"Target adat elmentve az adatbázisba: idő={hitTime}, pozíció=({posX},{posY}), sorszám={shotNumber}");
+        }
+        else
+        {
+            Debug.LogError("Nem található SQLiteDBScript a jelenetben! Adat nem menthető.");
+        }
+    }
     public IEnumerator spawnObject(GameObject targetObject)
     {
-        // Ellenхrizzьk, hogy van-e targetObject
+        // Ellenőrizzük, hogy van-e targetObject
         if (targetObject == null)
         {
             yield break;
         }
 
-        // Ellenхrizzьk, hogy van-e quad
+        // Ellenőrizzük, hogy van-e quad
         if (quad == null)
         {
             yield break;
         }
 
-        // Ellenхrizzьk, hogy a quadnak van-e MeshCollider komponense
+        // Ellenőrizzük, hogy a quadnak van-e MeshCollider komponense
         MeshCollider meshCollider = quad.GetComponent<MeshCollider>();
         if (meshCollider == null)
         {
             yield break;
         }
 
-        // Reseteljьk a szбmlбlуkat
+        // Reseteljük a számlálókat
         destroyedTargets = 0;
         activeTargets.Clear();
+        spawnTimes.Clear(); // Clear the spawn times list
+        hit_times.Clear(); // Clear the hit times
 
-        // Spawnoljuk a megadott szбmъ objektumot
+        // Spawnoljuk a megadott számú objektumot
         for (int i = 0; i < numberToSpawn; i++)
         {
-            // Keresьnk egy megfelelх pozнciуt
+            // Keresünk egy megfelelő pozíciót
             Vector3 spawnPosition = FindValidSpawnPosition(meshCollider);
 
             // Spawnoljuk az objektumot
             GameObject spawnedTarget = Instantiate(targetObject, spawnPosition, quad.transform.rotation);
 
-            // Gyхzхdjьnk meg rуla, hogy a target-nek van Target komponense
+            // Győződjünk meg róla, hogy a target-nek van Target komponense
             Target targetComponent = spawnedTarget.GetComponentInChildren<Target>();
             if (targetComponent == null)
             {
@@ -114,8 +181,9 @@ public class ObjectSpawner : MonoBehaviour
             }
 
             activeTargets.Add(spawnedTarget);
+            spawnTimes.Add(Time.time); // Record the spawn time
 
-            // Vйletlenszerы vбrakozбs a kцvetkezх spawnolбsig
+            // Véletlenszerű várakozás a következő spawnolásig
             float randomDelay = UnityEngine.Random.Range(spawnDelay * 0.75f, spawnDelay * 1.25f);
             yield return new WaitForSeconds(randomDelay);
         }

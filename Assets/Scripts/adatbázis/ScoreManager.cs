@@ -84,7 +84,49 @@ public class ScoreManager : MonoBehaviour
         }
 
         ResetScoresBasedOnLevel();
+        InvokeRepeating("CheckLevelChanges", 0.5f, 0.5f);
+
     }
+
+    //újj kód CheckLevelChanges
+    private int lastCheckedLevel = -1;
+
+    private void CheckLevelChanges()
+    {
+        int currentLevel = NextGameColliderScript.GetCurrentLevel();
+
+        if (lastCheckedLevel != currentLevel)
+        {
+            Debug.Log($"Szintváltás észlelve: {lastCheckedLevel} -> {currentLevel}");
+
+            // Ha szintváltás történt, indítsunk új session-t
+            if (dbManager != null)
+            {
+                dbManager.StartNewShootingSession(dbManager.GetCurrentPlayerID());
+                Debug.Log($"Új session indítva a {currentLevel}. szinthez");
+            }
+
+            // Nullázzuk a számlálókat, hogy ne frissüljön semmi a régi adatokból
+            switch (currentLevel)
+            {
+                case 1: // Target játék (2. szint)
+                    lastSavedShotIndex = -1;
+                    shootingTimes.Clear();
+                    hitPositions.Clear();
+                    break;
+
+                case 2: // Shooting játék (3. szint)
+                    lastSavedTargetShotIndex = -1;
+                    targetShootingTimes.Clear();
+                    targetHitPositions.Clear();
+                    break;
+            }
+
+            lastCheckedLevel = currentLevel;
+        }
+    }
+
+    //új kód vége
 
     void Start()
     {
@@ -224,44 +266,47 @@ public class ScoreManager : MonoBehaviour
 
     void Update()
     {
-        // ObjectSpawner_1place (lövöldözős játék) követése
-        if (objectSpawner != null && objectSpawner.hit_times != null && shootingScore != null)
-        {
-            // Ellenőrizzük, hogy változott-e a találatok száma
-            if (objectSpawner.hit_times.Count != shootingTimes.Count)
-            {
-                UpdateShootingScores();
-            }
+        int currentLevel = NextGameColliderScript.GetCurrentLevel();
 
-            // Ellenőrizzük a hitPlace_fromMiddle listát is
-            if (objectSpawner.hitPlace_fromMiddle != null &&
-                objectSpawner.hitPlace_fromMiddle.Count != hitPositions.Count)
+        // KIZÁRÓLAG a megfelelő szinten frissítünk
+        if (currentLevel == 1) // Target játék (2. szint)
+        {
+            if (targetObjectSpawner != null && targetObjectSpawner.hit_times != null)
             {
-                UpdateShootingScores();
+                // Csak akkor frissítünk, ha változás van
+                if (targetObjectSpawner.hit_times.Count != targetShootingTimes.Count ||
+                    (targetObjectSpawner.hitPlace_fromMiddle != null &&
+                     targetObjectSpawner.hitPlace_fromMiddle.Count != targetHitPositions.Count))
+                {
+                    // Explicit Target játék frissítés
+                    Debug.Log("Target játék adatainak frissítése (2. szint)");
+                    UpdateTargetScores();
+
+                    // Biztosítjuk, hogy ne kerüljön Shooting adat mentésre
+                    shootingTimes.Clear();
+                    hitPositions.Clear();
+                    lastSavedShotIndex = -1;
+                }
             }
         }
-
-        // ObjectSpawner (target játék) követése - kiegészítve jobb debug információkkal
-        if (targetObjectSpawner != null && targetObjectSpawner.hit_times != null && targetScore != null)
+        else if (currentLevel == 2) // Shooting játék (3. szint)
         {
-
-            // Ellenőrizzük, hogy változott-e a találatok száma
-            if (targetObjectSpawner.hit_times.Count != targetShootingTimes.Count)
+            if (objectSpawner != null && objectSpawner.hit_times != null)
             {
-                UpdateTargetScores();
-            }
+                // Csak akkor frissítünk, ha változás van
+                if (objectSpawner.hit_times.Count != shootingTimes.Count ||
+                    (objectSpawner.hitPlace_fromMiddle != null &&
+                     objectSpawner.hitPlace_fromMiddle.Count != hitPositions.Count))
+                {
+                    // Explicit Shooting játék frissítés
+                    Debug.Log("Shooting játék adatainak frissítése (3. szint)");
+                    UpdateShootingScores();
 
-            // Ellenőrizzük a hitPlace_fromMiddle listát is
-            if (targetObjectSpawner.hitPlace_fromMiddle != null &&
-                targetObjectSpawner.hitPlace_fromMiddle.Count != targetHitPositions.Count)
-            {
-                UpdateTargetScores();
-            }
-
-            // Ellenőrizzük a megsemmisített targeteket is
-            if (targetObjectSpawner.destroyedTargets > 0)
-            {
-                UpdateTargetScores();
+                    // Biztosítjuk, hogy ne kerüljön Target adat mentésre
+                    targetShootingTimes.Clear();
+                    targetHitPositions.Clear();
+                    lastSavedTargetShotIndex = -1;
+                }
             }
         }
     }
@@ -270,10 +315,13 @@ public class ScoreManager : MonoBehaviour
     {
         if (dbManager != null)
         {
-            dbManager.StartNewShootingSession(dbManager.GetCurrentPlayerID());
-            Debug.Log("Started new session for game type change");
+            // Reset counters for the new game type
             lastSavedShotIndex = -1;
             lastSavedTargetShotIndex = -1;
+
+            // Start a new session for the new game type
+            dbManager.StartNewShootingSession(dbManager.GetCurrentPlayerID());
+            Debug.Log("Started new session for game type change");
         }
     }
 
@@ -320,7 +368,6 @@ public class ScoreManager : MonoBehaviour
 
     private void UpdateTargetScores()
     {
-
         // Csak akkor frissítünk, ha létezik targetObjectSpawner
         if (targetObjectSpawner == null)
         {
@@ -335,10 +382,17 @@ public class ScoreManager : MonoBehaviour
 
         bool updateUI = (targetScore != null);
 
-        // Az adatok másolása lokális listákba
+        // Az adatok másolása lokális listákba - Klónozzuk a listákat, hogy ne módosítsuk az eredetit
         targetShootingTimes = new List<double>(targetObjectSpawner.hit_times);
-        targetHitPositions = new List<string>(targetObjectSpawner.hitPlace_fromMiddle);
 
+        if (targetObjectSpawner.hitPlace_fromMiddle != null)
+        {
+            targetHitPositions = new List<string>(targetObjectSpawner.hitPlace_fromMiddle);
+        }
+        else
+        {
+            targetHitPositions = new List<string>();
+        }
 
         // UI frissítés
         if (updateUI)
@@ -367,23 +421,40 @@ public class ScoreManager : MonoBehaviour
                 else
                 {
                     displayText.AppendLine(GetLocalizedText("PositionNA"));
-                    Debug.LogWarning($"Best target shot position unavailable. targetBestTimeIndex={targetBestTimeIndex}, targetHitPositions.Count={targetHitPositions.Count}");
                 }
 
                 // Last shot information
-                displayText.AppendLine("\n" + GetLocalizedText("LastShot"));
-                displayText.AppendLine(GetLocalizedText("Time", targetShootingTimes[targetShootingTimes.Count - 1]));
-
-                if (targetHitPositions.Count > 0)
+                if (targetShootingTimes.Count > 0)
                 {
-                    displayText.AppendLine(GetLocalizedText("Position", targetHitPositions[targetHitPositions.Count - 1]));
+                    displayText.AppendLine("\n" + GetLocalizedText("LastShot"));
+                    displayText.AppendLine(GetLocalizedText("Time", targetShootingTimes[targetShootingTimes.Count - 1]));
+
+                    if (targetHitPositions.Count > 0 && targetHitPositions.Count == targetShootingTimes.Count)
+                    {
+                        displayText.AppendLine(GetLocalizedText("Position", targetHitPositions[targetHitPositions.Count - 1]));
+                    }
+                    else
+                    {
+                        displayText.AppendLine(GetLocalizedText("PositionNA"));
+                    }
+                }
+
+                // Javítás: Explicit módon a valós találatok számát jelenítjük meg a Target játéknál
+                // Amikor a 2. szinten vagyunk (ami a kódban 1), akkor a tényleges destroyedTargets értéket használjuk
+                if (NextGameColliderScript.GetCurrentLevel() == 1)
+                {
+                    // Ha a destroyedTargets 0, de már van találat, akkor a találatok számát használjuk
+                    int displayedHits = targetObjectSpawner.destroyedTargets;
+                    if (displayedHits == 0 && targetShootingTimes.Count > 0)
+                    {
+                        displayedHits = targetShootingTimes.Count;
+                    }
+                    displayText.AppendLine("\n" + GetLocalizedText("TotalHits", displayedHits));
                 }
                 else
                 {
-                    displayText.AppendLine(GetLocalizedText("PositionNA"));
+                    displayText.AppendLine("\n" + GetLocalizedText("TotalHits", targetShootingTimes.Count));
                 }
-
-                displayText.AppendLine("\n" + GetLocalizedText("TotalHits", targetShootingTimes.Count));
 
                 if (dbManager != null)
                 {
@@ -396,42 +467,42 @@ public class ScoreManager : MonoBehaviour
         }
 
         // Adatbázis frissítés - csak új lövéseket mentünk
-        if (dbManager != null && targetShootingTimes.Count > 0)
+        if (dbManager != null && targetShootingTimes.Count > 0 && NextGameColliderScript.GetCurrentLevel() == 1)
         {
             // Ellenőrizzük, hogy van-e új mentendő lövés
             int newShotsCount = targetShootingTimes.Count - (lastSavedTargetShotIndex + 1);
             if (newShotsCount > 0)
             {
+                Debug.Log($"Target játék: {newShotsCount} új lövés mentése az adatbázisba");
 
                 // Csak az új lövéseken megyünk végig
                 for (int i = lastSavedTargetShotIndex + 1; i < targetShootingTimes.Count; i++)
                 {
-                    if (i >= 0 && i < targetHitPositions.Count)
+                    string hitPosition = "0|0"; // Default érték
+                    if (i < targetHitPositions.Count)
                     {
-                        string[] coordinates = targetHitPositions[i].Split('|');
-                        if (coordinates.Length == 2)
-                        {
-                            if (double.TryParse(coordinates[0], out double hitX) &&
-                                double.TryParse(coordinates[1], out double hitY))
-                            {
-
-                                // Az új UpdateTargetScore metódust használjuk
-                                bool success = dbManager.UpdateTargetScore(i + 1, targetShootingTimes[i], hitX, hitY);
-                                if (success)
-                                {
-                                    lastSavedTargetShotIndex = i;
-                                }
-
-                            }
-
-                        }
-
+                        hitPosition = targetHitPositions[i];
                     }
 
+                    string[] coordinates = hitPosition.Split('|');
+                    if (coordinates.Length == 2)
+                    {
+                        if (double.TryParse(coordinates[0], out double hitX) &&
+                            double.TryParse(coordinates[1], out double hitY))
+                        {
+                            Debug.Log($"Target lövés mentése: idx={i + 1}, idő={targetShootingTimes[i]}, X={hitX}, Y={hitY}");
+
+                            // Az új UpdateTargetScore metódust használjuk
+                            bool success = dbManager.UpdateTargetScore(i + 1, targetShootingTimes[i], hitX, hitY);
+                            if (success)
+                            {
+                                lastSavedTargetShotIndex = i;
+                            }
+                        }
+                    }
                 }
             }
         }
-
     }
 
 
@@ -457,7 +528,6 @@ public class ScoreManager : MonoBehaviour
 
     private void UpdateShootingScores()
     {
-
         if (objectSpawner == null)
         {
             return;
@@ -476,7 +546,7 @@ public class ScoreManager : MonoBehaviour
 
         try
         {
-            // Adatok másolása és ellenőrzése
+            // Adatok másolása és ellenőrzése - klónozzuk, hogy ne módosítsuk az eredetit
             shootingTimes = new List<double>(objectSpawner.hit_times);
 
             if (objectSpawner.hitPlace_fromMiddle != null)
@@ -485,16 +555,24 @@ public class ScoreManager : MonoBehaviour
             }
             else
             {
-                return;
+                hitPositions = new List<string>();
+                // If we don't have hit positions but we have hit times, we'll use default positions
+                for (int i = 0; i < shootingTimes.Count; i++)
+                {
+                    hitPositions.Add("0|0");
+                }
             }
 
             // Legjobb idő frissítése
-            double currentBestTime = shootingTimes.Min();
-            if (currentBestTime < bestTime)
+            if (shootingTimes.Count > 0)
             {
-                bestTime = currentBestTime;
-                bestTimeIndex = shootingTimes.IndexOf(bestTime);
-                Debug.Log($"New best time: {bestTime} at index {bestTimeIndex}");
+                double currentBestTime = shootingTimes.Min();
+                if (currentBestTime < bestTime)
+                {
+                    bestTime = currentBestTime;
+                    bestTimeIndex = shootingTimes.IndexOf(bestTime);
+                    Debug.Log($"New best shooting time: {bestTime} at index {bestTimeIndex}");
+                }
             }
 
             // Format the display text with proper position values (csak ha van UI)
@@ -502,27 +580,39 @@ public class ScoreManager : MonoBehaviour
             {
                 StringBuilder displayText = new StringBuilder();
                 displayText.AppendLine(GetLocalizedText("BestShot"));
-                displayText.AppendLine(GetLocalizedText("Time", bestTime));
 
-                if (bestTimeIndex >= 0 && bestTimeIndex < hitPositions.Count)
+                if (bestTimeIndex >= 0)
                 {
-                    displayText.AppendLine(GetLocalizedText("Position", hitPositions[bestTimeIndex]));
+                    displayText.AppendLine(GetLocalizedText("Time", bestTime));
+
+                    if (bestTimeIndex < hitPositions.Count)
+                    {
+                        displayText.AppendLine(GetLocalizedText("Position", hitPositions[bestTimeIndex]));
+                    }
+                    else
+                    {
+                        displayText.AppendLine(GetLocalizedText("PositionNA"));
+                    }
                 }
                 else
                 {
+                    displayText.AppendLine(GetLocalizedText("Time", 0));
                     displayText.AppendLine(GetLocalizedText("PositionNA"));
                 }
 
-                displayText.AppendLine("\n" + GetLocalizedText("LastShot"));
-                displayText.AppendLine(GetLocalizedText("Time", shootingTimes[shootingTimes.Count - 1]));
+                if (shootingTimes.Count > 0)
+                {
+                    displayText.AppendLine("\n" + GetLocalizedText("LastShot"));
+                    displayText.AppendLine(GetLocalizedText("Time", shootingTimes[shootingTimes.Count - 1]));
 
-                if (hitPositions.Count > 0)
-                {
-                    displayText.AppendLine(GetLocalizedText("Position", hitPositions[hitPositions.Count - 1]));
-                }
-                else
-                {
-                    displayText.AppendLine(GetLocalizedText("PositionNA"));
+                    if (hitPositions.Count > 0 && hitPositions.Count >= shootingTimes.Count)
+                    {
+                        displayText.AppendLine(GetLocalizedText("Position", hitPositions[hitPositions.Count - 1]));
+                    }
+                    else
+                    {
+                        displayText.AppendLine(GetLocalizedText("PositionNA"));
+                    }
                 }
 
                 displayText.AppendLine("\n" + GetLocalizedText("TotalHits", shootingTimes.Count));
@@ -536,36 +626,44 @@ public class ScoreManager : MonoBehaviour
                 shootingScore.SetText(displayText.ToString());
             }
 
-            // Update database with all shots not yet saved
-            if (dbManager != null)
+            // Update database with all shots not yet saved - only for this game type
+            if (dbManager != null && shootingTimes.Count > 0 && NextGameColliderScript.GetCurrentLevel() == 3)
             {
                 // Ellenőrizzük, hogy van-e új mentendő lövés
                 int newShotsCount = shootingTimes.Count - (lastSavedShotIndex + 1);
                 if (newShotsCount > 0)
                 {
+                    Debug.Log($"Saving {newShotsCount} new shooting shots to database");
+
+                    // Start a new session if needed - ONLY for Shooting game type
+                    if (dbManager.GetCurrentShootingSessionID() <= 0)
+                    {
+                        dbManager.StartNewShootingSession(dbManager.GetCurrentPlayerID());
+                    }
 
                     // Csak az új lövéseken megyünk végig
                     for (int i = lastSavedShotIndex + 1; i < shootingTimes.Count; i++)
                     {
-                        if (i >= 0 && i < hitPositions.Count)
+                        string hitPosition = "0|0"; // Default value
+                        if (i < hitPositions.Count)
                         {
-                            string[] coordinates = hitPositions[i].Split('|');
-                            if (coordinates.Length == 2)
+                            hitPosition = hitPositions[i];
+                        }
+
+                        string[] coordinates = hitPosition.Split('|');
+                        if (coordinates.Length == 2)
+                        {
+                            if (double.TryParse(coordinates[0], out double hitX) &&
+                                double.TryParse(coordinates[1], out double hitY))
                             {
-                                if (double.TryParse(coordinates[0], out double hitX) &&
-                                    double.TryParse(coordinates[1], out double hitY))
+                                Debug.Log($"Saving Shooting shot {i + 1}: time={shootingTimes[i]}, x={hitX}, y={hitY}");
+
+                                // EXPLICITLY use UpdateShootingScore
+                                bool success = dbManager.UpdateShootingScore(i + 1, shootingTimes[i], hitX, hitY);
+                                if (success)
                                 {
-                                    Debug.Log($"Sending to database: shooting shot {i + 1}, time={shootingTimes[i]}, X={hitX}, Y={hitY}");
-
-                                    // Itt meghívjuk a megfelelő játéktípussal az UpdateShootingScore-t
-                                    bool success = dbManager.UpdateShootingScore(i + 1, shootingTimes[i], hitX, hitY);
-                                    if (success)
-                                    {
-                                        lastSavedShotIndex = i;
-                                    }
-
+                                    lastSavedShotIndex = i;
                                 }
-
                             }
                         }
                     }
@@ -611,13 +709,38 @@ public class ScoreManager : MonoBehaviour
 
     public void OnLevelChanged(int newLevel)
     {
+        Debug.Log($"Level changed to {newLevel} - Starting new session and resetting counters");
+
+        // Reset the appropriate counters based on level
+        if (newLevel == 2) // Target game
+        {
+            // Reset Target game data
+            lastSavedTargetShotIndex = -1;
+            targetShootingTimes.Clear();
+            targetHitPositions.Clear();
+
+            // Explicitly ignore shooting data
+            shootingTimes.Clear();
+            hitPositions.Clear();
+            lastSavedShotIndex = -1;
+        }
+        else if (newLevel == 3) // Shooting game
+        {
+            // Reset Shooting game data
+            lastSavedShotIndex = -1;
+            shootingTimes.Clear();
+            hitPositions.Clear();
+
+            // Explicitly ignore target data
+            targetShootingTimes.Clear();
+            targetHitPositions.Clear();
+            lastSavedTargetShotIndex = -1;
+        }
 
         // Új session indítása a tiszta elkülönítés érdekében
         if (dbManager != null)
         {
             dbManager.StartNewShootingSession(dbManager.GetCurrentPlayerID());
-            lastSavedShotIndex = -1;
-            lastSavedTargetShotIndex = -1;
         }
     }
 
@@ -645,4 +768,51 @@ public class ScoreManager : MonoBehaviour
         InitializeUITexts();
         UpdateAllScores();
     }
+
+    public void ResetGameTypeData(int gameLevel)
+    {
+        Debug.Log($"Játéktípus adatainak resetelése: szint={gameLevel}");
+
+        // Csak akkor hozunk létre új session-t, ha már van adatunk
+        SQLiteDBScript dbManager = FindObjectOfType<SQLiteDBScript>();
+        if (dbManager != null && dbManager.GetCurrentShootingSessionID() > 0)
+        {
+            // Ellenőrizzük, van-e már adat a jelenlegi session-ben
+            if (dbManager.HasDataInCurrentSession())
+            {
+                // Csak akkor indítunk új session-t, ha már van adat a régi session-ben
+                dbManager.StartNewShootingSession(dbManager.GetCurrentPlayerID());
+                Debug.Log("Új session létrehozva, mert a régi session-ben már van adat");
+            }
+            else
+            {
+                Debug.Log("Meglévő üres session újrahasznosítva");
+            }
+        }
+
+        // A szint alapján reseteljük a megfelelő adatokat
+        if (gameLevel == 1) // Target játék
+        {
+            lastSavedTargetShotIndex = -1;
+            targetShootingTimes.Clear();
+            targetHitPositions.Clear();
+
+            // Megakadályozzuk a Shooting adatok frissítését
+            lastSavedShotIndex = -1;
+            shootingTimes.Clear();
+            hitPositions.Clear();
+        }
+        else if (gameLevel == 2) // Shooting játék
+        {
+            lastSavedShotIndex = -1;
+            shootingTimes.Clear();
+            hitPositions.Clear();
+
+            // Megakadályozzuk a Target adatok frissítését
+            lastSavedTargetShotIndex = -1;
+            targetShootingTimes.Clear();
+            targetHitPositions.Clear();
+        }
+    }
+
 }

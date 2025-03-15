@@ -55,14 +55,14 @@ public class Gun : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
         {
-            // Mуdosнtott feltйtel - ellenхrzйs javнtva, hogy mыkцdjцn bбrmilyen target objektummal
+            // Módosított feltétel - ellenőrzés javítva, hogy működjön bármilyen target objektummal
             Target target = hit.transform.GetComponent<Target>();
             if (target == null && hit.transform.parent != null)
             {
                 target = hit.transform.parent.GetComponent<Target>();
             }
 
-            // Minden target-front elemre vagy bбrmely Target komponenssel rendelkezх elemre mыkцdjцn
+            // Minden target-front elemre vagy bármely Target komponenssel rendelkező elemre működjön
             if (hit.collider.name == "target_front" || target != null)
             {
                 hitCounter++;
@@ -72,49 +72,67 @@ public class Gun : MonoBehaviour
                 double hitX = Math.Round(hitPointLocal.x * 10, 2);
                 double hitY = Math.Round(hitPointLocal.y * 10, 2);
 
-                // Debug log a talбlat helyйrхl
-                Debug.Log("Talбlati pont a target kцzйpйhez kйpest: " + hitX + ", " + hitY);
+                // Debug log a találat helyéről
+                Debug.Log("Találati pont a target közepéhez képest: " + hitX + ", " + hitY);
 
-                // Ellenхrizzьk, hogy osp_1place inicializбlva van-e
-                if (osp_1place != null)
+                // Határozzuk meg, melyik objectSpawner-t kell frissíteni
+                // Különböző szinteken vagyunk?
+                int currentLevel = NextGameColliderScript.GetCurrentLevel();
+
+                // 1-es szint = Target játék (ObjectSpawner)
+                if (currentLevel == 1 && targetObjectSpawner != null)
                 {
-                    // Gyхzхdjьnk meg rуla, hogy a lista inicializбlva van
-                    if (osp_1place.hitPlace_fromMiddle == null)
-                    {
-                        osp_1place.hitPlace_fromMiddle = new List<string>();
-                        Debug.Log("Initialized hitPlace_fromMiddle list");
-                    }
-
-                    // Formбtum vбltoztatбs: vesszх helyett pont hasznбlata
-                    string formattedPosition = $"{hitX.ToString().Replace(',', '.')},{hitY.ToString().Replace(',', '.')}";
-                    osp_1place.hitPlace_fromMiddle.Add($"{hitX}|{hitY}");
-
-                    // Tбroljuk el a sajбt listбnkban is
-                    hitpoints.Add(new Tuple<double, double>(hitX, hitY));
-                }
-
-                // ЪJ KУD: ObjectSpawner frissнtйse
-                if (targetObjectSpawner != null)
-                {
-                    // Gyхzхdjьnk meg rуla, hogy a lista inicializбlva van
+                    // Győződjünk meg róla, hogy a listák inicializálva vannak
                     if (targetObjectSpawner.hitPlace_fromMiddle == null)
                     {
                         targetObjectSpawner.hitPlace_fromMiddle = new List<string>();
                     }
-
                     if (targetObjectSpawner.hit_times == null)
                     {
                         targetObjectSpawner.hit_times = new List<double>();
                     }
 
-                    // Talбlat idejйnek йs pozнciуjбnak eltбrolбsa
-                    targetObjectSpawner.hitPlace_fromMiddle.Add($"{hitX}|{hitY}");
-                    double currentTime = Math.Round(Time.time - nextFireTime + fireRate, 2); // Reakciуidх szбmнtбsa
-                    targetObjectSpawner.hit_times.Add(currentTime);
+                    // Csak egyszer tároljuk el a találatot
+                    string positionString = $"{hitX}|{hitY}";
 
+                    // Ellenőrizzük, hogy ez a pozíció már szerepel-e a listában
+                    bool positionExists = false;
+                    foreach (string pos in targetObjectSpawner.hitPlace_fromMiddle)
+                    {
+                        if (pos == positionString)
+                        {
+                            positionExists = true;
+                            break;
+                        }
+                    }
+
+                    // Csak akkor adjuk hozzá, ha még nem szerepel
+                    if (!positionExists)
+                    {
+                        targetObjectSpawner.hitPlace_fromMiddle.Add(positionString);
+
+                        // Ne mentsük itt az időt, azt az ObjectSpawner saját logikája fogja kezelni
+                        // Így elkerüljük a duplikációt
+                    }
+                }
+                // 2-es szint = Shooting játék (ObjectSpawner_1place)
+                else if (currentLevel == 2 && osp_1place != null)
+                {
+                    // Ellenőrizzük, hogy a lista inicializálva van-e
+                    if (osp_1place.hitPlace_fromMiddle == null)
+                    {
+                        osp_1place.hitPlace_fromMiddle = new List<string>();
+                    }
+
+                    // Formátum változtatás: vessző helyett pont használata
+                    string positionString = $"{hitX}|{hitY}";
+                    osp_1place.hitPlace_fromMiddle.Add(positionString);
+
+                    // Tároljuk el a saját listánkban is
+                    hitpoints.Add(new Tuple<double, double>(hitX, hitY));
                 }
 
-                // Mindig keressьnk Target komponenst йs ellenхrizzьk, hogy mйg nem null-e
+                // Mindig keressünk Target komponenst és ellenőrizzük, hogy még nem null-e
                 if (target != null)
                 {
                     target.TakeDamage(damage);
@@ -122,4 +140,5 @@ public class Gun : MonoBehaviour
             }
         }
     }
+
 }

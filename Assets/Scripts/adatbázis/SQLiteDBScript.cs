@@ -352,50 +352,99 @@ public class SQLiteDBScript : MonoBehaviour
         }
     }
 
-    // Ъj lцvйsi session indнtбsa egy jбtйkoshoz
     public int StartNewShootingSession(int playerID)
     {
-        if (!isDatabaseInitialized)
+        // Ellenőrizzük a paramétereket
+        if (!isDatabaseInitialized || playerID <= 0)
         {
+            Debug.LogError("Nem lehet új session-t indítani: érvénytelen paraméterek");
             return -1;
         }
 
-        if (playerID <= 0)
+        // Csak a releváns szinteken hozunk létre új sessiont
+        int currentLevel = NextGameColliderScript.GetCurrentLevel();
+
+        // A 0. szinten soha ne hozzunk létre új sessiont, csak ha még nincs egy sem
+        if (currentLevel == 0)
         {
-            return -1;
+            Debug.Log("Játék indítás (0. szint): nem hozunk létre új session-t");
+
+            // Ha már van érvényes session, azt használjuk
+            if (currentShootingSessionID > 0)
+            {
+                return currentShootingSessionID;
+            }
+        }
+        // Csak a lövöldözős játékokhoz engedélyezzük az új session létrehozását
+        else if (currentLevel != 1 && currentLevel != 2)
+        {
+            Debug.Log($"Nem lövöldözős szint (szint={currentLevel}), nem hozunk létre új session-t");
+            // Ha már van érvényes session, azt visszaadjuk
+            if (currentShootingSessionID > 0)
+            {
+                return currentShootingSessionID;
+            }
         }
 
         try
         {
+            // Debug infó
+            Debug.Log($"StartNewShootingSession hívva: jelenlegi szint = {currentLevel}, jelenlegi session = {currentShootingSessionID}");
+
+            // Ellenőrizzük, hogy tényleg szükséges-e új session
+            if (currentShootingSessionID > 0)
+            {
+                using (IDbConnection dbConnection = new SqliteConnection(connectionString))
+                {
+                    dbConnection.Open();
+
+                    // Ellenőrizzük, hogy van-e már adat a jelenlegi session-ben
+                    using (IDbCommand checkCmd = dbConnection.CreateCommand())
+                    {
+                        checkCmd.CommandText = "SELECT COUNT(*) FROM ShootingScores WHERE SessionID = @sessionID";
+
+                        IDbDataParameter sessionParam = checkCmd.CreateParameter();
+                        sessionParam.ParameterName = "@sessionID";
+                        sessionParam.Value = currentShootingSessionID;
+                        checkCmd.Parameters.Add(sessionParam);
+
+                        int count = Convert.ToInt32(checkCmd.ExecuteScalar());
+
+                        // Ha nincs adat, használjuk újra a session-t
+                        if (count == 0)
+                        {
+                            Debug.Log($"Üres session újrafelhasználása: ID={currentShootingSessionID}");
+                            return currentShootingSessionID;
+                        }
+
+                        // Ha van már adat, ellenőrizzük a jelenlegi session játéktípusát
+                        if (count > 0)
+                        {
+                            checkCmd.CommandText = "SELECT GameType FROM ShootingScores WHERE SessionID = @sessionID LIMIT 1";
+
+                            object result = checkCmd.ExecuteScalar();
+                            string currentGameType = result != null && result != DBNull.Value ? result.ToString() : "";
+
+                            // Ha a szint és a játéktípus egyezik, használjuk a meglévő session-t
+                            bool isSameGameType = (currentLevel == 1 && currentGameType == GAME_TYPE_TARGET) ||
+                                                 (currentLevel == 2 && currentGameType == GAME_TYPE_SHOOTING);
+
+                            if (isSameGameType)
+                            {
+                                Debug.Log($"Azonos játéktípusú session újrafelhasználása: ID={currentShootingSessionID}, GameType={currentGameType}");
+                                return currentShootingSessionID;
+                            }
+
+                            Debug.Log($"Új session szükséges: jelenlegi szint={currentLevel}, aktuális játéktípus={currentGameType}");
+                        }
+                    }
+                }
+            }
+
+            // Új session létrehozása
             using (IDbConnection dbConnection = new SqliteConnection(connectionString))
             {
                 dbConnection.Open();
-
-                // ELLENХRIZZЬK, HOGY VAN-E MБR AKTНV SESSION
-                using (IDbCommand checkCmd = dbConnection.CreateCommand())
-                {
-                    checkCmd.CommandText = @"
-                SELECT SessionID FROM ShootingSessions 
-                WHERE PlayerID = @playerID 
-                ORDER BY StartedAt DESC LIMIT 1";
-
-                    IDbDataParameter playerParam = checkCmd.CreateParameter();
-                    playerParam.ParameterName = "@playerID";
-                    playerParam.Value = playerID;
-                    checkCmd.Parameters.Add(playerParam);
-
-                    object result = checkCmd.ExecuteScalar();
-
-                    // Ha van mбr session, akkor hasznбljuk azt
-                    if (result != null && result != DBNull.Value)
-                    {
-                        int existingSessionID = Convert.ToInt32(result);
-                        currentShootingSessionID = existingSessionID;
-                        return existingSessionID;
-                    }
-                }
-
-                // Ha nincs mйg session, akkor hozzunk lйtre
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
                 {
                     dbCmd.CommandText = "INSERT INTO ShootingSessions (PlayerID) VALUES (@playerID); SELECT last_insert_rowid();";
@@ -406,14 +455,14 @@ public class SQLiteDBScript : MonoBehaviour
                     dbCmd.Parameters.Add(playerParam);
 
                     currentShootingSessionID = Convert.ToInt32(dbCmd.ExecuteScalar());
-
+                    Debug.Log($"Új session létrehozva: ID={currentShootingSessionID}");
                     return currentShootingSessionID;
                 }
             }
         }
         catch (Exception e)
         {
-            Debug.LogError("Error starting new shooting session: " + e.Message);
+            Debug.LogError($"Hiba a session létrehozásakor: {e.Message}");
             return -1;
         }
     }
@@ -566,12 +615,11 @@ public class SQLiteDBScript : MonoBehaviour
             return false;
         }
     }
-
-    // Lцvйsi pontszбm frissнtйse (mуdosнtott a gameType paramйterrel)
-    public bool UpdateShootingScore(int shotNumber, double reactionTime, double posX, double posY, string gameType = "Shooting")
+    private bool UpdateShootingScore(int shotNumber, double reactionTime, double posX, double posY, string gameType)
     {
         if (!isDatabaseInitialized)
         {
+            Debug.LogError("Cannot update score: Database not initialized");
             return false;
         }
 
@@ -583,16 +631,18 @@ public class SQLiteDBScript : MonoBehaviour
                 currentShootingSessionID = StartNewShootingSession(currentPlayerID);
                 if (currentShootingSessionID <= 0)
                 {
-                    Debug.LogWarning("Cannot update Shooting score: No active shooting session and failed to create new one");
+                    Debug.LogError("Cannot update score: No active shooting session and failed to create new one");
                     return false;
                 }
             }
             else
             {
-                Debug.LogWarning("Cannot update Shooting score: No active shooting session");
+                Debug.LogError("Cannot update score: No active shooting session");
                 return false;
             }
         }
+
+        Debug.Log($"Adatok mentése: Session={currentShootingSessionID}, Shot={shotNumber}, Time={reactionTime}, X={posX}, Y={posY}, Type={gameType}");
 
         try
         {
@@ -600,36 +650,7 @@ public class SQLiteDBScript : MonoBehaviour
             {
                 dbConnection.Open();
 
-                // ELLENХRIZZЬK, HOGY A LЦVЙS MБR SZEREPEL-E AZ ADATBБZISBAN
-                using (IDbCommand checkCmd = dbConnection.CreateCommand())
-                {
-                    checkCmd.CommandText = "SELECT COUNT(*) FROM ShootingScores WHERE SessionID = @sessionID AND ShotNumber = @shotNumber AND GameType = @gameType";
-
-                    IDbDataParameter sessionParam = checkCmd.CreateParameter();
-                    sessionParam.ParameterName = "@sessionID";
-                    sessionParam.Value = currentShootingSessionID;
-                    checkCmd.Parameters.Add(sessionParam);
-
-                    IDbDataParameter shotParam = checkCmd.CreateParameter();
-                    shotParam.ParameterName = "@shotNumber";
-                    shotParam.Value = shotNumber;
-                    checkCmd.Parameters.Add(shotParam);
-
-                    IDbDataParameter gameTypeParam = checkCmd.CreateParameter();
-                    gameTypeParam.ParameterName = "@gameType";
-                    gameTypeParam.Value = gameType;
-                    checkCmd.Parameters.Add(gameTypeParam);
-
-                    int count = Convert.ToInt32(checkCmd.ExecuteScalar());
-
-                    // Ha mбr lйtezik ilyen lцvйs, ne adjunk hozzб ъjat
-                    if (count > 0)
-                    {
-                        return false;
-                    }
-                }
-
-                // Ha mйg nem lйtezik, akkor adjuk hozzб
+                // Ha még nem létezik, akkor adjuk hozzá
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
                 {
                     dbCmd.CommandText = @"
@@ -666,27 +687,43 @@ public class SQLiteDBScript : MonoBehaviour
                     gameTypeParam.Value = gameType;
                     dbCmd.Parameters.Add(gameTypeParam);
 
-                    dbCmd.ExecuteNonQuery();
-                    return true;
+                    int rowsAffected = dbCmd.ExecuteNonQuery();
+                    Debug.Log($"Adatok mentve az adatbázisba: {rowsAffected} sor érintett, GameType: {gameType}");
+                    return rowsAffected > 0;
                 }
             }
         }
         catch (Exception e)
         {
-            Debug.LogError("Error updating Shooting score: " + e.Message);
+            Debug.LogError($"Hiba az adatok mentésekor: {e.Message}\n{e.StackTrace}");
             return false;
         }
     }
 
-    // Egyszerыbb hнvбshoz tъlterhelt metуdus - Target jбtйkhoz
+
+
     public bool UpdateTargetScore(int shotNumber, double reactionTime, double posX, double posY)
     {
+        // CSAK akkor mentsük a Target játék adatait, ha a 2. szinten vagyunk
+        if (NextGameColliderScript.GetCurrentLevel() != 1) // A 2. szint indexe 1
+        {
+            Debug.LogWarning($"Nem mentünk Target adatokat a {NextGameColliderScript.GetCurrentLevel()} szinten");
+            return false;
+        }
+
         return UpdateShootingScore(shotNumber, reactionTime, posX, posY, GAME_TYPE_TARGET);
     }
 
-    // Egyszerыbb hнvбshoz tъlterhelt metуdus - Shooting jбtйkhoz
+
     public bool UpdateShootingScore(int shotNumber, double reactionTime, double posX, double posY)
     {
+        // CSAK akkor mentsük a Shooting játék adatait, ha a 3. szinten vagyunk
+        if (NextGameColliderScript.GetCurrentLevel() != 2) // A 3. szint indexe 2
+        {
+            Debug.LogWarning($"Nem mentünk Shooting adatokat a {NextGameColliderScript.GetCurrentLevel()} szinten");
+            return false;
+        }
+
         return UpdateShootingScore(shotNumber, reactionTime, posX, posY, GAME_TYPE_SHOOTING);
     }
 
@@ -726,4 +763,82 @@ public class SQLiteDBScript : MonoBehaviour
             Debug.LogWarning("Failed to start new shooting session for player ID: " + playerID);
         }
     }
+
+    public bool IsAlreadySaved(int shotNumber, double reactionTime, string gameType)
+    {
+        if (!isDatabaseInitialized || currentShootingSessionID <= 0)
+        {
+            return false;
+        }
+
+        try
+        {
+            using (IDbConnection dbConnection = new SqliteConnection(connectionString))
+            {
+                dbConnection.Open();
+                using (IDbCommand checkCmd = dbConnection.CreateCommand())
+                {
+                    checkCmd.CommandText = "SELECT COUNT(*) FROM ShootingScores WHERE SessionID = @sessionID AND ShotNumber = @shotNumber AND GameType = @gameType";
+
+                    IDbDataParameter sessionParam = checkCmd.CreateParameter();
+                    sessionParam.ParameterName = "@sessionID";
+                    sessionParam.Value = currentShootingSessionID;
+                    checkCmd.Parameters.Add(sessionParam);
+
+                    IDbDataParameter shotParam = checkCmd.CreateParameter();
+                    shotParam.ParameterName = "@shotNumber";
+                    shotParam.Value = shotNumber;
+                    checkCmd.Parameters.Add(shotParam);
+
+                    IDbDataParameter gameTypeParam = checkCmd.CreateParameter();
+                    gameTypeParam.ParameterName = "@gameType";
+                    gameTypeParam.Value = gameType == "Target" ? GAME_TYPE_TARGET : GAME_TYPE_SHOOTING;
+                    checkCmd.Parameters.Add(gameTypeParam);
+
+                    int count = Convert.ToInt32(checkCmd.ExecuteScalar());
+                    return count > 0;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Hiba az IsAlreadySaved ellenőrzés során: {e.Message}");
+            return false;
+        }
+    }
+
+
+    public bool HasDataInCurrentSession()
+    {
+        if (!isDatabaseInitialized || currentShootingSessionID <= 0)
+        {
+            return false;
+        }
+
+        try
+        {
+            using (IDbConnection dbConnection = new SqliteConnection(connectionString))
+            {
+                dbConnection.Open();
+                using (IDbCommand checkCmd = dbConnection.CreateCommand())
+                {
+                    checkCmd.CommandText = "SELECT COUNT(*) FROM ShootingScores WHERE SessionID = @sessionID";
+
+                    IDbDataParameter sessionParam = checkCmd.CreateParameter();
+                    sessionParam.ParameterName = "@sessionID";
+                    sessionParam.Value = currentShootingSessionID;
+                    checkCmd.Parameters.Add(sessionParam);
+
+                    int count = Convert.ToInt32(checkCmd.ExecuteScalar());
+                    return count > 0;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Hiba a HasDataInCurrentSession ellenőrzés során: {e.Message}");
+            return false;
+        }
+    }
+
 }

@@ -7791,11 +7791,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5964970432291283494, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
       propertyPath: m_fontSize
-      value: 30
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 5964970432291283494, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
       propertyPath: m_fontSizeBase
-      value: 30
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7580210132530780372, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
       propertyPath: m_LocalPosition.x
