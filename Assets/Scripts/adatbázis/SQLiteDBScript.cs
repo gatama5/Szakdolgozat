@@ -364,25 +364,22 @@ public class SQLiteDBScript : MonoBehaviour
         // Csak a releváns szinteken hozunk létre új sessiont
         int currentLevel = NextGameColliderScript.GetCurrentLevel();
 
-        // A 0. szinten soha ne hozzunk létre új sessiont, csak ha még nincs egy sem
-        if (currentLevel == 0)
+        // A 0. szinten és a 3. szinten (vagy magasabb) SOHA ne hozzunk létre új sessiont
+        if (currentLevel == 0 || currentLevel > 2)
         {
-            Debug.Log("Játék indítás (0. szint): nem hozunk létre új session-t");
+            Debug.Log($"Nem releváns szint (szint={currentLevel}), nem hozunk létre új session-t");
 
             // Ha már van érvényes session, azt használjuk
             if (currentShootingSessionID > 0)
             {
                 return currentShootingSessionID;
             }
-        }
-        // Csak a lövöldözős játékokhoz engedélyezzük az új session létrehozását
-        else if (currentLevel != 1 && currentLevel != 2)
-        {
-            Debug.Log($"Nem lövöldözős szint (szint={currentLevel}), nem hozunk létre új session-t");
-            // Ha már van érvényes session, azt visszaadjuk
-            if (currentShootingSessionID > 0)
+
+            // Ha a 0. szinten vagyunk és nincs session, egyszerűen visszatérünk anélkül, hogy újat hoznánk létre
+            if (currentLevel == 0)
             {
-                return currentShootingSessionID;
+                Debug.Log("0. szint - nem hozunk létre új session-t még akkor sem, ha nincs meglévő");
+                return 0; // Jelezzük, hogy nincs érvényes session
             }
         }
 
