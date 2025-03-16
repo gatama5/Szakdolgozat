@@ -13,19 +13,6 @@ public class ui_c : MonoBehaviour
 
     public ModalWindowPanel modalwindow => _modalwindow;
 
-    //private void Awake()
-    //{
-    //    if (Instance == null)
-    //    {
-    //        Instance = this;
-    //    }
-    //    else
-    //    {
-    //        Destroy(gameObject);
-    //    }
-    //}
-
-
     public void Close()
     {
         panel.SetActive(false);

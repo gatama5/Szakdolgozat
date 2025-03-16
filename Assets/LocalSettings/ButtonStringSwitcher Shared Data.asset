@@ -79,6 +79,22 @@ MonoBehaviour:
     m_Key: PickUpTextSwitcher
     m_Metadata:
       m_Items: []
+  - m_Id: 48238389345095680
+    m_Key: TurotialChanger
+    m_Metadata:
+      m_Items: []
+  - m_Id: 48240480784453632
+    m_Key: TutorialBoxHeaderChanger
+    m_Metadata:
+      m_Items: []
+  - m_Id: 48248185767038976
+    m_Key: TutorialMovingControllChanger
+    m_Metadata:
+      m_Items: []
+  - m_Id: 48248679986073600
+    m_Key: TutorialImageText
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

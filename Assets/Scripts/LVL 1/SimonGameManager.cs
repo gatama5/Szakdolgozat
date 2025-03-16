@@ -21,25 +21,6 @@ public class SimonGameManager : MonoBehaviour
 
     private Dictionary<int, int> buttonUsageCount = new Dictionary<int, int>();
     private SQLiteDBScript dbManager;
-    //[SerializeField] public GameObject door;
-    //[SerializeField] public GameObject doorknob;
-
-
-    //public Tuple<Vector3, Quaternion> door_start_pos =
-    // new Tuple<Vector3, Quaternion>(
-    //     new Vector3(13.21f, 2.32f, 6.26f),
-    //     new Quaternion(0, -0.707103193f, 0, 0.707110405f)
-    // );
-
-    //public Tuple<Vector3, Quaternion> door_open_pos =
-    //    new Tuple<Vector3, Quaternion>(
-    //         new Vector3(16.44f, 2.32f, 3.75f),
-    //         new Quaternion(0, -1, 0, 5.30f)
-    //   );
-
-
-    //public Tuple<Vector3, Quaternion> door_knob_start = new Tuple<Vector3, Quaternion>(new Vector3(10.72f, 6.48f, 6.26f), new Quaternion(0, -0.70f, 0, 0.70f));
-    //public Tuple<Vector3, Quaternion> door_knob_open = new Tuple<Vector3, Quaternion>(new Vector3(16.5f, 6.4000001f, 0.109999999f), new Quaternion(0, -0.00617052522f, 0, 0.999981046f));
 
 
 

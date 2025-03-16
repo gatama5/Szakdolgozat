@@ -9,7 +9,6 @@ public class ModalWindowPanel : MonoBehaviour
     [SerializeField] private Button apply_btn;
     [SerializeField] public GameObject modalWindow; // A bezárandó ablak GameObject-je
     [SerializeField] public TriggerZoneForWindow trg_zone;
-    //public FPS_Controller playerController;
 
 
 
@@ -19,14 +18,9 @@ public class ModalWindowPanel : MonoBehaviour
     private void Awake()
     {
         apply_btn.onClick.AddListener(CloseModalButton);
-        //trg_zone = GetComponent<TriggerZoneForWindow>();
     }
 
-    //public void Confirm()
-    //{
-    //    onApplyAction?.Invoke();
-    //    ui_c.Instance.Close();
-    //}
+
 
     public void CloseModalButton()
     {
@@ -42,7 +36,6 @@ public class ModalWindowPanel : MonoBehaviour
 
     public void ShowAsHero()
     {
-        Debug.Log("megjelenítés");
         ui_c.Instance.Show();
     }
 

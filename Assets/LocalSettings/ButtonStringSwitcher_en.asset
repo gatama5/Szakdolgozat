@@ -115,6 +115,31 @@ MonoBehaviour:
     m_Localized: '"E" to pick up'
     m_Metadata:
       m_Items: []
+  - m_Id: 48238389345095680
+    m_Localized: Tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 48240480784453632
+    m_Localized: Tutorial for game controlling and completing
+    m_Metadata:
+      m_Items: []
+  - m_Id: 48248185767038976
+    m_Localized: 'You can controll the character with pressing the:
+
+      - WASD
+      buttons
+
+      -Arrow keys
+
+      And with pressing the LeftShift button you
+      can run'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 48248679986073600
+    m_Localized: After you finished the Mini game that you played, you get your score
+      and you can go to the next level with walking trough the door.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

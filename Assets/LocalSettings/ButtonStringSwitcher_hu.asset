@@ -100,6 +100,26 @@ MonoBehaviour:
     m_Localized: "\"E\" a felv\xE9telhez"
     m_Metadata:
       m_Items: []
+  - m_Id: 48238389345095680
+    m_Localized: "S\xFAg\xF3"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 48240480784453632
+    m_Localized: "Seg\xEDts\xE9g a j\xE1t\xE9k ir\xE1ny\xEDt\xE1s\xE1hoz \xE9s teljes\xEDt\xE9s\xE9hez"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 48248185767038976
+    m_Localized: "A karaktert a k\xF6vetkez\u0151 gombok lenyom\xE1s\xE1val lehet
+      ir\xE1ny\xEDtani:\n- WASD gombok\n- Ny\xEDl billenty\u0171k\nA tud futni a
+      Baloldali Shift gomb nyom\xE1s\xE1val"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 48248679986073600
+    m_Localized: "A minij\xE1t\xE9k befejez\xE9se ut\xE1n megkapod az eredm\xE9nyedet
+      \xE9s tov\xE1bbl\xE9phetsz a kovetkez\u0151 szintre azzal ha \xE1tm\xE9sz az
+      ajt\xF3n."
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []
