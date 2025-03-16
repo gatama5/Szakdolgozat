@@ -56,7 +56,7 @@ public class PlayBefore_screen_script : MonoBehaviour
 
         // Add listeners for input validation and generation calculation
         ageInput.onValueChanged.AddListener(ValidateInput);
-        ageInput.onValueChanged.AddListener(UpdateGeneration);
+
 
         // Add listeners for all fields to update button state
         if (nameInput != null)
@@ -174,6 +174,7 @@ public class PlayBefore_screen_script : MonoBehaviour
         }
     }
 
+
     private void ValidateInput(string text)
     {
         if (string.IsNullOrEmpty(text))
@@ -183,35 +184,35 @@ public class PlayBefore_screen_script : MonoBehaviour
             return;
         }
 
+        // Ellenõrizzük, hogy a teljes szöveg érvényes-e
         if (int.TryParse(text, out int number))
         {
             if (number >= 0 && number <= 99)
             {
+                // Az érték rendben van, hagyjuk és frissítsük a generációt
+                int birthYear = 2024 - number;
+                string generation = DetermineGeneration(birthYear);
+                genDisplayBox.text = generation;
                 UpdateStartButtonState();
                 return;
             }
         }
 
-        // Remove the last character if the input is invalid
+        // Ha ide jutunk, az bemenet érvénytelen
         if (text.Length > 0)
         {
+            // Mivel az aktuális bemenet érvénytelen, állítsuk vissza az elõzõ érvényes értékre
             ageInput.text = text.Substring(0, text.Length - 1);
-        }
-    }
+            // Helyezzük a kurzort a szöveg végére
+            ageInput.caretPosition = ageInput.text.Length;
 
-    private void UpdateGeneration(string ageText)
-    {
-        if (string.IsNullOrEmpty(ageText))
-        {
-            genDisplayBox.text = "";
-            return;
-        }
-
-        if (int.TryParse(ageText, out int age))
-        {
-            int birthYear = 2024 - age;
-            string generation = DetermineGeneration(birthYear);
-            genDisplayBox.text = generation;
+            // Ha még maradt érvényes szám, akkor frissítsük a generációt azzal
+            if (int.TryParse(ageInput.text, out int validNumber) && validNumber >= 0 && validNumber <= 99)
+            {
+                int birthYear = 2024 - validNumber;
+                string generation = DetermineGeneration(birthYear);
+                genDisplayBox.text = generation;
+            }
         }
     }
 

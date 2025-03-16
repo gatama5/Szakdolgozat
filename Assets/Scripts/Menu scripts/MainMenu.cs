@@ -18,4 +18,15 @@ public class MainMenu : MonoBehaviour
     {
         Application.Quit();
     }
+
+    public void ScoreScreen() 
+    {
+        SceneManager.LoadScene(1);
+    }
+
+    public void BackBtn() 
+    {
+        SceneManager.LoadScene(0);
+    }
+
 }

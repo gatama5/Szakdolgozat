@@ -120,6 +120,15 @@ MonoBehaviour:
       ajt\xF3n."
     m_Metadata:
       m_Items: []
+  - m_Id: 48265965841125376
+    m_Localized: "J\xE1t\xE9k v\xE9ge!\nAz el\xE9rt eredm\xE9nyeket mentettem, k\xF6sz\xF6n\xF6m
+      hogy j\xE1tszott\xE1l!\nMost visszair\xE1ny\xEDtalak a Men\xFCbe."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 48278201875795968
+    m_Localized: Vissza
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

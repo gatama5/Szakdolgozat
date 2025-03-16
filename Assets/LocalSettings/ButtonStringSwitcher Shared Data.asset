@@ -95,6 +95,14 @@ MonoBehaviour:
     m_Key: TutorialImageText
     m_Metadata:
       m_Items: []
+  - m_Id: 48265965841125376
+    m_Key: EndTextChanger
+    m_Metadata:
+      m_Items: []
+  - m_Id: 48278201875795968
+    m_Key: BackBtn
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

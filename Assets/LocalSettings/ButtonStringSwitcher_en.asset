@@ -140,6 +140,21 @@ MonoBehaviour:
       and you can go to the next level with walking trough the door.
     m_Metadata:
       m_Items: []
+  - m_Id: 48265965841125376
+    m_Localized: 'Game Over!
+
+      I have saved your achievements,
+
+      Thanks
+      for playing!
+
+      Now you will be redirected to the Menu.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 48278201875795968
+    m_Localized: Back
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

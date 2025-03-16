@@ -1,5 +1,10 @@
 
 using UnityEngine;
+using TMPro;
+using System.Collections;
+using UnityEngine.SceneManagement;
+using System.Collections.Generic;
+
 public class NextGameColliderScript : MonoBehaviour
 {
     private static int currentLevel = 0;
@@ -8,13 +13,18 @@ public class NextGameColliderScript : MonoBehaviour
     [SerializeField] private SimonGameManager simonGame; // Simon játék referencia
     [SerializeField] private ObjectSpawner targetGame; // Target játék referencia (ObjectSpawner)
     [SerializeField] private ObjectSpawner_1place shootingGame; // Lövöldözõs játék referencia
-
+    [SerializeField] private ButtonsForMaze mazeGame; // Új: Labirintus játék referencia (ButtonsForMaze)
+    [Header("UI Elements")]
+    [SerializeField] private TextMeshProUGUI completionText; // Befejezés szöveg (GameOver)
+    [SerializeField] private List<TextMeshProUGUI> inGameTexts = new List<TextMeshProUGUI>(); // Játék közbeni szövegek
+    [SerializeField] private float textDisplayTime = 5f; // Új: Szöveg megjelenítési ideje
+    [SerializeField] private string menuSceneName = "menu_basic"; // Új: Menu scene neve
 
     private static Vector3[] levelPositions = new Vector3[] {
         new Vector3(-58.56f, 0.54f, 7.49f),  // 1. szint
         new Vector3(-68.96f, 0.54f, 7.49f),  // 2. szint
         new Vector3(-79.87f, 0.54f, 7.49f),  // 3. szint
-        new Vector3(-92.23f, 0.54f, 5.08f)   // 4. szint
+        new Vector3(-92.23f, 0.54f, 5.08f)   // 4. szint (maze játék)
     };
 
     private void Start()
@@ -42,6 +52,35 @@ public class NextGameColliderScript : MonoBehaviour
         if (thisLevelIndex == 2 && shootingGame == null) // 3. szint ellenõrzése
         {
             Debug.LogError("Shooting Game reference is missing from the third level collider!");
+        }
+        if (thisLevelIndex == 3 && mazeGame == null) // 4. szint ellenõrzése (új: labirintus)
+        {
+            Debug.LogError("Maze Game reference is missing from the fourth level collider!");
+        }
+
+        // Ellenõrizzük az UI elemeket
+        CheckUIElements();
+    }
+
+    private void CheckUIElements()
+    {
+        // Ha befejezés szöveg meg van adva, akkor elrejtjük amíg nincs rá szükség
+        if (completionText != null)
+        {
+            completionText.gameObject.SetActive(false);
+        }
+        else if (thisLevelIndex == levelPositions.Length - 1)
+        {
+            Debug.LogWarning("Completion text (Game Over) is not assigned but this is the last level!");
+        }
+
+        // Ellenõrizzük a játék közben látható szövegeket
+        for (int i = 0; i < inGameTexts.Count; i++)
+        {
+            if (inGameTexts[i] == null)
+            {
+                Debug.LogWarning($"In-game text at index {i} is null!");
+            }
         }
     }
 
@@ -99,6 +138,24 @@ public class NextGameColliderScript : MonoBehaviour
             }
         }
 
+        // Negyedik szint - Labirintus játék ellenõrzése
+        else if (thisLevelIndex == 3)
+        {
+            if (mazeGame == null)
+            {
+                Debug.LogError("Maze Game reference is missing!");
+                return;
+            }
+
+            // Ellenõrizzük, hogy a játékos megnyomta-e a jó gombot (teljesítette a labirintust)
+            // Most már használhatjuk az isCompleted változót a közvetlen ellenõrzéshez
+            if (!mazeGame.isCompleted)
+            {
+                canProceed = false;
+                Debug.Log("Complete the Maze game first! Find and press the correct button.");
+            }
+        }
+
         if (!canProceed)
         {
             // Visszalökjük a játékost
@@ -116,7 +173,14 @@ public class NextGameColliderScript : MonoBehaviour
             return;
         }
 
-        // Ha idáig eljutottunk, akkor továbbléphetünk
+        // Ha az utolsó szint után vagyunk, akkor a játék véget ér
+        if (thisLevelIndex == levelPositions.Length - 1)  // A maze játék az utolsó, innen visszadobjuk a menübe
+        {
+            StartCoroutine(CompleteGame());
+            return;
+        }
+
+        // Egyébként továbblépünk a következõ szintre
         MoveToNextLevel();
     }
 
@@ -137,6 +201,45 @@ public class NextGameColliderScript : MonoBehaviour
                 player.transform.position = newPos;
             }
         }
+    }
+
+    private IEnumerator CompleteGame()
+    {
+        // Elrejtjük az összes játék közben látható szöveget
+        foreach (TextMeshProUGUI inGameText in inGameTexts)
+        {
+            if (inGameText != null)
+            {
+                inGameText.gameObject.SetActive(false);
+            }
+        }
+
+        // Megjeleníti a befejezés szöveget, ha meg van adva
+        if (completionText != null)
+        {
+            completionText.gameObject.SetActive(true);
+
+            // Ha van score_time, hozzáadjuk az idõt a befejezés szöveghez
+            if (thisLevelIndex == 3 && mazeGame != null && mazeGame.score_time != System.TimeSpan.Zero)
+            {
+                string formattedTime = string.Format("{0:mm\\:ss\\.ff}", mazeGame.score_time);
+                completionText.text += $"\nYour time: {formattedTime}";
+            }
+        }
+
+        // Várakozás a meghatározott ideig
+        yield return new WaitForSeconds(textDisplayTime);
+
+        // Játék vége, visszadobás a menübe
+        ResetLevels();
+
+        // Alaphelyzetbe állítjuk a labirintus játékot
+        if (thisLevelIndex == 3 && mazeGame != null)
+        {
+            mazeGame.ResetMaze();
+        }
+
+        SceneManager.LoadScene(menuSceneName);
     }
 
     public static int GetCurrentLevel()
