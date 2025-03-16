@@ -2641,6 +2641,7 @@ MonoBehaviour:
   - {fileID: 1095848393}
   textDisplayTime: 8
   menuSceneName: menu_basic
+  teleportDelay: 0.5
 --- !u!65 &424037697
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -9693,6 +9694,7 @@ MonoBehaviour:
   - {fileID: 1095848393}
   textDisplayTime: 8
   menuSceneName: menu_basic
+  teleportDelay: 0.5
 --- !u!65 &1448844502
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -10805,6 +10807,7 @@ GameObject:
   - component: {fileID: 1741469579}
   - component: {fileID: 1741469581}
   - component: {fileID: 1741469580}
+  - component: {fileID: 1741469582}
   m_Layer: 0
   m_Name: Plane.051 (1)
   m_TagString: Untagged
@@ -10876,6 +10879,28 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1741469578}
+  m_Mesh: {fileID: -6744738779940193599, guid: 02aadb021b6ad3a4d85068be2d578e57, type: 3}
+--- !u!64 &1741469582
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1741469578}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
   m_Mesh: {fileID: -6744738779940193599, guid: 02aadb021b6ad3a4d85068be2d578e57, type: 3}
 --- !u!1 &1743303786 stripped
 GameObject:
@@ -11228,6 +11253,7 @@ MonoBehaviour:
   - {fileID: 1095848393}
   textDisplayTime: 8
   menuSceneName: menu_basic
+  teleportDelay: 0.5
 --- !u!65 &1771706715
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -12037,6 +12063,7 @@ MonoBehaviour:
   - {fileID: 1095848393}
   textDisplayTime: 8
   menuSceneName: menu_basic
+  teleportDelay: 0.5
 --- !u!65 &1872540030
 BoxCollider:
   m_ObjectHideFlags: 0

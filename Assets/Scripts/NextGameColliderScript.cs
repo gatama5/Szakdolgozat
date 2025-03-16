@@ -19,6 +19,7 @@ public class NextGameColliderScript : MonoBehaviour
     [SerializeField] private List<TextMeshProUGUI> inGameTexts = new List<TextMeshProUGUI>(); // Játék közbeni szövegek
     [SerializeField] private float textDisplayTime = 5f; // Új: Szöveg megjelenítési ideje
     [SerializeField] private string menuSceneName = "menu_basic"; // Új: Menu scene neve
+    [SerializeField] private float teleportDelay = 0.5f; // Késleltetés a teleportálás elõtt
 
     private static Vector3[] levelPositions = new Vector3[] {
         new Vector3(-58.56f, 0.54f, 7.49f),  // 1. szint
@@ -148,7 +149,6 @@ public class NextGameColliderScript : MonoBehaviour
             }
 
             // Ellenõrizzük, hogy a játékos megnyomta-e a jó gombot (teljesítette a labirintust)
-            // Most már használhatjuk az isCompleted változót a közvetlen ellenõrzéshez
             if (!mazeGame.isCompleted)
             {
                 canProceed = false;
@@ -158,17 +158,29 @@ public class NextGameColliderScript : MonoBehaviour
 
         if (!canProceed)
         {
-            // Visszalökjük a játékost
-            Vector3 pushBackPosition = player.transform.position + (player.transform.forward * -2f);
-            if (player.GetComponent<CharacterController>() != null)
+            // Visszalökjük a játékost, de NEM kapcsoljuk ki a CharacterController-t
+            FPS_Controller fpsController = player.GetComponent<FPS_Controller>();
+            if (fpsController != null)
             {
-                player.GetComponent<CharacterController>().enabled = false;
-                player.transform.position = pushBackPosition;
-                player.GetComponent<CharacterController>().enabled = true;
+                // Ideiglenesen letiltjuk a mozgást
+                bool originalCanMove = fpsController.canMove;
+                fpsController.canMove = false;
+
+                // A player pozícióját a CharacterController.Move funkcióval módosítjuk
+                CharacterController charController = player.GetComponent<CharacterController>();
+                if (charController != null)
+                {
+                    Vector3 pushDirection = -player.transform.forward * 2f;
+                    charController.Move(pushDirection);
+                }
+
+                // Kis késleltetés után visszaállítjuk a mozgást
+                StartCoroutine(ReenableMovementAfterDelay(fpsController, originalCanMove, 0.2f));
             }
             else
             {
-                player.transform.position = pushBackPosition;
+                // Ha nincs FPS_Controller, akkor egyszerûen csak mozgatjuk a játékost
+                player.transform.position += -player.transform.forward * 2f;
             }
             return;
         }
@@ -181,26 +193,58 @@ public class NextGameColliderScript : MonoBehaviour
         }
 
         // Egyébként továbblépünk a következõ szintre
-        MoveToNextLevel();
+        StartCoroutine(MoveToNextLevelSafely());
     }
 
-    private void MoveToNextLevel()
+    private IEnumerator MoveToNextLevelSafely()
     {
         if (currentLevel < levelPositions.Length - 1)
         {
+            // Letiltjuk a játékos mozgását a teleportálás idejére
+            FPS_Controller fpsController = player.GetComponent<FPS_Controller>();
+            bool originalCanMove = true;
+
+            if (fpsController != null)
+            {
+                originalCanMove = fpsController.canMove;
+                fpsController.canMove = false;
+            }
+
+            // Vegyünk vissza 1 biztonsági keretet, mielõtt teleportálnánk
+            yield return new WaitForFixedUpdate();
+
+            // Frissítjük a szintet
             currentLevel++;
             Vector3 newPos = levelPositions[currentLevel];
-            if (player.GetComponent<CharacterController>() != null)
+
+            // Teleportáljuk a játékost az új pozícióba
+            CharacterController charController = player.GetComponent<CharacterController>();
+            if (charController != null)
             {
-                player.GetComponent<CharacterController>().enabled = false;
+                charController.enabled = false;
                 player.transform.position = newPos;
-                player.GetComponent<CharacterController>().enabled = true;
+                charController.enabled = true;
             }
             else
             {
                 player.transform.position = newPos;
             }
+
+            // Várjunk egy rövid ideig, hogy a fizika rendszer stabilizálódjon
+            yield return new WaitForSeconds(teleportDelay);
+
+            // Visszakapcsoljuk a mozgást
+            if (fpsController != null)
+            {
+                fpsController.canMove = originalCanMove;
+            }
         }
+    }
+
+    private IEnumerator ReenableMovementAfterDelay(FPS_Controller controller, bool originalState, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        controller.canMove = originalState;
     }
 
     private IEnumerator CompleteGame()
@@ -214,7 +258,7 @@ public class NextGameColliderScript : MonoBehaviour
             }
         }
 
-        // Megjeleníti a befejezés szöveget, ha meg van adva
+        // Megjelenítjük a befejezés szövegét, ha meg van adva
         if (completionText != null)
         {
             completionText.gameObject.SetActive(true);

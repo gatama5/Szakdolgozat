@@ -1,3 +1,4 @@
+
 using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,6 +20,12 @@ public class FPS_Controller : MonoBehaviour
 
     public bool canMove = true;
 
+    // Gravitáció hozzáadása
+    public float gravity = 20f;
+
+    // Ütközés ellenõrzés
+    private bool isColliding = false;
+
     CharacterController characterController;
 
     void Start()
@@ -27,7 +34,6 @@ public class FPS_Controller : MonoBehaviour
         characterController = GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-
     }
 
     void Update()
@@ -39,11 +45,72 @@ public class FPS_Controller : MonoBehaviour
         bool isRunning = Input.GetKey(KeyCode.LeftShift);
         float curSpeedX = canMove ? (isRunning ? runSpeed : walkSpeed) * Input.GetAxis("Vertical") : 0;
         float curSpeedY = canMove ? (isRunning ? runSpeed : walkSpeed) * Input.GetAxis("Horizontal") : 0;
+
+        // Gravitáció kezelése
         float movementDirectionY = moveDirection.y;
-        moveDirection =  (forward * curSpeedX) + (right * curSpeedY);
+        moveDirection = (forward * curSpeedX) + (right * curSpeedY);
+
+        // Ütközésvizsgálat elõre és oldal irányokban
+        RaycastHit hit;
+        float rayDistance = 0.5f; // A sugár távolsága
+        int layerMask = ~LayerMask.GetMask("Ignore Raycast"); // Minden layer kivéve az Ignore Raycast
+
+        // Elõre irányú ütközés ellenõrzése
+        if (curSpeedX > 0 && Physics.Raycast(transform.position, forward, out hit, rayDistance, layerMask))
+        {
+            // Ha nem trigger, akkor blokkoljuk a mozgást
+            if (hit.collider != null && !hit.collider.isTrigger)
+            {
+                curSpeedX = 0;
+            }
+        }
+
+        // Hátra irányú ütközés ellenõrzése
+        if (curSpeedX < 0 && Physics.Raycast(transform.position, -forward, out hit, rayDistance, layerMask))
+        {
+            // Ha nem trigger, akkor blokkoljuk a mozgást
+            if (hit.collider != null && !hit.collider.isTrigger)
+            {
+                curSpeedX = 0;
+            }
+        }
+
+        // Jobb oldali ütközés ellenõrzése
+        if (curSpeedY > 0 && Physics.Raycast(transform.position, right, out hit, rayDistance, layerMask))
+        {
+            // Ha nem trigger, akkor blokkoljuk a mozgást
+            if (hit.collider != null && !hit.collider.isTrigger)
+            {
+                curSpeedY = 0;
+            }
+        }
+
+        // Bal oldali ütközés ellenõrzése
+        if (curSpeedY < 0 && Physics.Raycast(transform.position, -right, out hit, rayDistance, layerMask))
+        {
+            // Ha nem trigger, akkor blokkoljuk a mozgást
+            if (hit.collider != null && !hit.collider.isTrigger)
+            {
+                curSpeedY = 0;
+            }
+        }
+
+        // Mozgási irányt frissítjük a potenciálisan módosított sebességek alapján
+        moveDirection = (forward * curSpeedX) + (right * curSpeedY);
+
+        // Gravitáció alkalmazása
+        if (characterController.isGrounded)
+        {
+            moveDirection.y = 0;
+        }
+        else
+        {
+            moveDirection.y = movementDirectionY - gravity * Time.deltaTime;
+        }
         #endregion
 
         #region Handles Rotation
+        // Mozgás alkalmazása a CharacterController-re
         characterController.Move(moveDirection * Time.deltaTime);
 
         if (canMove)
@@ -51,13 +118,11 @@ public class FPS_Controller : MonoBehaviour
             rotationX += -Input.GetAxis("Mouse Y") * lookSpeed;
             rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
             playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
-            transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0); 
+            transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
         }
-
         #endregion
 
         #region Mouse Hide/Show
-
         if (Input.GetKey(KeyCode.H))
         {
             Cursor.visible = false;
@@ -68,10 +133,7 @@ public class FPS_Controller : MonoBehaviour
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.Confined;
         }
-
         #endregion
-
-        
     }
 
     public void canMoveAgain()
