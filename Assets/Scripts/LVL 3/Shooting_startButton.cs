@@ -40,11 +40,11 @@ public class Shooting_startButton : MonoBehaviour
             // Hibaьzenet megjelenнtйse a szцvegdobozban
             if (countdownText != null)
             {
-                countdownText.text = "Kйrem vegye fel a fegyvert a kezdйshez!";
+                countdownText.text = "Kérem vegye fel a fegyvert a kezdéshez";
             }
             else
             {
-                Debug.Log("Kйrem vegye fel a fegyvert a kezdйshez!");
+                Debug.Log("Kérem vegye fel a fegyvert a kezdéshez");
             }
         }
     }

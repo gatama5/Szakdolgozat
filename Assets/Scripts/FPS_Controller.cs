@@ -24,7 +24,7 @@ public class FPS_Controller : MonoBehaviour
     public float gravity = 20f;
 
     // Ütközés ellenõrzés
-    private bool isColliding = false;
+    //private bool isColliding = false;
 
     CharacterController characterController;
 

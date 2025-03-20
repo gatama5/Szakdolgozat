@@ -18,7 +18,6 @@ public class PickUpGun : MonoBehaviour
 
     void Update()
     {
-        // Ha a jбtйkos hatуtбvon belьl van йs megnyomja az E gombot
         if (isInRange && !isPickedUp && Input.GetKeyDown(KeyCode.E))
         {
             PickUpWeapon();

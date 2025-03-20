@@ -41,10 +41,12 @@ public class TutorialBtnScript : MonoBehaviour
     }
 
 
-    public IEnumerator Hide() 
+    public IEnumerator Hide()
     {
         panel.SetActive(false);
         playerController.canMove = true;
         yield return new WaitForSeconds(delay);
     }
+
 }
+
