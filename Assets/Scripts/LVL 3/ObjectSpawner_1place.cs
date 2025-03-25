@@ -1,10 +1,13 @@
-﻿using System.Collections;
+﻿
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Reflection;
 using Unity.VisualScripting;
 using System.Security.Cryptography;
+using TMPro; // TextMeshPro névtér hozzáadása
+
 public class ObjectSpawner_1place : MonoBehaviour
 {
     public int numberToSpawn = 5; // Hány objektumot spawnoljunk
@@ -17,10 +20,25 @@ public class ObjectSpawner_1place : MonoBehaviour
     private Target target_script;
     public List<double> hit_times = new List<double>();
     public List<string> hitPlace_fromMiddle = new List<string>();
+
+    // Játék befejezésekor megjelenő értesítés
+    [SerializeField] TextMeshProUGUI gameOverNotificationText;
+    [SerializeField] float notificationDisplayTime = 3f;
+
     // Számláló a megsemmisített targetek számolására
     private int destroyedTargets = 0;
     // Referencia a PickUpGun komponensre
     public PickUpGun pickUpGun;
+
+    void Start()
+    {
+        // Hide notification text at start if it exists
+        if (gameOverNotificationText != null)
+        {
+            gameOverNotificationText.gameObject.SetActive(false);
+        }
+    }
+
     void Update()
     {
         //target_script = spawned.GetComponent<Target>();
@@ -36,6 +54,12 @@ public class ObjectSpawner_1place : MonoBehaviour
     {
         // Reset the counter at the beginning of a new spawn session
         destroyedTargets = 0;
+
+        // Elrejtjük az értesítést, ha látható lenne
+        if (gameOverNotificationText != null)
+        {
+            gameOverNotificationText.gameObject.SetActive(false);
+        }
 
         float randomNumber = UnityEngine.Random.Range(2f, 5f);
         for (int i = 0; i < numberToSpawn; i++)
@@ -70,16 +94,39 @@ public class ObjectSpawner_1place : MonoBehaviour
                 // Ha a pickUpGun referencia létezik, hívjuk meg a DropWeapon() metódust
                 if (pickUpGun != null)
                 {
-                    pickUpGun.DorpWeapon();
+                    pickUpGun.DropWeapon();
                 }
                 else
                 {
                     Debug.LogError("Nincs beállítva a pickUpGun referencia az ObjectSpawner_1place szkriptben!");
                 }
+
+                // Jelenítsük meg a játék vége értesítést
+                ShowGameOverNotification();
             }
         }
     }
 
+    private void ShowGameOverNotification()
+    {
+        if (gameOverNotificationText != null)
+        {
+            // Egyszerűen megjelenítjük a szöveget, nem módosítjuk a tartalmát
+            gameOverNotificationText.gameObject.SetActive(true);
+
+            // Hide the notification after delay
+            StartCoroutine(HideNotificationAfterDelay());
+        }
+    }
+
+    private IEnumerator HideNotificationAfterDelay()
+    {
+        yield return new WaitForSeconds(notificationDisplayTime);
+        if (gameOverNotificationText != null)
+        {
+            gameOverNotificationText.gameObject.SetActive(false);
+        }
+    }
 
     private void SaveHitToDatabase(double hitTime, double posX, double posY)
     {

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class ModalWindowPanel : MonoBehaviour
 {
 
-    [SerializeField] private Button apply_btn;
+    [SerializeField] public Button apply_btn;
     [SerializeField] public GameObject modalWindow; // A bezárandó ablak GameObject-je
     [SerializeField] public TriggerZoneForWindow trg_zone;
 

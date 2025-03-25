@@ -155,6 +155,40 @@ MonoBehaviour:
     m_Localized: Back
     m_Metadata:
       m_Items: []
+  - m_Id: 51583194343116800
+    m_Localized: 'In this type of game, you will shoot targets that will appear in
+      front of you in random places.
+
+      We will measure the time between the
+      pop up and the shoot and this wil be your score.
+
+      There will be multiple
+      target on random spot.
+
+      First you have to pick up the gun with the "E"
+      key when the text appears.
+
+      When you have the gun just press the "Start"
+      button and start playing.
+
+      Good luck duckhunter.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 51624428046618624
+    m_Localized: Congrats, the game is over!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 51624798726623232
+    m_Localized: 'We saved your data!
+
+      You can exti the game by passing trough
+      the door at the start of the labirynth!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 51627725935579136
+    m_Localized: Start!
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using TMPro; // TextMeshPro névtér hozzáadása
 
 public class ObjectSpawner : MonoBehaviour
 {
@@ -19,6 +21,10 @@ public class ObjectSpawner : MonoBehaviour
 
     [Tooltip("Minimбlis tбvolsбg kйt target kцzцtt")]
     public float minDistanceBetweenTargets = 1.0f;
+
+    // Játék befejezésekor megjelenő értesítés
+    [SerializeField] TextMeshProUGUI gameOverNotificationText;
+    [SerializeField] float notificationDisplayTime = 3f;
 
     // Talбlatok ideje йs helyei
     public List<double> hit_times = new List<double>();
@@ -40,6 +46,12 @@ public class ObjectSpawner : MonoBehaviour
         // Inicializбljuk a listбkat
         hit_times = new List<double>();
         hitPlace_fromMiddle = new List<string>();
+
+        // Hide notification text at start if it exists
+        if (gameOverNotificationText != null)
+        {
+            gameOverNotificationText.gameObject.SetActive(false);
+        }
     }
 
     void Update()
@@ -94,13 +106,66 @@ public class ObjectSpawner : MonoBehaviour
             }
         }
 
-        // Ha minden target megsemmisült, akkor ledobjuk a fegyvert
+        // Ha minden target megsemmisült, akkor ledobjuk a fegyvert és megjelenítjük az értesítést
         if (anyDestroyed && activeTargets.Count == 0 && destroyedTargets >= numberToSpawn)
         {
             if (pickUpGun != null)
             {
-                pickUpGun.DorpWeapon();
+                pickUpGun.DropWeapon();
             }
+
+            // Mentsük az eredményt az adatbázisba
+            SaveHitResults();
+
+            // Jelenítsük meg az értesítést
+            ShowGameOverNotification();
+        }
+    }
+
+    private void ShowGameOverNotification()
+    {
+        if (gameOverNotificationText != null)
+        {
+            // Egyszerűen megjelenítjük a szöveget, nem módosítjuk a tartalmát
+            gameOverNotificationText.gameObject.SetActive(true);
+
+            // Hide the notification after delay
+            StartCoroutine(HideNotificationAfterDelay());
+        }
+    }
+
+    private IEnumerator HideNotificationAfterDelay()
+    {
+        yield return new WaitForSeconds(notificationDisplayTime);
+        if (gameOverNotificationText != null)
+        {
+            gameOverNotificationText.gameObject.SetActive(false);
+        }
+    }
+
+    private void SaveHitResults()
+    {
+        // Elmentjük az összes találat adatait az adatbázisba
+        for (int i = 0; i < hit_times.Count; i++)
+        {
+            double hitTime = hit_times[i];
+            double posX = 0;
+            double posY = 0;
+
+            // Ha van pozíció információ, akkor kiolvassuk
+            if (i < hitPlace_fromMiddle.Count)
+            {
+                string posInfo = hitPlace_fromMiddle[i];
+                string[] coordinates = posInfo.Split('|');
+                if (coordinates.Length == 2)
+                {
+                    double.TryParse(coordinates[0], out posX);
+                    double.TryParse(coordinates[1], out posY);
+                }
+            }
+
+            // Mentés az adatbázisba
+            SaveHitToDatabase(hitTime, posX, posY);
         }
     }
 
@@ -163,6 +228,12 @@ public class ObjectSpawner : MonoBehaviour
         activeTargets.Clear();
         spawnTimes.Clear(); // Clear the spawn times list
         hit_times.Clear(); // Clear the hit times
+
+        // Elrejtjük az értesítést, ha látható lenne
+        if (gameOverNotificationText != null)
+        {
+            gameOverNotificationText.gameObject.SetActive(false);
+        }
 
         // Spawnoljuk a megadott számú objektumot
         for (int i = 0; i < numberToSpawn; i++)

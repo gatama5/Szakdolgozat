@@ -8,7 +8,7 @@ public class ui_c : MonoBehaviour
     public static ui_c Instance;
 
     [SerializeField] private ModalWindowPanel _modalwindow;
-    [SerializeField] private GameObject panel;
+    [SerializeField] public GameObject panel;
 
 
     public ModalWindowPanel modalwindow => _modalwindow;

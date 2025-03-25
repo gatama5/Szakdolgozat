@@ -375,6 +375,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   videoRawImage: {fileID: 1324936544}
   videoLength: 70
+  videoSpeedMultiplier: 2
+  videoPlayer: {fileID: 935683434}
 --- !u!1 &1324936542
 GameObject:
   m_ObjectHideFlags: 0

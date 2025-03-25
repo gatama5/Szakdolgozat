@@ -129,6 +129,30 @@ MonoBehaviour:
     m_Localized: Vissza
     m_Metadata:
       m_Items: []
+  - m_Id: 51583194343116800
+    m_Localized: "Ebben a j\xE1t\xE9kt\xEDpusban c\xE9lpontokra kell l\u0151n\xF6d,
+      amelyek megjelennek el\u0151tted.\nM\xE9rni fogjuk az id\u0151 k\xF6z\xF6tt,
+      ami a c\xE9lpont felbukkan\xE1sa \xE9s a l\xF6v\xE9sed k\xF6z\xF6tt telik el,
+      ez lesz a pontsz\xE1mod.\nT\xF6bb c\xE9lpont fog megjelenni k\xFCl\xF6nb\xF6z\u0151
+      helyeken.\nEl\u0151sz\xF6r fel kell venned a fegyvert az \"E\" billenty\u0171vel,
+      amikor megjelenik a sz\xF6veg.\nMiut\xE1n n\xE1lad van a fegyver, csak nyomd
+      meg a \"Start\" gombot \xE9s kezdheted a j\xE1t\xE9kot.\nSok szerencs\xE9t,
+      kacsavad\xE1sz."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 51624428046618624
+    m_Localized: "Gratul\xE1lunk v\xE9ge a j\xE1t\xE9knak!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 51624798726623232
+    m_Localized: "Eredm\xE9nyedet mentett\xFCk!\nA labirintus elej\xE9n l\xE9v\u0151
+      ajt\xF3n\xE1l lez\xE1rhatod a j\xE1t\xE9kot!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 51627725935579136
+    m_Localized: Indul!
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

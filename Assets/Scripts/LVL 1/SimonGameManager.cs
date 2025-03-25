@@ -1,9 +1,10 @@
-using System;
+Ôªøusing System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro; // Added TextMeshPro namespace
 
 public class SimonGameManager : MonoBehaviour
 {
@@ -19,6 +20,10 @@ public class SimonGameManager : MonoBehaviour
     [SerializeField] public bool isShowing = false;
     [SerializeField] public bool isEnded = false;
 
+    // New field for game over notification
+    [SerializeField] TextMeshProUGUI gameOverNotificationText;
+    [SerializeField] float notificationDisplayTime = 3f;
+
     private Dictionary<int, int> buttonUsageCount = new Dictionary<int, int>();
     private SQLiteDBScript dbManager;
 
@@ -31,11 +36,17 @@ public class SimonGameManager : MonoBehaviour
         currentPickDelay = initialPickDelay;
         InitializeButtonUsage();
 
-        // Megkeress¸k az adatb·zis managert
+        // Hide notification text at start if it exists
+        if (gameOverNotificationText != null)
+        {
+            gameOverNotificationText.gameObject.SetActive(false);
+        }
+
+        // Megkeress—åk az adatb–±zis managert
         dbManager = FindObjectOfType<SQLiteDBScript>();
         if (dbManager == null)
         {
-            Debug.LogWarning("SQLiteDBScript nem tal·lhatÛ! Az eredmÈnyek nem lesznek mentve.");
+            Debug.LogWarning("SQLiteDBScript nem tal–±lhat—É! Az eredm–πnyek nem lesznek mentve.");
         }
     }
 
@@ -48,9 +59,9 @@ public class SimonGameManager : MonoBehaviour
         }
     }
 
-    void SetButtonIndex() 
+    void SetButtonIndex()
     {
-        for (int i = 0; i < buttons.Length; i++) 
+        for (int i = 0; i < buttons.Length; i++)
         {
             buttons[i].ButtonIndex = i;
         }
@@ -70,7 +81,7 @@ public class SimonGameManager : MonoBehaviour
 
         PickRandomColor();
 
-        // GyorsÌt·s minden sikeres kˆr ut·n
+        // Gyors–Ωt–±s minden sikeres k—Ür ut–±n
         currentPickDelay = Mathf.Max(minPickDelay,
             initialPickDelay - (speedIncreaseRate * buttons_Order.Count));
 
@@ -79,14 +90,14 @@ public class SimonGameManager : MonoBehaviour
 
     void PickRandomColor()
     {
-        // Megtal·ljuk a legkevÈsbÈ haszn·lt gombokat
+        // Megtal–±ljuk a legkev–πsb–π haszn–±lt gombokat
         int minUsage = int.MaxValue;
         foreach (var usage in buttonUsageCount.Values)
         {
             minUsage = Mathf.Min(minUsage, usage);
         }
 
-        // ÷sszegy˚jtj¸k a legkevÈsbÈ haszn·lt gombok indexeit
+        // –¶sszegy—ãjtj—åk a legkev–πsb–π haszn–±lt gombok indexeit
         List<int> leastUsedButtons = new List<int>();
         foreach (var kvp in buttonUsageCount)
         {
@@ -96,10 +107,10 @@ public class SimonGameManager : MonoBehaviour
             }
         }
 
-        // VÈletlenszer˚en v·lasztunk a legkevÈsbÈ haszn·lt gombok kˆz¸l
+        // V–πletlenszer—ãen v–±lasztunk a legkev–πsb–π haszn–±lt gombok k—Üz—ål
         int selectedIndex = leastUsedButtons[UnityEngine.Random.Range(0, leastUsedButtons.Count)];
 
-        // Nˆvelj¸k a haszn·lati sz·ml·lÛt
+        // N—Üvelj—åk a haszn–±lati sz–±ml–±l—Ét
         buttonUsageCount[selectedIndex]++;
 
         buttons[selectedIndex].PressButton();
@@ -130,67 +141,66 @@ public class SimonGameManager : MonoBehaviour
         }
     }
 
-    //private void GameOver()
-    //{
-    //    score.CheckForNewHighscore(); // Ellenırizz¸k, hogy ˙j highscore sz¸letett-e
-    //    Debug.Log($"Game Over! Final score: {score.GetCurrentScore()}");
-    //}
-
-
     private void GameOver()
     {
         int finalScore = score.GetCurrentScore();
         score.CheckForNewHighscore();
         Debug.Log($"Game Over! Final score: {finalScore}");
 
-        // Adatb·zis mentÈs
+        // Adatb–±zis ment–πs
         SaveScoreToDatabase(finalScore);
+
+        // Show game over notification
+        ShowGameOverNotification();
     }
 
-    //private void SaveScoreToDatabase(int finalScore)
-    //{
-    //    if (dbManager != null)
-    //    {
-    //        try
-    //        {
-    //            // FrissÌtj¸k a Simon j·tÈk pontsz·m·t az adatb·zisban
-    //            dbManager.UpdateSimonScore(finalScore);
-    //            Debug.Log($"Simon j·tÈk pontsz·m sikeresen mentve: {finalScore}");
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            Debug.LogError($"Hiba tˆrtÈnt a pontsz·m mentÈse kˆzben: {e.Message}");
-    //        }
-    //    }
-    //}
+    private void ShowGameOverNotification()
+    {
+        if (gameOverNotificationText != null)
+        {
+            // Egyszer≈±en megjelen√≠tj√ºk a sz√∂veget, nem m√≥dos√≠tjuk a tartalm√°t
+            gameOverNotificationText.gameObject.SetActive(true);
+
+            // Hide the notification after delay
+            StartCoroutine(HideNotificationAfterDelay());
+        }
+    }
+
+    private IEnumerator HideNotificationAfterDelay()
+    {
+        yield return new WaitForSeconds(notificationDisplayTime);
+        if (gameOverNotificationText != null)
+        {
+            gameOverNotificationText.gameObject.SetActive(false);
+        }
+    }
 
     private void SaveScoreToDatabase(int finalScore)
     {
-        if (dbManager != null && finalScore > 0) // NE MENTS‹K A NULL¡S PONTSZ¡MOT
+        if (dbManager != null && finalScore > 0) // NE MENTS–¨K A NULL–ëS PONTSZ–ëMOT
         {
             try
             {
-                // Ellenırizz¸k, hogy van-e ÈrvÈnyes j·tÈkos azonosÌtÛ
+                // Ellen—Örizz—åk, hogy van-e –πrv–πnyes j–±t–πkos azonos–Ωt—É
                 int playerID = dbManager.GetCurrentPlayerID();
 
-                // Ha nincs ÈrvÈnyes azonosÌtÛ, prÛb·ljuk meg vissza·llÌtani a PlayerPrefs-bıl
+                // Ha nincs –πrv–πnyes azonos–Ωt—É, pr—Éb–±ljuk meg vissza–±ll–Ωtani a PlayerPrefs-b—Öl
                 if (playerID <= 0 && PlayerPrefs.HasKey("CurrentPlayerID"))
                 {
                     playerID = PlayerPrefs.GetInt("CurrentPlayerID");
                     dbManager.SetCurrentPlayerID(playerID);
                 }
 
-                // Ellenırizz¸k ˙jra, hogy van-e ÈrvÈnyes azonosÌtÛ
+                // Ellen—Örizz—åk —äjra, hogy van-e –πrv–πnyes azonos–Ωt—É
                 if (dbManager.GetCurrentPlayerID() > 0)
                 {
-                    // FrissÌtj¸k a Simon j·tÈk pontsz·m·t az adatb·zisban
-                    bool success = dbManager.UpdateSimonScore(finalScore);
-                    
+                    // Friss–Ωtj—åk a Simon j–±t–πk pontsz–±m–±t az adatb–±zisban
+                    dbManager.UpdateSimonScore(finalScore);
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError($"Hiba tˆrtÈnt a pontsz·m mentÈse kˆzben: {e.Message}");
+                Debug.LogError($"Hiba t—Ürt–πnt a pontsz–±m ment–πse k—Üzben: {e.Message}");
             }
         }
     }
@@ -203,6 +213,11 @@ public class SimonGameManager : MonoBehaviour
         currentPickDelay = initialPickDelay;
         InitializeButtonUsage();
         isEnded = false;
-    }
 
+        // Hide notification if it's visible
+        if (gameOverNotificationText != null)
+        {
+            gameOverNotificationText.gameObject.SetActive(false);
+        }
+    }
 }

@@ -1,41 +1,47 @@
-﻿using System.Collections;
+﻿
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro; // TextMeshPro nйvtйr hozzбadбsa
+using TMPro; // TextMeshPro névtér hozzáadása
 
 public class RandomSpawner_StartButton : MonoBehaviour
 {
     public ObjectSpawner objSpawner;       // Referencia a random ObjectSpawner-re
-    public GameObject targetPrefab;         // A cйlpont objektum, amit spawnolni fogunk
-    public PickUpGun pickUpGun;            // Referencia a fegyver felvйtelhez
-    public AudioSource audioSource;         // Hang forrбs a gomb megnyomбsбhoz
+    public GameObject targetPrefab;         // A célpont objektum, amit spawnolni fogunk
+    public PickUpGun pickUpGun;            // Referencia a fegyver felvételhez
+    public AudioSource audioSource;         // Hang forrás a gomb megnyomásához
     public Gun gunScript;                   // Referencia a Gun script-hez
 
-    [SerializeField] public float startDelay = 3f;    // Kйsleltetйs a jбtйk indнtбsa elхtt
-    [SerializeField] private bool showCountdown = true;    // Visszaszбmlбlбs mutatбsa
+    [SerializeField] public float startDelay = 3f;    // Késleltetés a játék indítása előtt
+    [SerializeField] private bool showCountdown = true;    // Visszaszámlálás mutatása
 
-    // TextMeshPro szцvegdoboz referencia
+    // TextMeshPro szövegdoboz referencia
     [SerializeField] private TextMeshProUGUI countdownText;
     [SerializeField] private Canvas countdownCanvas;
+
+    // Renderer komponens referencia a gombhoz
+    private Renderer buttonRenderer;
+    // Zöld szín a gombhoz
+    [SerializeField] private Color greenColor = new Color(0.0f, 1.0f, 0.0f);
 
     public bool isPlaying = false;
 
     void Start()
     {
-        // Kikapcsoljuk a visszaszбmlбlу canvas-t
+        // Kikapcsoljuk a visszaszámláló canvas-t
         if (countdownCanvas != null)
         {
             countdownCanvas.enabled = false;
         }
         isPlaying = false;
 
-        // Ha nem adtunk meg referenciбt, keressьk meg az objektumokat
+        // Ha nem adtunk meg referenciát, keressük meg az objektumokat
         if (objSpawner == null)
         {
             objSpawner = FindObjectOfType<ObjectSpawner>();
             if (objSpawner == null)
             {
-                Debug.LogError("Nem talбlhatу ObjectSpawner objektum a jбtйkban!");
+                Debug.LogError("Nem található ObjectSpawner objektum a játékban!");
             }
         }
 
@@ -44,7 +50,7 @@ public class RandomSpawner_StartButton : MonoBehaviour
             pickUpGun = FindObjectOfType<PickUpGun>();
             if (pickUpGun == null)
             {
-                Debug.LogWarning("Nem talбlhatу PickUpGun objektum a jбtйkban!");
+                Debug.LogWarning("Nem található PickUpGun objektum a játékban!");
             }
         }
 
@@ -52,17 +58,37 @@ public class RandomSpawner_StartButton : MonoBehaviour
         {
             gunScript = FindObjectOfType<Gun>();
         }
+
+        // Megkeressük a Renderer komponenst és beállítjuk a zöld színt
+        buttonRenderer = GetComponent<Renderer>();
+        if (buttonRenderer != null)
+        {
+            buttonRenderer.material.color = greenColor;
+        }
+        else
+        {
+            // Ha nincs renderer, keressünk gyermek objektumokban
+            buttonRenderer = GetComponentInChildren<Renderer>();
+            if (buttonRenderer != null)
+            {
+                buttonRenderer.material.color = greenColor;
+            }
+            else
+            {
+                Debug.LogWarning("Nem található Renderer komponens a gombhoz!");
+            }
+        }
     }
 
     private void OnMouseDown()
     {
-        // Lejбtszuk a hang effektet
+        // Lejátszuk a hang effektet
         if (audioSource != null)
         {
             audioSource.Play();
         }
 
-        // Ellenхrizzьk, hogy fel van-e vйve a fegyver
+        // Ellenőrizzük, hogy fel van-e véve a fegyver
         if (pickUpGun != null && pickUpGun.isPickedUp)
         {
             isPlaying = true;
@@ -70,21 +96,21 @@ public class RandomSpawner_StartButton : MonoBehaviour
         }
         else
         {
-            // Hibaьzenet megjelenнtйse a szцvegdobozban
+            // Hibaüzenet megjelenítése a szövegdobozban
             if (countdownText != null)
             {
-                countdownText.text = "Kйrem vegye fel a fegyvert a kezdйshez!";
-                // Canvas bekapcsolбsa, hogy lбtszуdjon a szцveg
+                countdownText.text = "Kérem vegye fel a fegyvert a kezdéshez!";
+                // Canvas bekapcsolása, hogy látszódjon a szöveg
                 if (countdownCanvas != null)
                 {
                     countdownCanvas.enabled = true;
                 }
-                // Kйsleltetve eltьntetjьk a hibaьzenetet
+                // Késleltetve eltüntetjük a hibaüzenetet
                 StartCoroutine(ClearTextAfterDelay(2f));
             }
             else
             {
-                Debug.Log("Kйrem vegye fel a fegyvert a kezdйshez!");
+                Debug.Log("Kérem vegye fel a fegyvert a kezdéshez!");
             }
         }
     }
@@ -175,7 +201,7 @@ public class RandomSpawner_StartButton : MonoBehaviour
         }
     }
 
-    // Szцveg tцrlйse kйsleltetйssel
+    // Szöveg törlése késleltetéssel
     private IEnumerator ClearTextAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
@@ -184,7 +210,7 @@ public class RandomSpawner_StartButton : MonoBehaviour
             countdownText.text = "";
         }
 
-        // Ha nincs szцveg, elrejthetjьk a canvas-t is
+        // Ha nincs szöveg, elrejthetjük a canvas-t is
         if (countdownCanvas != null && string.IsNullOrEmpty(countdownText.text))
         {
             countdownCanvas.enabled = false;
