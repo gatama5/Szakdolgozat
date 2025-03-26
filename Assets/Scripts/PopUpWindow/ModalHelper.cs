@@ -73,3 +73,4 @@ public class ModalHelper : MonoBehaviour
         Debug.Log("ModalResetHelper: All modal states reset");
     }
 }
+

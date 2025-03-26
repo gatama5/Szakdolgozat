@@ -499,6 +499,17 @@ public class ButtonsForMaze : MonoBehaviour
             return;
         }
 
+        // Ellenőrizzük, hogy aktiválni tudjuk-e a buttonsParent-et
+        if (buttonsParent != null)
+        {
+            buttonsParent.SetActive(true);
+        }
+        else
+        {
+            UnityEngine.Debug.LogError("ButtonsParent nincs beállítva a ButtonsForMaze szkriptben!");
+            return;
+        }
+
         // Elrejtjük a játék vége értesítést, ha látható lenne
         if (gameOverNotificationText != null)
         {
@@ -510,10 +521,6 @@ public class ButtonsForMaze : MonoBehaviour
 
         // Reset timer
         sw.Reset();
-
-        // Gombok megjelenítése
-        if (buttonsParent != null)
-            buttonsParent.SetActive(true);
 
         // Idõzítõ indítása
         sw.Start();
@@ -528,11 +535,29 @@ public class ButtonsForMaze : MonoBehaviour
     {
         if (gameStartNotificationText != null)
         {
-            // Megjelenítjük a kezdő szöveget
+            // Aktiváljuk a gameObject-et, amely tartalmazza a szöveget
             gameStartNotificationText.gameObject.SetActive(true);
 
-            // Elrejtjük a szöveget a megadott idő után
-            StartCoroutine(HideStartNotificationAfterDelay());
+            // Csak akkor indítjuk el a coroutine-t, ha a gameObject aktív
+            if (gameStartNotificationText.gameObject.activeInHierarchy)
+            {
+                StartCoroutine(HideStartNotificationAfterDelay());
+            }
+            else
+            {
+                // Ha nem aktív a hierarchiában, akkor használjunk alternatív megoldást
+                UnityEngine.Debug.LogWarning("A gameStartNotificationText objektum nem aktív a hierarchiában. Közvetlen időzítőt használunk.");
+                // Manuálisan elrejtjük az értesítést a megadott idő után
+                Invoke("HideStartNotification", startNotificationDisplayTime);
+            }
+        }
+    }
+
+    private void HideStartNotification()
+    {
+        if (gameStartNotificationText != null)
+        {
+            gameStartNotificationText.gameObject.SetActive(false);
         }
     }
 

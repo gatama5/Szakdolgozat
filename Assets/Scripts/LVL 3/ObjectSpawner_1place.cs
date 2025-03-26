@@ -50,6 +50,29 @@ public class ObjectSpawner_1place : MonoBehaviour
     }
 
     // Objektum spawnolбsa a Quad kцzepйre
+    //public IEnumerator spawnObject(GameObject obj)
+    //{
+    //    // Reset the counter at the beginning of a new spawn session
+    //    destroyedTargets = 0;
+
+    //    // Elrejtjük az értesítést, ha látható lenne
+    //    if (gameOverNotificationText != null)
+    //    {
+    //        gameOverNotificationText.gameObject.SetActive(false);
+    //    }
+
+    //    float randomNumber = UnityEngine.Random.Range(2f, 5f);
+    //    for (int i = 0; i < numberToSpawn; i++)
+    //    {
+    //        // A Quad kцzйppontjбnak lekйrйse
+    //        Vector3 fit_quad = quad.transform.position;
+    //        // Objektum lйtrehozбsa a Quad kцzйppontjбban
+    //        spawned = Instantiate(obj, fit_quad, quad.transform.rotation);
+    //        isSpawned = true;
+    //        yield return new WaitForSeconds(randomNumber); // Kйsleltetйs a kцvetkezх spawn elхtt
+    //    }
+    //}
+
     public IEnumerator spawnObject(GameObject obj)
     {
         // Reset the counter at the beginning of a new spawn session
@@ -61,17 +84,74 @@ public class ObjectSpawner_1place : MonoBehaviour
             gameOverNotificationText.gameObject.SetActive(false);
         }
 
-        float randomNumber = UnityEngine.Random.Range(2f, 5f);
+        // Egyesével spawnolja a célpontokat, mindig megvárva az előző megsemmisítését
         for (int i = 0; i < numberToSpawn; i++)
         {
-            // A Quad kцzйppontjбnak lekйrйse
-            Vector3 fit_quad = quad.transform.position;
-            // Objektum lйtrehozбsa a Quad kцzйppontjбban
-            spawned = Instantiate(obj, fit_quad, quad.transform.rotation);
-            isSpawned = true;
-            yield return new WaitForSeconds(randomNumber); // Kйsleltetйs a kцvetkezх spawn elхtt
+            // Csak akkor spawnolja a következőt, ha nincs aktív célpont
+            if (!isSpawned)
+            {
+                yield return SpawnSingleTarget(obj);
+            }
+
+            // Várunk amíg a célpont megsemmisül
+            while (isSpawned)
+            {
+                yield return null;
+            }
+
+            // Várunk egy véletlenszerű időt a következő célpont előtt
+            float randomDelay = UnityEngine.Random.Range(2f, 5f);
+            yield return new WaitForSeconds(randomDelay);
         }
     }
+
+    // Új függvény egyetlen célpont spawnolásakor
+    private IEnumerator SpawnSingleTarget(GameObject obj)
+    {
+        // A Quad középpontjának lekérése
+        Vector3 fit_quad = quad.transform.position;
+
+        // Objektum létrehozása a Quad középpontjában
+        spawned = Instantiate(obj, fit_quad, quad.transform.rotation);
+        isSpawned = true;
+        timer = 0f;  // Reset timer for new target
+
+        yield return null;
+    }
+
+    //public void destroyedObj(GameObject obj)
+    //{
+    //    if (obj.IsDestroyed())
+    //    {
+    //        Debug.Log("Találat! Idő spawn és találat között: " + Math.Round(timer, 2) + " mp");
+    //        hit_times.Add(Math.Round(timer, 2)); // idő elmentése
+
+    //        // Itt mentjük rögtön az adatbázisba, közvetlenül
+    //        SaveHitToDatabase(Math.Round(timer, 2), 0, 0);
+
+    //        timer = 0f;
+    //        isSpawned = false;
+    //        // Növeljük a megsemmisített targetek számát
+    //        destroyedTargets++;
+    //        // Ellenőrizzük, hogy minden target el lett-e találva
+    //        if (destroyedTargets >= numberToSpawn)
+    //        {
+    //            Debug.Log("Minden target eltalálva! Fegyver ledobása...");
+    //            // Ha a pickUpGun referencia létezik, hívjuk meg a DropWeapon() metódust
+    //            if (pickUpGun != null)
+    //            {
+    //                pickUpGun.DropWeapon();
+    //            }
+    //            else
+    //            {
+    //                Debug.LogError("Nincs beállítva a pickUpGun referencia az ObjectSpawner_1place szkriptben!");
+    //            }
+
+    //            // Jelenítsük meg a játék vége értesítést
+    //            ShowGameOverNotification();
+    //        }
+    //    }
+    //}
 
     public void destroyedObj(GameObject obj)
     {
@@ -84,9 +164,11 @@ public class ObjectSpawner_1place : MonoBehaviour
             SaveHitToDatabase(Math.Round(timer, 2), 0, 0);
 
             timer = 0f;
-            isSpawned = false;
+            isSpawned = false;  // Jelezzük, hogy nincs aktív célpont
+
             // Növeljük a megsemmisített targetek számát
             destroyedTargets++;
+
             // Ellenőrizzük, hogy minden target el lett-e találva
             if (destroyedTargets >= numberToSpawn)
             {

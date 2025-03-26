@@ -90,44 +90,52 @@ public class TutorialBtnScript : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
+
     void Update()
     {
+        // Add debug logging for T key
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            Debug.Log("T key was pressed");
+        }
+
         // Force unlock input if stuck for too long (5 seconds)
         // This prevents the script from getting permanently locked
         if (inputLocked && Time.time - lastInputLockTime > 5.0f)
         {
-
+            Debug.Log("TutorialBtnScript: Input lock timeout - forcing unlock");
             ForceUnlockInput();
-        }
-
-        if (inputLocked)
-        {
-            // Skip input processing if locked
-            return;
         }
 
         // Check for T key press directly
         if (Input.GetKeyDown(KeyCode.T))
         {
-            
-            // First check if any modal window is active
-            bool isModalActive = CheckIfModalActive();
+            // Skip the modal check temporarily for testing
+            // bool isModalActive = CheckIfModalActive();
+            bool isModalActive = false; // Force to false for testing
 
+            Debug.Log("TutorialBtnScript: Processing T key press, current panel state: " + panelIsActive);
+            Debug.Log("TutorialBtnScript: Modal active check bypassed: " + isModalActive);
 
+            // Direct panel toggle
             if (!isModalActive)
             {
-                Debug.Log("TutorialBtnScript: Processing T key press, current panel state: " + panelIsActive);
+                Debug.Log("TutorialBtnScript: Calling TogglePanel()");
                 TogglePanel();
             }
-
         }
 
         // Debug key for resetting state (R key)
         if (Input.GetKeyDown(KeyCode.R) && Input.GetKey(KeyCode.LeftShift))
         {
-
+            Debug.Log("TutorialBtnScript: Reset key combination detected");
             ResetState();
+        }
+
+        // Debug output to monitor input lock state
+        if (Input.GetKeyDown(KeyCode.I) && Input.GetKey(KeyCode.LeftShift))
+        {
+            Debug.Log($"TutorialBtnScript: Status - inputLocked: {inputLocked}, panelIsActive: {panelIsActive}, panel active: {(panel != null ? panel.activeSelf : false)}");
         }
     }
 
@@ -331,3 +339,5 @@ public class TutorialBtnScript : MonoBehaviour
         Debug.Log("TutorialBtnScript: Input forcibly unlocked");
     }
 }
+
+

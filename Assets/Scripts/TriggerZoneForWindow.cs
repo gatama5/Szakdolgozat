@@ -49,7 +49,7 @@ public class TriggerZoneForWindow : MonoBehaviour
                     //panel.Show();
                     //ui_c.Instance.modalwindow.ShowAsHero();
                 }
-            }            
+            }
         }
     }
 
@@ -74,3 +74,4 @@ public class TriggerZoneForWindow : MonoBehaviour
         isOpen = false;
     }
 }
+

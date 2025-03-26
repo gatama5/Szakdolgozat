@@ -865,6 +865,17 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &104373944 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4432356232424836924, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
+  m_PrefabInstance: {fileID: 1402163447}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ebe39af942b5ac44a5c5650ee22bf8f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &109289687
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1654,6 +1665,14 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 1842310873}
+    - target: {fileID: 605378621848493222, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
+      propertyPath: modalPanel
+      value: 
+      objectReference: {fileID: 1027912064}
+    - target: {fileID: 605378621848493222, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
+      propertyPath: uiController
+      value: 
+      objectReference: {fileID: 104373944}
     - target: {fileID: 605378621848493222, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
       propertyPath: playerController
       value: 
@@ -3748,6 +3767,14 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 1842310873}
+    - target: {fileID: 605378621848493222, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
+      propertyPath: modalPanel
+      value: 
+      objectReference: {fileID: 1027912064}
+    - target: {fileID: 605378621848493222, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
+      propertyPath: uiController
+      value: 
+      objectReference: {fileID: 1401637163}
     - target: {fileID: 605378621848493222, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
       propertyPath: playerController
       value: 
@@ -6766,6 +6793,7 @@ MonoBehaviour:
   playerController: {fileID: 1842310879}
   triggerZone: {fileID: 876500592}
   uiController: {fileID: 1059610875}
+  modalHelper: {fileID: 1960438036}
   delay: 2
 --- !u!4 &936888841
 Transform:
@@ -7455,6 +7483,17 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -321097001797125818, guid: 02aadb021b6ad3a4d85068be2d578e57, type: 3}
+--- !u!114 &1027912064 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5789375412714141413, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
+  m_PrefabInstance: {fileID: 1402163447}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d1ff59c03a58644088e00e2533455d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1059610875 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4432356232424836924, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
@@ -9564,6 +9603,17 @@ MonoBehaviour:
   gameOverNotificationText: {fileID: 1406204333}
   notificationDisplayTime: 3
   pickUpGun: {fileID: 820063629}
+--- !u!114 &1401637163 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4432356232424836924, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
+  m_PrefabInstance: {fileID: 525928669}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ebe39af942b5ac44a5c5650ee22bf8f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1402163447
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9576,6 +9626,14 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 1842310873}
+    - target: {fileID: 605378621848493222, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
+      propertyPath: modalPanel
+      value: 
+      objectReference: {fileID: 2014270669}
+    - target: {fileID: 605378621848493222, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
+      propertyPath: uiController
+      value: 
+      objectReference: {fileID: 104373944}
     - target: {fileID: 605378621848493222, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
       propertyPath: playerController
       value: 
@@ -15173,6 +15231,14 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 1842310873}
+    - target: {fileID: 605378621848493222, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
+      propertyPath: modalPanel
+      value: 
+      objectReference: {fileID: 2014270669}
+    - target: {fileID: 605378621848493222, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
+      propertyPath: uiController
+      value: 
+      objectReference: {fileID: 1059610875}
     - target: {fileID: 605378621848493222, guid: e1b8a084fa51a654e91dedfcf0c7625d, type: 3}
       propertyPath: playerController
       value: 
