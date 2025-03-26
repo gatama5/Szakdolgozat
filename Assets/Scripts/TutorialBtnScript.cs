@@ -18,14 +18,10 @@ public class TutorialBtnScript : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-
-
-
         if (panel != null)
         {
             panel.SetActive(false);
         }
-
 
         // If uiController reference is not set, try to find it in the scene
         if (uiController == null)
@@ -37,16 +33,12 @@ public class TutorialBtnScript : MonoBehaviour
         if (triggerZone == null)
         {
             triggerZone = FindObjectOfType<TriggerZoneForWindow>();
-
         }
-
-
 
         // Keress ModalWindowPanel-t, és állíts be listener-t a bezárásra
         ModalWindowPanel modalPanel = FindObjectOfType<ModalWindowPanel>();
         if (modalPanel != null && modalPanel.apply_btn != null)
         {
-
             modalPanel.apply_btn.onClick.AddListener(OnModalClosed);
         }
     }
@@ -54,7 +46,6 @@ public class TutorialBtnScript : MonoBehaviour
     // Modal ablak bezárása után meghívódik
     private void OnModalClosed()
     {
-
         StartCoroutine(DelayedStateReset());
     }
 
@@ -67,29 +58,21 @@ public class TutorialBtnScript : MonoBehaviour
         // Most állítsuk vissza az állapotokat
         if (triggerZone != null)
         {
-
             triggerZone.isOpen = false;
         }
 
         // Gyõzõdj meg róla, hogy az inputLocked feloldódik
         inputLocked = false;
-
-
     }
 
     // Additional reference check on Start
     void Start()
     {
-
-
         if (playerController == null)
         {
-
             playerController = FindObjectOfType<FPS_Controller>();
-
         }
     }
-
 
     void Update()
     {
@@ -110,18 +93,21 @@ public class TutorialBtnScript : MonoBehaviour
         // Check for T key press directly
         if (Input.GetKeyDown(KeyCode.T))
         {
-            // Skip the modal check temporarily for testing
-            // bool isModalActive = CheckIfModalActive();
-            bool isModalActive = false; // Force to false for testing
+            // FIX: Re-enabled the modal check to prevent tutorial box from opening when a modal is active
+            bool isModalActive = CheckIfModalActive();
 
             Debug.Log("TutorialBtnScript: Processing T key press, current panel state: " + panelIsActive);
-            Debug.Log("TutorialBtnScript: Modal active check bypassed: " + isModalActive);
+            Debug.Log("TutorialBtnScript: Modal active check: " + isModalActive);
 
-            // Direct panel toggle
-            if (!isModalActive)
+            // Only toggle panel if modal is not active
+            if (!isModalActive && !inputLocked)
             {
                 Debug.Log("TutorialBtnScript: Calling TogglePanel()");
                 TogglePanel();
+            }
+            else
+            {
+                Debug.Log("TutorialBtnScript: Cannot toggle panel - modal is active or input is locked");
             }
         }
 
@@ -139,69 +125,54 @@ public class TutorialBtnScript : MonoBehaviour
         }
     }
 
-    // Separate method to check modal status
+    // Simplified method to check modal status - only care about real active modals
     private bool CheckIfModalActive()
     {
+        // Start with the assumption that no modal is active
         bool result = false;
 
-        // Debug info
+        // Check the triggerZone first
         bool triggerZoneOpen = triggerZone != null && triggerZone.isOpen;
-        bool uiControllerPanelActive = uiController != null && uiController.panel != null && uiController.panel.activeSelf;
 
-        Debug.Log($"TutorialBtnScript: Checking modal status - triggerZone.isOpen: {triggerZoneOpen}, uiController.panel.activeSelf: {uiControllerPanelActive}, panelIsActive: {panelIsActive}, panel.activeSelf: {(panel != null ? panel.activeSelf : false)}");
-
-        // JAVÍTÁS: Ellenõrizzük a modalWindow-t közvetlenül is
+        // Get reference to the modal window
         ModalWindowPanel modalPanel = FindObjectOfType<ModalWindowPanel>();
         bool modalWindowActive = false;
 
         if (modalPanel != null && modalPanel.modalWindow != null)
         {
             modalWindowActive = modalPanel.modalWindow.activeSelf;
-            Debug.Log($"TutorialBtnScript: ModalWindowPanel.modalWindow.activeSelf: {modalWindowActive}");
         }
 
-        // Check through triggerZone - csak akkor aktív, ha a játékos a zónában van
+        // Also check the UI controller panel
+        bool uiControllerPanelActive = uiController != null && uiController.panel != null && uiController.panel.activeSelf;
+
+        // Log all states for debugging
+        Debug.Log($"TutorialBtnScript: Modal check - triggerZone.isOpen: {triggerZoneOpen}, modalWindow.activeSelf: {modalWindowActive}, uiController.panel.activeSelf: {uiControllerPanelActive}");
+
+        // IMPORTANT: The modal is ONLY considered active if the player is in the trigger zone
+        // This is the key change - we ONLY care about triggerZone.isOpen, not the window visibility
         if (triggerZoneOpen)
         {
-            Debug.Log("TutorialBtnScript: TriggerZone is marked as open");
-
-            // Ha a modalWindow nem aktív, de triggerZone.isOpen = true, akkor javítsuk
-            if (!modalWindowActive)
-            {
-                Debug.Log("TutorialBtnScript: TriggerZone incorrectly marked as open - fixing");
-                triggerZone.isOpen = false;
-            }
-            else
-            {
-                result = true;
-            }
-        }
-
-        // Check through uiController (panel active status)
-        if (uiControllerPanelActive)
-        {
-            Debug.Log("TutorialBtnScript: UI Controller panel is active and visible");
-
-            // Ha a modalWindow nem aktív, de uiController.panel aktív, akkor javítsuk
-            if (!modalWindowActive)
-            {
-                Debug.Log("TutorialBtnScript: UI Controller panel incorrectly active - fixing");
-                uiController.Close();
-            }
-            else
-            {
-                result = true;
-            }
-        }
-
-        if (result)
-        {
-            Debug.Log("TutorialBtnScript: Modal is active");
+            Debug.Log("TutorialBtnScript: Player is in trigger zone, modal is active");
+            result = true;
         }
         else
         {
-            Debug.Log("TutorialBtnScript: No active modal windows detected");
+            // If the player is not in a trigger zone, we don't consider any modal active
+            // regardless of its visual state
+            Debug.Log("TutorialBtnScript: Player is NOT in trigger zone, modal is NOT active");
+            result = false;
+
+            // If we detect inconsistent state (modal visually active but player not in trigger zone)
+            // We'll log it but NOT try to fix it here - that's handled elsewhere
+            if (modalWindowActive || uiControllerPanelActive)
+            {
+                Debug.Log("TutorialBtnScript: Inconsistent state detected - modal appears active but player not in trigger zone");
+            }
         }
+
+        // Final log with the result
+        Debug.Log("TutorialBtnScript: Modal active check result: " + result);
 
         return result;
     }
@@ -339,5 +310,3 @@ public class TutorialBtnScript : MonoBehaviour
         Debug.Log("TutorialBtnScript: Input forcibly unlocked");
     }
 }
-
-

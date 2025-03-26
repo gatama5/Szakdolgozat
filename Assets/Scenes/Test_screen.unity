@@ -6793,8 +6793,7 @@ MonoBehaviour:
   playerController: {fileID: 1842310879}
   triggerZone: {fileID: 876500592}
   uiController: {fileID: 1059610875}
-  modalHelper: {fileID: 1960438036}
-  delay: 2
+  delay: 1
 --- !u!4 &936888841
 Transform:
   m_ObjectHideFlags: 0

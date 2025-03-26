@@ -17,7 +17,6 @@ public class TriggerZoneForWindow : MonoBehaviour
     public void Awake()
     {
         megjelenit.enabled = false;
-        //panel.Close();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -46,8 +45,7 @@ public class TriggerZoneForWindow : MonoBehaviour
                     isOpen = true;
                     megjelenit.enabled = true;
                     TriggerZoneEnter++;
-                    //panel.Show();
-                    //ui_c.Instance.modalwindow.ShowAsHero();
+
                 }
             }
         }
@@ -59,7 +57,7 @@ public class TriggerZoneForWindow : MonoBehaviour
         {
             // Fixáljuk a pozíciót és forgást amíg a Modal Window aktív
             player.transform.position = fixedPosition;
-            //player.transform.rotation = fixedRotation;
+
         }
     }
 
