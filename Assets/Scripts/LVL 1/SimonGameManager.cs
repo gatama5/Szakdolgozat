@@ -20,7 +20,6 @@ public class SimonGameManager : MonoBehaviour
     [SerializeField] public bool isShowing = false;
     [SerializeField] public bool isEnded = false;
 
-    // New field for game over notification
     [SerializeField] TextMeshProUGUI gameOverNotificationText;
     [SerializeField] float notificationDisplayTime = 3f;
 
@@ -81,7 +80,6 @@ public class SimonGameManager : MonoBehaviour
 
         PickRandomColor();
 
-        // Gyorsнtбs minden sikeres kцr utбn
         currentPickDelay = Mathf.Max(minPickDelay,
             initialPickDelay - (speedIncreaseRate * buttons_Order.Count));
 
@@ -90,14 +88,12 @@ public class SimonGameManager : MonoBehaviour
 
     void PickRandomColor()
     {
-        // Megtalбljuk a legkevйsbй hasznбlt gombokat
         int minUsage = int.MaxValue;
         foreach (var usage in buttonUsageCount.Values)
         {
             minUsage = Mathf.Min(minUsage, usage);
         }
 
-        // Цsszegyыjtjьk a legkevйsbй hasznбlt gombok indexeit
         List<int> leastUsedButtons = new List<int>();
         foreach (var kvp in buttonUsageCount)
         {
@@ -107,10 +103,8 @@ public class SimonGameManager : MonoBehaviour
             }
         }
 
-        // Vйletlenszerыen vбlasztunk a legkevйsbй hasznбlt gombok kцzьl
         int selectedIndex = leastUsedButtons[UnityEngine.Random.Range(0, leastUsedButtons.Count)];
 
-        // Nцveljьk a hasznбlati szбmlбlуt
         buttonUsageCount[selectedIndex]++;
 
         buttons[selectedIndex].PressButton();
@@ -128,7 +122,7 @@ public class SimonGameManager : MonoBehaviour
                 pickNumber++;
                 if (pickNumber == buttons_Order.Count)
                 {
-                    score.Set(buttons_Order.Count); // update the player score
+                    score.Set(buttons_Order.Count);
                     StartCoroutine("PlayGame");
                 }
             }
@@ -136,7 +130,6 @@ public class SimonGameManager : MonoBehaviour
             {
                 isEnded = true;
                 GameOver();
-                // Game over logic here
             }
         }
     }
@@ -147,10 +140,8 @@ public class SimonGameManager : MonoBehaviour
         score.CheckForNewHighscore();
         Debug.Log($"Game Over! Final score: {finalScore}");
 
-        // Adatbбzis mentйs
         SaveScoreToDatabase(finalScore);
 
-        // Show game over notification
         ShowGameOverNotification();
     }
 
@@ -158,10 +149,8 @@ public class SimonGameManager : MonoBehaviour
     {
         if (gameOverNotificationText != null)
         {
-            // Egyszerűen megjelenítjük a szöveget, nem módosítjuk a tartalmát
             gameOverNotificationText.gameObject.SetActive(true);
 
-            // Hide the notification after delay
             StartCoroutine(HideNotificationAfterDelay());
         }
     }
@@ -177,24 +166,20 @@ public class SimonGameManager : MonoBehaviour
 
     private void SaveScoreToDatabase(int finalScore)
     {
-        if (dbManager != null && finalScore > 0) // NE MENTSЬK A NULLБS PONTSZБMOT
+        if (dbManager != null && finalScore > 0) 
         {
             try
             {
-                // Ellenхrizzьk, hogy van-e йrvйnyes jбtйkos azonosнtу
                 int playerID = dbManager.GetCurrentPlayerID();
 
-                // Ha nincs йrvйnyes azonosнtу, prуbбljuk meg visszaбllнtani a PlayerPrefs-bхl
                 if (playerID <= 0 && PlayerPrefs.HasKey("CurrentPlayerID"))
                 {
                     playerID = PlayerPrefs.GetInt("CurrentPlayerID");
                     dbManager.SetCurrentPlayerID(playerID);
                 }
 
-                // Ellenхrizzьk ъjra, hogy van-e йrvйnyes azonosнtу
                 if (dbManager.GetCurrentPlayerID() > 0)
                 {
-                    // Frissнtjьk a Simon jбtйk pontszбmбt az adatbбzisban
                     dbManager.UpdateSimonScore(finalScore);
                 }
             }
@@ -214,7 +199,6 @@ public class SimonGameManager : MonoBehaviour
         InitializeButtonUsage();
         isEnded = false;
 
-        // Hide notification if it's visible
         if (gameOverNotificationText != null)
         {
             gameOverNotificationText.gameObject.SetActive(false);

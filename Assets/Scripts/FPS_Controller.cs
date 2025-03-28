@@ -20,11 +20,7 @@ public class FPS_Controller : MonoBehaviour
 
     public bool canMove = true;
 
-    // Gravitáció hozzáadása
     public float gravity = 20f;
-
-    // Ütközés ellenõrzés
-    //private bool isColliding = false;
 
     CharacterController characterController;
 
