@@ -6,14 +6,13 @@ using System;
 using System.Reflection;
 using Unity.VisualScripting;
 using System.Security.Cryptography;
-using TMPro; // TextMeshPro névtér hozzáadása
+using TMPro;
 
 public class ObjectSpawner_1place : MonoBehaviour
 {
     public int numberToSpawn = 5; // Hány objektumot spawnoljunk
     public GameObject trg; // A spawnolandó target objektum
     public GameObject quad; // A Quad, amelynek a közepére spawnoljuk az objektumot
-    //public float spawnDelay = 2.0f; // Spawnolások között eltelt idő (mp-ben)
     public GameObject spawned;
     public bool isSpawned = false;
     public float timer = 0f;
@@ -41,7 +40,7 @@ public class ObjectSpawner_1place : MonoBehaviour
 
     void Update()
     {
-        //target_script = spawned.GetComponent<Target>();
+
         if (isSpawned)
         {
             timer += Time.deltaTime;
@@ -49,29 +48,6 @@ public class ObjectSpawner_1place : MonoBehaviour
         }
     }
 
-    // Objektum spawnolбsa a Quad kцzepйre
-    //public IEnumerator spawnObject(GameObject obj)
-    //{
-    //    // Reset the counter at the beginning of a new spawn session
-    //    destroyedTargets = 0;
-
-    //    // Elrejtjük az értesítést, ha látható lenne
-    //    if (gameOverNotificationText != null)
-    //    {
-    //        gameOverNotificationText.gameObject.SetActive(false);
-    //    }
-
-    //    float randomNumber = UnityEngine.Random.Range(2f, 5f);
-    //    for (int i = 0; i < numberToSpawn; i++)
-    //    {
-    //        // A Quad kцzйppontjбnak lekйrйse
-    //        Vector3 fit_quad = quad.transform.position;
-    //        // Objektum lйtrehozбsa a Quad kцzйppontjбban
-    //        spawned = Instantiate(obj, fit_quad, quad.transform.rotation);
-    //        isSpawned = true;
-    //        yield return new WaitForSeconds(randomNumber); // Kйsleltetйs a kцvetkezх spawn elхtt
-    //    }
-    //}
 
     public IEnumerator spawnObject(GameObject obj)
     {
@@ -105,53 +81,17 @@ public class ObjectSpawner_1place : MonoBehaviour
         }
     }
 
-    // Új függvény egyetlen célpont spawnolásakor
+
     private IEnumerator SpawnSingleTarget(GameObject obj)
     {
-        // A Quad középpontjának lekérése
         Vector3 fit_quad = quad.transform.position;
 
-        // Objektum létrehozása a Quad középpontjában
         spawned = Instantiate(obj, fit_quad, quad.transform.rotation);
         isSpawned = true;
-        timer = 0f;  // Reset timer for new target
+        timer = 0f; 
 
         yield return null;
     }
-
-    //public void destroyedObj(GameObject obj)
-    //{
-    //    if (obj.IsDestroyed())
-    //    {
-    //        Debug.Log("Találat! Idő spawn és találat között: " + Math.Round(timer, 2) + " mp");
-    //        hit_times.Add(Math.Round(timer, 2)); // idő elmentése
-
-    //        // Itt mentjük rögtön az adatbázisba, közvetlenül
-    //        SaveHitToDatabase(Math.Round(timer, 2), 0, 0);
-
-    //        timer = 0f;
-    //        isSpawned = false;
-    //        // Növeljük a megsemmisített targetek számát
-    //        destroyedTargets++;
-    //        // Ellenőrizzük, hogy minden target el lett-e találva
-    //        if (destroyedTargets >= numberToSpawn)
-    //        {
-    //            Debug.Log("Minden target eltalálva! Fegyver ledobása...");
-    //            // Ha a pickUpGun referencia létezik, hívjuk meg a DropWeapon() metódust
-    //            if (pickUpGun != null)
-    //            {
-    //                pickUpGun.DropWeapon();
-    //            }
-    //            else
-    //            {
-    //                Debug.LogError("Nincs beállítva a pickUpGun referencia az ObjectSpawner_1place szkriptben!");
-    //            }
-
-    //            // Jelenítsük meg a játék vége értesítést
-    //            ShowGameOverNotification();
-    //        }
-    //    }
-    //}
 
     public void destroyedObj(GameObject obj)
     {

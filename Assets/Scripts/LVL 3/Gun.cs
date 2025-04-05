@@ -55,14 +55,12 @@ public class Gun : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
         {
-            // Módosított feltétel - ellenőrzés javítva, hogy működjön bármilyen target objektummal
             Target target = hit.transform.GetComponent<Target>();
             if (target == null && hit.transform.parent != null)
             {
                 target = hit.transform.parent.GetComponent<Target>();
             }
 
-            // Minden target-front elemre vagy bármely Target komponenssel rendelkező elemre működjön
             if (hit.collider.name == "target_front" || target != null)
             {
                 hitCounter++;
@@ -75,14 +73,11 @@ public class Gun : MonoBehaviour
                 // Debug log a találat helyéről
                 Debug.Log("Találati pont a target közepéhez képest: " + hitX + ", " + hitY);
 
-                // Határozzuk meg, melyik objectSpawner-t kell frissíteni
-                // Különböző szinteken vagyunk?
+
                 int currentLevel = NextGameColliderScript.GetCurrentLevel();
 
-                // 1-es szint = Target játék (ObjectSpawner)
                 if (currentLevel == 1 && targetObjectSpawner != null)
                 {
-                    // Győződjünk meg róla, hogy a listák inicializálva vannak
                     if (targetObjectSpawner.hitPlace_fromMiddle == null)
                     {
                         targetObjectSpawner.hitPlace_fromMiddle = new List<string>();
@@ -92,10 +87,7 @@ public class Gun : MonoBehaviour
                         targetObjectSpawner.hit_times = new List<double>();
                     }
 
-                    // Csak egyszer tároljuk el a találatot
                     string positionString = $"{hitX}|{hitY}";
-
-                    // Ellenőrizzük, hogy ez a pozíció már szerepel-e a listában
                     bool positionExists = false;
                     foreach (string pos in targetObjectSpawner.hitPlace_fromMiddle)
                     {
@@ -105,8 +97,6 @@ public class Gun : MonoBehaviour
                             break;
                         }
                     }
-
-                    // Csak akkor adjuk hozzá, ha még nem szerepel
                     if (!positionExists)
                     {
                         targetObjectSpawner.hitPlace_fromMiddle.Add(positionString);

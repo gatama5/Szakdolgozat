@@ -235,16 +235,12 @@ public class ObjectSpawner : MonoBehaviour
             gameOverNotificationText.gameObject.SetActive(false);
         }
 
-        // Spawnoljuk a megadott számú objektumot
         for (int i = 0; i < numberToSpawn; i++)
         {
-            // Keresünk egy megfelelő pozíciót
             Vector3 spawnPosition = FindValidSpawnPosition(meshCollider);
 
-            // Spawnoljuk az objektumot
             GameObject spawnedTarget = Instantiate(targetObject, spawnPosition, quad.transform.rotation);
 
-            // Győződjünk meg róla, hogy a target-nek van Target komponense
             Target targetComponent = spawnedTarget.GetComponentInChildren<Target>();
             if (targetComponent == null)
             {
@@ -252,9 +248,8 @@ public class ObjectSpawner : MonoBehaviour
             }
 
             activeTargets.Add(spawnedTarget);
-            spawnTimes.Add(Time.time); // Record the spawn time
+            spawnTimes.Add(Time.time);
 
-            // Véletlenszerű várakozás a következő spawnolásig
             float randomDelay = UnityEngine.Random.Range(spawnDelay * 0.75f, spawnDelay * 1.25f);
             yield return new WaitForSeconds(randomDelay);
         }

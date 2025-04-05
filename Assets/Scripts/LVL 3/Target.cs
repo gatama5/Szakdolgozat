@@ -13,7 +13,6 @@ public class Target : MonoBehaviour
         healt -= amount;
         isTargetHit = true;
 
-        // Hнvjuk a Die() metуdust, ha az йleterх 0 vagy kevesebb
         if (healt <= 0)
         {
             Die();
@@ -24,14 +23,12 @@ public class Target : MonoBehaviour
     public void Die()
     {
 
-        // Ha van szьlх objektum, azt is megsemmisнtjьk
         if (transform.parent != null)
         {
             Destroy(transform.parent.gameObject);
         }
         else
         {
-            // Ha nincs szьlх, csak ezt az objektumot semmisнtjьk meg
             Destroy(gameObject);
         }
     }
