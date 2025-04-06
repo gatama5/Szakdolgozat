@@ -18,11 +18,11 @@ public class JSONDataSaver : MonoBehaviour
     private SQLiteDBScript dbManager;
     private ScoreManager scoreManager;
 
-    // Class to structure the player data for JSON serialization - Updated structure
+
     [Serializable]
     private class PlayerData
     {
-        // Az playerId most már YYYYMMDDHHMM formátumú dátumidõbélyeg
+
         public int playerId;
 
         public int playerAge;
