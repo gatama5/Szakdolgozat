@@ -12,11 +12,9 @@ public class SQLiteDBScript : MonoBehaviour
     private int currentPlayerID = 0;
     private int currentShootingSessionID = 0;
 
-    // Jбtйktнpus konstansok
     public const string GAME_TYPE_TARGET = "Target";
     public const string GAME_TYPE_SHOOTING = "Shooting";
 
-    // This will help track if we have a properly initialized database connection
     private bool isDatabaseInitialized = false;
 
     void Awake()
@@ -27,8 +25,6 @@ public class SQLiteDBScript : MonoBehaviour
         // Az adatbázis fájl elérési útja
         string dbPath = Application.persistentDataPath + "/game_scores.db";
         connectionString = "URI=file:" + dbPath;
-
-        //Debug.Log("Database path: " + dbPath);
 
         // Adatbázis inicializálása
         InitializeDatabase();
@@ -56,7 +52,6 @@ public class SQLiteDBScript : MonoBehaviour
             {
                 dbConnection.Open();
 
-                // Players tábla létrehozása név nélkül (vagy opcionális névvel)
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
                 {
                     string createPlayersTable = @"
