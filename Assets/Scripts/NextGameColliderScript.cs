@@ -25,7 +25,7 @@ public class NextGameColliderScript : MonoBehaviour
         new Vector3(-58.56f, 0.54f, 7.49f),  // 1. szint
         new Vector3(-68.96f, 0.54f, 7.49f),  // 2. szint
         new Vector3(-79.87f, 0.54f, 7.49f),  // 3. szint
-        new Vector3(-92.23f, 0.54f, 5.08f)   // 4. szint (maze játék)
+        new Vector3(-92.23f, 0.54f, 5.08f)   // 4. szint
     };
 
     private void Start()

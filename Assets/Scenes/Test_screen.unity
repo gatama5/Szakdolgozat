@@ -2444,7 +2444,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Tutorial for game controlling and completing
+  m_text: "Seg\xEDts\xE9g a j\xE1t\xE9k ir\xE1ny\xEDt\xE1s\xE1hoz \xE9s teljes\xEDt\xE9s\xE9hez"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -6297,7 +6297,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "A minij\xE1t\xE9k befejez\xE9se ut\xE1n megkapod az eredm\xE9nyedet \xE9s
-    tov\xE1bbl\xE9phetsz a kovetkez\u0151 szintre azzal ha \xE1tm\xE9sz az ajt\xF3n."
+    tov\xE1bbl\xE9phetsz a kovetkez\u0151 szintre azzal, ha \xE1tm\xE9sz az ajt\xF3n."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -7306,7 +7306,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1000609298}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.000000013038}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7314,8 +7314,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -316.03, y: -308.92}
-  m_SizeDelta: {x: -705.0247, y: -617.8439}
+  m_AnchoredPosition: {x: -277.11, y: -304.83}
+  m_SizeDelta: {x: -627.1988, y: -626.1824}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1000609300
 MonoBehaviour:
@@ -7378,7 +7378,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "A karaktert a k\xF6vetkez\u0151 gombok lenyom\xE1s\xE1val lehet ir\xE1ny\xEDtani:\n-
-    WASD gombok\n- Ny\xEDl billenty\u0171k\nA tud futni a Baloldali Shift gomb nyom\xE1s\xE1val"
+    WASD gombok\n- Ny\xEDl billenty\u0171k\nA karakter tud futni a Baloldali Shift
+    gomb nyom\xE1s\xE1val"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -8123,7 +8124,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Tutorial
+  m_text: "S\xFAg\xF3"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
