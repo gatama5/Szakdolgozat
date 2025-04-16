@@ -1,3 +1,16 @@
-C:\Users\nonst\AppData\LocalLow\DefaultCompany\Szakdolgozat
-DB Access with SQLite
-DB browser SQLite
+Dokumentáció
+- Statisztikai rész megírása
+- ábrajegyzék (hivatkozásokkal)
+- tartalmi összefoglaló, köszönetnyilvánítás
+- javítások
+
+Szakdoga:
+- MAtlab statisztikázó script kijavítása
+- statisztikagenerálás
+
+Halprog 4KisZh NagyZH
+InfoBizt Final exam, SBA
+rendszerfejlesztés
+projeklabor
+
+rékának összefoglaló írása a kosárról
