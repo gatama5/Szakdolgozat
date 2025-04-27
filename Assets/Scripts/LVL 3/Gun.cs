@@ -13,24 +13,22 @@ public class Gun : MonoBehaviour
     public AudioSource src;
     public int hitCounter = 0;
 
-    List<Tuple<double, double>> hitpoints = new List<Tuple<double, double>>(); // talбlatok
-    public float fireRate = 1f;  // A lцvйsenkйnti szьnet (mбsodpercben)
+    List<Tuple<double, double>> hitpoints = new List<Tuple<double, double>>();
+    public float fireRate = 1f;
     private float nextFireTime = 0f;
     public float src_volume = 0.5f;
     public ObjectSpawner_1place osp_1place;
     public PickUpGun pck_gun;
 
-    public ObjectSpawner targetObjectSpawner; // Ъj vбltozу az ObjectSpawner referenciбhoz
+    public ObjectSpawner targetObjectSpawner;
 
     public void Start()
     {
-        // Ellenхrizzьk йs ha null, akkor megprуbбljuk megkeresni
         if (osp_1place == null)
         {
             osp_1place = FindObjectOfType<ObjectSpawner_1place>();
         }
 
-        // Ъj kуd: ObjectSpawner keresйse
         if (targetObjectSpawner == null)
         {
             targetObjectSpawner = FindObjectOfType<ObjectSpawner>();
@@ -70,7 +68,6 @@ public class Gun : MonoBehaviour
                 double hitX = Math.Round(hitPointLocal.x * 10, 2);
                 double hitY = Math.Round(hitPointLocal.y * 10, 2);
 
-                // Debug log a találat helyéről
                 Debug.Log("Találati pont a target közepéhez képest: " + hitX + ", " + hitY);
 
 
@@ -101,28 +98,20 @@ public class Gun : MonoBehaviour
                     {
                         targetObjectSpawner.hitPlace_fromMiddle.Add(positionString);
 
-                        // Ne mentsük itt az időt, azt az ObjectSpawner saját logikája fogja kezelni
-                        // Így elkerüljük a duplikációt
                     }
                 }
-                // 2-es szint = Shooting játék (ObjectSpawner_1place)
                 else if (currentLevel == 2 && osp_1place != null)
                 {
-                    // Ellenőrizzük, hogy a lista inicializálva van-e
                     if (osp_1place.hitPlace_fromMiddle == null)
                     {
                         osp_1place.hitPlace_fromMiddle = new List<string>();
                     }
 
-                    // Formátum változtatás: vessző helyett pont használata
                     string positionString = $"{hitX}|{hitY}";
                     osp_1place.hitPlace_fromMiddle.Add(positionString);
 
-                    // Tároljuk el a saját listánkban is
                     hitpoints.Add(new Tuple<double, double>(hitX, hitY));
                 }
-
-                // Mindig keressünk Target komponenst és ellenőrizzük, hogy még nem null-e
                 if (target != null)
                 {
                     target.TakeDamage(damage);

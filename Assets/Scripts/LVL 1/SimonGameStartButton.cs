@@ -1,7 +1,7 @@
 
 using UnityEngine;
 using System.Collections;
-using TMPro; // TextMeshPro namespace added
+using TMPro;
 
 public class SimonGameStartButton : MonoBehaviour
 {
@@ -11,14 +11,12 @@ public class SimonGameStartButton : MonoBehaviour
     [SerializeField] private float start_delay = 3f;
     private bool canStart = true;
 
-    // New countdown UI elements
     [SerializeField] private bool showCountdown = true;
     [SerializeField] private TextMeshProUGUI countdownText;
     [SerializeField] private Canvas countdownCanvas;
 
     private void Start()
     {
-        // Hide the countdown canvas at start
         if (countdownCanvas != null)
         {
             countdownCanvas.enabled = false;
@@ -33,32 +31,25 @@ public class SimonGameStartButton : MonoBehaviour
 
     private void StartGame()
     {
-        // Temporarily disable the button
         canStart = false;
 
-        // Play the sound
         if (src != null) src.Play();
 
-        // Reset button colors
         ResetButtonColors();
 
-        // Reset the game
         gm.isEnded = false;
         gm.ResetGame();
 
-        // Start the countdown before starting the game
         StartCoroutine(CountdownAndStartGame());
     }
 
     private IEnumerator CountdownAndStartGame()
     {
-        // Show countdown canvas if available
         if (countdownCanvas != null)
         {
             countdownCanvas.enabled = true;
         }
 
-        // Perform countdown
         float remainingTime = start_delay;
         while (remainingTime > 0)
         {
@@ -70,20 +61,16 @@ public class SimonGameStartButton : MonoBehaviour
             remainingTime -= 1f;
         }
 
-        // Clear the countdown text
         if (showCountdown && countdownText != null)
         {
             StartCoroutine(ClearTextAfterDelay(0f));
         }
 
-        // Start the game
         gm.StartCoroutine(gm.PlayGame());
 
-        // Re-enable the start button
         canStart = true;
     }
 
-    // Method to clear the countdown text after a delay
     private IEnumerator ClearTextAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
@@ -92,7 +79,6 @@ public class SimonGameStartButton : MonoBehaviour
             countdownText.text = "";
         }
 
-        // Hide the countdown canvas
         if (countdownCanvas != null)
         {
             countdownCanvas.enabled = false;

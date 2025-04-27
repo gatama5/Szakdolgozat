@@ -14,14 +14,12 @@ public class LoacalisationManagerScript : MonoBehaviour
 
     private void Awake()
     {
-        // Ha már létezik egy példány, akkor eltávolítjuk ezt
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
 
-        // Egyébként eltároljuk a referenciát
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }

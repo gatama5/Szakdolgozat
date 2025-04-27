@@ -7,13 +7,11 @@ public class SimonScores : MonoBehaviour
     [SerializeField] private int highscore_point = 0;
     private const string HIGHSCORE_KEY = "highscore_point";
 
-    // Esemény a pontszám változásához
     public UnityEvent<int> onScoreChanged = new UnityEvent<int>();
     public UnityEvent<int> onHighScoreChanged = new UnityEvent<int>();
 
     private void Start()
     {
-        //LoadHighScore();
         ResetScore();
     }
 
@@ -30,7 +28,6 @@ public class SimonScores : MonoBehaviour
         CheckForNewHighscore();
     }
 
-    // Növelési függvény a pontokhoz
     public void AddPoint()
     {
         score_points++;

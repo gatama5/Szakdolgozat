@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; // Added TextMeshPro namespace
+using TMPro;
 
 public class SimonGameManager : MonoBehaviour
 {
@@ -35,13 +35,11 @@ public class SimonGameManager : MonoBehaviour
         currentPickDelay = initialPickDelay;
         InitializeButtonUsage();
 
-        // Hide notification text at start if it exists
         if (gameOverNotificationText != null)
         {
             gameOverNotificationText.gameObject.SetActive(false);
         }
 
-        // Megkeressьk az adatbбzis managert
         dbManager = FindObjectOfType<SQLiteDBScript>();
         if (dbManager == null)
         {

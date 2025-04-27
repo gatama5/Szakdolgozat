@@ -20,7 +20,6 @@ public class BestScoreDisplay : MonoBehaviour
     private LoacalisationManagerScript locManager;
     private int previousLanguage = -1;
 
-    // Wrapper class for JSON deserialization
     [Serializable]
     private class AllPlayersWrapper
     {
@@ -73,7 +72,6 @@ public class BestScoreDisplay : MonoBehaviour
         public string recordedAt;
     }
 
-    // Lokalizált szövegek - magyar és angol verzióban
     private Dictionary<string, string[]> localizedTexts = new Dictionary<string, string[]>()
     {
         // 0 = angol, 1 = magyar
@@ -93,10 +91,8 @@ public class BestScoreDisplay : MonoBehaviour
 
     private void Awake()
     {
-        // Elérési út beállítása
         backupFolderPath = Path.Combine(Application.persistentDataPath, backupFolderName);
 
-        // Lokalizációs manager lekérése
         locManager = FindObjectOfType<LoacalisationManagerScript>();
         if (locManager == null)
         {
@@ -104,7 +100,6 @@ public class BestScoreDisplay : MonoBehaviour
         }
         else
         {
-            // Az aktuális nyelv megjegyzése
             previousLanguage = locManager.getLocal();
         }
     }
@@ -112,7 +107,6 @@ public class BestScoreDisplay : MonoBehaviour
 
     private void Start()
     {
-        // Elsõ indításkor frissítsük az adatokat
         if (autoRefreshOnStart)
         {
             RefreshBestScores();
@@ -121,13 +115,10 @@ public class BestScoreDisplay : MonoBehaviour
 
     private void Update()
     {
-        // Csak akkor ellenõrizzük, ha van lokalizációs manager
         if (locManager != null)
         {
-            // Lekérdezzük az aktuális nyelvi beállítást
             int currentLanguage = locManager.getLocal();
 
-            // Ha változott a nyelv, frissítjük a megjelenítést
             if (currentLanguage != previousLanguage)
             {
                 LogMessage($"Nyelvváltás észlelve: {previousLanguage} -> {currentLanguage}");
@@ -137,10 +128,9 @@ public class BestScoreDisplay : MonoBehaviour
         }
     }
 
-    // Lokalizált szöveg lekérése
     private string GetLocalizedText(string key, params object[] args)
     {
-        int langIndex = 0; // Alapértelmezetten angol
+        int langIndex = 0; 
 
         if (locManager != null)
         {
@@ -149,20 +139,18 @@ public class BestScoreDisplay : MonoBehaviour
             // Ellenõrizzük, hogy érvényes index-e (0 = angol, 1 = magyar)
             if (langIndex < 0 || langIndex > 1)
             {
-                langIndex = 0; // Fallback angol nyelvre
+                langIndex = 0; 
             }
         }
 
-        // Ellenõrizzük, hogy létezik-e a kulcs a szótárban
         if (localizedTexts.TryGetValue(key, out string[] texts) && langIndex < texts.Length)
         {
             return string.Format(texts[langIndex], args);
         }
 
-        return $"[Missing:{key}]"; // Hiányzó kulcs jelzése
+        return $"[Missing:{key}]"; 
     }
 
-    // Publikus metódus a pontszámok frissítésére
     public void RefreshBestScores()
     {
         if (bestScoresText == null)
@@ -182,7 +170,6 @@ public class BestScoreDisplay : MonoBehaviour
 
         try
         {
-            // JSON fájl beolvasása
             string jsonData = File.ReadAllText(summaryFilePath);
             AllPlayersWrapper wrapper = JsonUtility.FromJson<AllPlayersWrapper>(jsonData);
 
@@ -192,17 +179,14 @@ public class BestScoreDisplay : MonoBehaviour
                 return;
             }
 
-            // Legjobb eredmények keresése
             PlayerData bestSimonPlayer = GetBestSimonPlayer(wrapper.players);
             PlayerData bestMazePlayer = GetBestMazePlayer(wrapper.players);
             PlayerData bestShootingPlayer = GetBestShootingPlayer(wrapper.players);
 
-            // Eredmények megjelenítése
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
             sb.AppendLine($"<b>{GetLocalizedText("BestScores")}</b>\n");
 
-            // Simon Játék
             sb.AppendLine($"<color=#4da6ff><b>{GetLocalizedText("SimonScore")}:</b></color>");
             if (bestSimonPlayer != null && bestSimonPlayer.simonData != null && bestSimonPlayer.simonData.highScore > 0)
             {
@@ -218,7 +202,6 @@ public class BestScoreDisplay : MonoBehaviour
 
             sb.AppendLine();
 
-            // Labirintus Játék
             sb.AppendLine($"<color=#4da6ff><b>{GetLocalizedText("MazeTime")}:</b></color>");
             if (bestMazePlayer != null && bestMazePlayer.mazeData != null && !string.IsNullOrEmpty(bestMazePlayer.mazeData.formattedTime))
             {
@@ -234,7 +217,6 @@ public class BestScoreDisplay : MonoBehaviour
 
             sb.AppendLine();
 
-            // Lövöldözõs Játék
             sb.AppendLine($"<color=#4da6ff><b>{GetLocalizedText("ShootingScore")}:</b></color>");
             if (bestShootingPlayer != null && bestShootingPlayer.shootingSessions != null && bestShootingPlayer.shootingSessions.Count > 0)
             {
@@ -242,7 +224,6 @@ public class BestScoreDisplay : MonoBehaviour
                 sb.AppendLine($"{GetLocalizedText("Age")}: {bestShootingPlayer.playerAge}");
                 sb.AppendLine($"{GetLocalizedText("Generation")}: {bestShootingPlayer.playerAgeGeneration}");
 
-                // Legjobb lövés reactionTime
                 var bestShot = GetBestShot(bestShootingPlayer.shootingSessions);
                 if (bestShot != null)
                 {
@@ -267,7 +248,6 @@ public class BestScoreDisplay : MonoBehaviour
         }
     }
 
-    // Legjobb Simon játékos meghatározása
     private PlayerData GetBestSimonPlayer(List<PlayerData> players)
     {
         return players
@@ -276,19 +256,16 @@ public class BestScoreDisplay : MonoBehaviour
             .FirstOrDefault();
     }
 
-    // Legjobb Labirintus játékos meghatározása
     private PlayerData GetBestMazePlayer(List<PlayerData> players)
     {
         return players
             .Where(p => p.mazeData != null && p.mazeData.completionTime > 0)
-            .OrderBy(p => p.mazeData.completionTime)  // Legrövidebb idõ a legjobb
+            .OrderBy(p => p.mazeData.completionTime) 
             .FirstOrDefault();
     }
 
-    // Legjobb Lövöldözõs játékos meghatározása 
     private PlayerData GetBestShootingPlayer(List<PlayerData> players)
     {
-        // Játékosok szûrése, akiknek van lövés adata
         var playersWithShots = players
             .Where(p => p.shootingSessions != null &&
                         p.shootingSessions.Any(s => s.shots != null && s.shots.Count > 0))
@@ -297,7 +274,6 @@ public class BestScoreDisplay : MonoBehaviour
         if (playersWithShots.Count == 0)
             return null;
 
-        // Minden játékos legjobb lövésének meghatározása
         var playerBestShots = new List<Tuple<PlayerData, ShootingData>>();
 
         foreach (var player in playersWithShots)
@@ -309,18 +285,16 @@ public class BestScoreDisplay : MonoBehaviour
             }
         }
 
-        // Sorba rendezés a legjobb lövés alapján
         if (playerBestShots.Count > 0)
         {
             return playerBestShots
-                .OrderBy(t => t.Item2.reactionTime)  // Leggyorsabb reakcióidõ a legjobb
+                .OrderBy(t => t.Item2.reactionTime) 
                 .FirstOrDefault()?.Item1;
         }
 
         return null;
     }
 
-    // Legjobb lövés meghatározása
     private ShootingData GetBestShot(List<ShootingSessionData> sessions)
     {
         var allShots = new List<ShootingData>();
@@ -333,13 +307,11 @@ public class BestScoreDisplay : MonoBehaviour
             }
         }
 
-        // Leggyorsabb reakcióidejû lövés meghatározása
         return allShots
             .OrderBy(s => s.reactionTime)
             .FirstOrDefault();
     }
 
-    // Debug üzenetek kezelése
     private void LogMessage(string message, bool isError = false)
     {
         if (logDebugMessages)
@@ -351,7 +323,6 @@ public class BestScoreDisplay : MonoBehaviour
         }
     }
 
-    // Ez a metódus meghívható egy UI gombról
     public void RefreshButtonClicked()
     {
         RefreshBestScores();

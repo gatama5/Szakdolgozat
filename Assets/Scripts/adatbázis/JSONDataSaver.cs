@@ -66,7 +66,7 @@ public class JSONDataSaver : MonoBehaviour
         public string recordedAt;
     }
 
-    // Wrapper class for JSON serialization of player list
+
     [Serializable]
     private class AllPlayersWrapper
     {
@@ -75,16 +75,13 @@ public class JSONDataSaver : MonoBehaviour
 
     private void Awake()
     {
-        // Create the backup folder path
         backupFolderPath = Path.Combine(Application.persistentDataPath, backupFolderName);
 
-        // Ensure the backup directory exists
         if (!Directory.Exists(backupFolderPath))
         {
             Directory.CreateDirectory(backupFolderPath);
         }
 
-        // Get reference to the database manager
         dbManager = FindObjectOfType<SQLiteDBScript>();
         scoreManager = FindObjectOfType<ScoreManager>();
 
@@ -106,7 +103,6 @@ public class JSONDataSaver : MonoBehaviour
         }
     }
 
-    // Public method that can be called to save the current player's data
     public void BackupCurrentPlayerData()
     {
         if (dbManager == null)
@@ -125,7 +121,6 @@ public class JSONDataSaver : MonoBehaviour
         BackupPlayerData(currentPlayerId);
     }
 
-    // This method listens for maze game completion if needed
     public void OnMazeGameCompleted()
     {
         if (backupAfterMazeGame)
@@ -135,19 +130,14 @@ public class JSONDataSaver : MonoBehaviour
         }
     }
 
-    // This function should be called from the ButtonsForMaze.cs script when the maze is completed
-    // You would need to add: FindObjectOfType<JSONDataSaver>().OnMazeGameCompleted();
-    // to the maze completion handler in ButtonsForMaze.cs
 
-    // Backs up a specific player's data - UPDATED for new DB structure
-    // Backs up a specific player's data - UPDATED for date-based player ID format
     public void BackupPlayerData(int playerId)
     {
         try
         {
-            // Jelenítsük meg a dátum formátumú ID-t olvasható formában (csak logoláshoz)
+
             string playerIdStr = playerId.ToString();
-            if (playerIdStr.Length == 8) // MMDDHHMM formátum esetén
+            if (playerIdStr.Length == 8) 
             {
                 string month = playerIdStr.Substring(0, 2);
                 string day = playerIdStr.Substring(2, 2);
@@ -160,7 +150,6 @@ public class JSONDataSaver : MonoBehaviour
                 LogMessage($"Backing up data for player ID: {playerId}");
             }
 
-            // Get the player's basic data
             DataTable playerBasicInfo = GetPlayerBasicInfo(playerId);
 
             if (playerBasicInfo == null || playerBasicInfo.Rows.Count == 0)
@@ -169,11 +158,9 @@ public class JSONDataSaver : MonoBehaviour
                 return;
             }
 
-            // Create a new PlayerData object
             var playerData = new PlayerData
             {
                 playerId = playerId,
-                // playerName eltávolítva
                 playerAge = 0,
                 playerAgeGeneration = "",
                 simonData = new SimonGameData(),
@@ -181,7 +168,6 @@ public class JSONDataSaver : MonoBehaviour
                 shootingSessions = new List<ShootingSessionData>()
             };
 
-            // Get player details if available
             DataTable playerDetails = GetPlayerDetails(playerId);
             if (playerDetails != null && playerDetails.Rows.Count > 0)
             {
@@ -195,11 +181,9 @@ public class JSONDataSaver : MonoBehaviour
                     playerData.playerAgeGeneration = detailRow["Generation"].ToString();
             }
 
-            // Get Simon game scores
             DataTable simonScores = GetSimonScores(playerId);
             if (simonScores != null && simonScores.Rows.Count > 0)
             {
-                // Get the highest score
                 int highestScore = 0;
                 string recordedAt = "";
 
@@ -217,11 +201,9 @@ public class JSONDataSaver : MonoBehaviour
                 playerData.simonData.recordedAt = recordedAt;
             }
 
-            // Get Maze completion times
             DataTable mazeScores = GetMazeScores(playerId);
             if (mazeScores != null && mazeScores.Rows.Count > 0)
             {
-                // Get the best (lowest) completion time
                 double bestTime = double.MaxValue;
                 string formattedTime = "";
                 string recordedAt = "";
@@ -248,7 +230,6 @@ public class JSONDataSaver : MonoBehaviour
                 }
             }
 
-            // Get Shooting sessions and scores
             DataTable shootingSessions = GetShootingSessions(playerId);
             if (shootingSessions != null && shootingSessions.Rows.Count > 0)
             {
@@ -263,7 +244,6 @@ public class JSONDataSaver : MonoBehaviour
                         shots = new List<ShootingData>()
                     };
 
-                    // Get all shots for this session
                     DataTable shootingScores = GetShootingScores(sessionId);
                     if (shootingScores != null && shootingScores.Rows.Count > 0)
                     {
@@ -286,17 +266,15 @@ public class JSONDataSaver : MonoBehaviour
                 }
             }
 
-            // Fájlnév formátumának módosítása - megtartjuk a dátum alapú játékos ID-t is
             string fileName = $"Player_{playerId}_{DateTime.Now:yyyyMMdd_HHmmss}.json";
             string filePath = Path.Combine(backupFolderPath, fileName);
 
-            // Convert to JSON
             string json = JsonUtility.ToJson(playerData, true);
             File.WriteAllText(filePath, json, Encoding.UTF8);
 
             LogMessage($"Player data successfully backed up to: {filePath}");
 
-            // Create a summary file that combines all data for easier viewing
+
             CreateSummaryFile(playerData, playerId);
         }
         catch (Exception ex)
@@ -305,7 +283,7 @@ public class JSONDataSaver : MonoBehaviour
         }
     }
 
-    // Helper methods to get data from the database
+
     private DataTable GetPlayerBasicInfo(int playerId)
     {
         try
@@ -486,7 +464,6 @@ public class JSONDataSaver : MonoBehaviour
         }
     }
 
-    // Creates a summary file with all players' data for easier viewing
     private void CreateSummaryFile(PlayerData newData, int playerId)
     {
         try
@@ -494,31 +471,25 @@ public class JSONDataSaver : MonoBehaviour
             string summaryPath = Path.Combine(backupFolderPath, "AllPlayersData.json");
             List<PlayerData> allPlayers = new List<PlayerData>();
 
-            // Read existing data if available
             if (File.Exists(summaryPath))
             {
                 string existingJson = File.ReadAllText(summaryPath);
 
-                // Unity's JsonUtility doesn't directly support deserializing JSON arrays,
-                // so we need a wrapper class to deserialize the data
+
                 AllPlayersWrapper wrapper = JsonUtility.FromJson<AllPlayersWrapper>(existingJson);
                 if (wrapper != null && wrapper.players != null)
                 {
                     allPlayers = wrapper.players;
 
-                    // Remove any existing entry for this player
                     allPlayers.RemoveAll(p => p.playerId == playerId);
                 }
             }
 
-            // Add the new player data
             allPlayers.Add(newData);
 
-            // Create a wrapper to serialize the list
             AllPlayersWrapper newWrapper = new AllPlayersWrapper { players = allPlayers };
             string json = JsonUtility.ToJson(newWrapper, true);
 
-            // Write to the summary file
             File.WriteAllText(summaryPath, json, Encoding.UTF8);
 
             LogMessage($"Updated summary file with latest player data: {summaryPath}");
@@ -529,7 +500,6 @@ public class JSONDataSaver : MonoBehaviour
         }
     }
 
-    // Helper method for logging with optional error flag
     private void LogMessage(string message, bool isError = false)
     {
         if (logDebugMessages)
@@ -540,12 +510,10 @@ public class JSONDataSaver : MonoBehaviour
         }
     }
 
-    // Manual backup method that can be called from UI buttons
     public void BackupAllPlayersData()
     {
         try
         {
-            // Get all player IDs from database
             DataTable allPlayers = GetAllPlayers();
 
             if (allPlayers != null && allPlayers.Rows.Count > 0)

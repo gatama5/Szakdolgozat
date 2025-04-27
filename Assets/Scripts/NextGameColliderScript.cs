@@ -10,16 +10,16 @@ public class NextGameColliderScript : MonoBehaviour
     private static int currentLevel = 0;
     [SerializeField] private GameObject player;
     [SerializeField] private int thisLevelIndex;
-    [SerializeField] private SimonGameManager simonGame; // Simon játék referencia
-    [SerializeField] private ObjectSpawner targetGame; // Target játék referencia (ObjectSpawner)
-    [SerializeField] private ObjectSpawner_1place shootingGame; // Lövöldözõs játék referencia
-    [SerializeField] private ButtonsForMaze mazeGame; // Új: Labirintus játék referencia (ButtonsForMaze)
+    [SerializeField] private SimonGameManager simonGame;
+    [SerializeField] private ObjectSpawner targetGame; 
+    [SerializeField] private ObjectSpawner_1place shootingGame;
+    [SerializeField] private ButtonsForMaze mazeGame; 
     [Header("UI Elements")]
-    [SerializeField] private TextMeshProUGUI completionText; // Befejezés szöveg (GameOver)
-    [SerializeField] private List<TextMeshProUGUI> inGameTexts = new List<TextMeshProUGUI>(); // Játék közbeni szövegek
-    [SerializeField] private float textDisplayTime = 5f; // Új: Szöveg megjelenítési ideje
-    [SerializeField] private string menuSceneName = "menu_basic"; // Új: Menu scene neve
-    [SerializeField] private float teleportDelay = 0.5f; // Késleltetés a teleportálás elõtt
+    [SerializeField] private TextMeshProUGUI completionText;
+    [SerializeField] private List<TextMeshProUGUI> inGameTexts = new List<TextMeshProUGUI>();
+    [SerializeField] private float textDisplayTime = 5f; 
+    [SerializeField] private string menuSceneName = "menu_basic"; 
+    [SerializeField] private float teleportDelay = 0.5f;
 
     private static Vector3[] levelPositions = new Vector3[] {
         new Vector3(-58.56f, 0.54f, 7.49f),  // 1. szint
@@ -41,31 +41,28 @@ public class NextGameColliderScript : MonoBehaviour
             player.transform.position = levelPositions[0];
         }
 
-        // Ellenõrizzük a játékok referenciáit
         if (thisLevelIndex == 0 && simonGame == null)
         {
             Debug.LogError("Simon Game Manager reference is missing from the first level collider!");
         }
-        if (thisLevelIndex == 1 && targetGame == null) // 2. szint ellenõrzése
+        if (thisLevelIndex == 1 && targetGame == null) 
         {
             Debug.LogError("Target Game (ObjectSpawner) reference is missing from the second level collider!");
         }
-        if (thisLevelIndex == 2 && shootingGame == null) // 3. szint ellenõrzése
+        if (thisLevelIndex == 2 && shootingGame == null) 
         {
             Debug.LogError("Shooting Game reference is missing from the third level collider!");
         }
-        if (thisLevelIndex == 3 && mazeGame == null) // 4. szint ellenõrzése (új: labirintus)
+        if (thisLevelIndex == 3 && mazeGame == null) 
         {
             Debug.LogError("Maze Game reference is missing from the fourth level collider!");
         }
 
-        // Ellenõrizzük az UI elemeket
         CheckUIElements();
     }
 
     private void CheckUIElements()
     {
-        // Ha befejezés szöveg meg van adva, akkor elrejtjük amíg nincs rá szükség
         if (completionText != null)
         {
             completionText.gameObject.SetActive(false);
@@ -75,7 +72,6 @@ public class NextGameColliderScript : MonoBehaviour
             Debug.LogWarning("Completion text (Game Over) is not assigned but this is the last level!");
         }
 
-        // Ellenõrizzük a játék közben látható szövegeket
         for (int i = 0; i < inGameTexts.Count; i++)
         {
             if (inGameTexts[i] == null)
@@ -92,7 +88,6 @@ public class NextGameColliderScript : MonoBehaviour
 
         bool canProceed = true;
 
-        // Elsõ szint - Simon játék ellenõrzése
         if (thisLevelIndex == 0)
         {
             if (simonGame == null)
@@ -107,7 +102,6 @@ public class NextGameColliderScript : MonoBehaviour
             }
         }
 
-        // Második szint - Target játék ellenõrzése (ObjectSpawner)
         else if (thisLevelIndex == 1)
         {
             if (targetGame == null)
@@ -116,7 +110,6 @@ public class NextGameColliderScript : MonoBehaviour
                 return;
             }
 
-            // Ellenõrizzük, hogy a játékos megsemmisített-e legalább annyi targetet, amennyit spawnoltunk
             if (targetGame.destroyedTargets < targetGame.numberToSpawn)
             {
                 canProceed = false;
@@ -124,7 +117,6 @@ public class NextGameColliderScript : MonoBehaviour
             }
         }
 
-        // Harmadik szint - Lövöldözõs játék ellenõrzése
         else if (thisLevelIndex == 2)
         {
             if (shootingGame == null)
@@ -132,14 +124,13 @@ public class NextGameColliderScript : MonoBehaviour
                 Debug.LogError("Shooting Game reference is missing!");
                 return;
             }
-            if (shootingGame.hit_times.Count == 0) // Ha még nincs találat, nem játszott
+            if (shootingGame.hit_times.Count == 0) 
             {
                 canProceed = false;
                 Debug.Log("Complete at least one round of the Shooting game first!");
             }
         }
 
-        // Negyedik szint - Labirintus játék ellenõrzése
         else if (thisLevelIndex == 3)
         {
             if (mazeGame == null)
@@ -148,7 +139,6 @@ public class NextGameColliderScript : MonoBehaviour
                 return;
             }
 
-            // Ellenõrizzük, hogy a játékos megnyomta-e a jó gombot (teljesítette a labirintust)
             if (!mazeGame.isCompleted)
             {
                 canProceed = false;
@@ -158,15 +148,12 @@ public class NextGameColliderScript : MonoBehaviour
 
         if (!canProceed)
         {
-            // Visszalökjük a játékost, de NEM kapcsoljuk ki a CharacterController-t
             FPS_Controller fpsController = player.GetComponent<FPS_Controller>();
             if (fpsController != null)
             {
-                // Ideiglenesen letiltjuk a mozgást
                 bool originalCanMove = fpsController.canMove;
                 fpsController.canMove = false;
 
-                // A player pozícióját a CharacterController.Move funkcióval módosítjuk
                 CharacterController charController = player.GetComponent<CharacterController>();
                 if (charController != null)
                 {
@@ -174,25 +161,21 @@ public class NextGameColliderScript : MonoBehaviour
                     charController.Move(pushDirection);
                 }
 
-                // Kis késleltetés után visszaállítjuk a mozgást
                 StartCoroutine(ReenableMovementAfterDelay(fpsController, originalCanMove, 0.2f));
             }
             else
             {
-                // Ha nincs FPS_Controller, akkor egyszerûen csak mozgatjuk a játékost
                 player.transform.position += -player.transform.forward * 2f;
             }
             return;
         }
 
-        // Ha az utolsó szint után vagyunk, akkor a játék véget ér
-        if (thisLevelIndex == levelPositions.Length - 1)  // A maze játék az utolsó, innen visszadobjuk a menübe
+        if (thisLevelIndex == levelPositions.Length - 1) 
         {
             StartCoroutine(CompleteGame());
             return;
         }
 
-        // Egyébként továbblépünk a következõ szintre
         StartCoroutine(MoveToNextLevelSafely());
     }
 
@@ -200,7 +183,6 @@ public class NextGameColliderScript : MonoBehaviour
     {
         if (currentLevel < levelPositions.Length - 1)
         {
-            // Letiltjuk a játékos mozgását a teleportálás idejére
             FPS_Controller fpsController = player.GetComponent<FPS_Controller>();
             bool originalCanMove = true;
 
@@ -210,14 +192,11 @@ public class NextGameColliderScript : MonoBehaviour
                 fpsController.canMove = false;
             }
 
-            // Vegyünk vissza 1 biztonsági keretet, mielõtt teleportálnánk
             yield return new WaitForFixedUpdate();
 
-            // Frissítjük a szintet
             currentLevel++;
             Vector3 newPos = levelPositions[currentLevel];
 
-            // Teleportáljuk a játékost az új pozícióba
             CharacterController charController = player.GetComponent<CharacterController>();
             if (charController != null)
             {
@@ -230,10 +209,8 @@ public class NextGameColliderScript : MonoBehaviour
                 player.transform.position = newPos;
             }
 
-            // Várjunk egy rövid ideig, hogy a fizika rendszer stabilizálódjon
             yield return new WaitForSeconds(teleportDelay);
 
-            // Visszakapcsoljuk a mozgást
             if (fpsController != null)
             {
                 fpsController.canMove = originalCanMove;
@@ -249,7 +226,6 @@ public class NextGameColliderScript : MonoBehaviour
 
     private IEnumerator CompleteGame()
     {
-        // Elrejtjük az összes játék közben látható szöveget
         foreach (TextMeshProUGUI inGameText in inGameTexts)
         {
             if (inGameText != null)
@@ -258,12 +234,10 @@ public class NextGameColliderScript : MonoBehaviour
             }
         }
 
-        // Megjelenítjük a befejezés szövegét, ha meg van adva
         if (completionText != null)
         {
             completionText.gameObject.SetActive(true);
 
-            // Ha van score_time, hozzáadjuk az idõt a befejezés szöveghez
             if (thisLevelIndex == 3 && mazeGame != null && mazeGame.score_time != System.TimeSpan.Zero)
             {
                 string formattedTime = string.Format("{0:mm\\:ss\\.ff}", mazeGame.score_time);
@@ -271,13 +245,10 @@ public class NextGameColliderScript : MonoBehaviour
             }
         }
 
-        // Várakozás a meghatározott ideig
         yield return new WaitForSeconds(textDisplayTime);
 
-        // Játék vége, visszadobás a menübe
         ResetLevels();
 
-        // Alaphelyzetbe állítjuk a labirintus játékot
         if (thisLevelIndex == 3 && mazeGame != null)
         {
             mazeGame.ResetMaze();

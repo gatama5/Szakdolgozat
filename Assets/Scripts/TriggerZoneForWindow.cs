@@ -7,7 +7,6 @@ public class TriggerZoneForWindow : MonoBehaviour
     public FPS_Controller playerController;
     [SerializeField] public GameObject player;
 
-    //[SerializeField] public ui_c panel;
     [SerializeField] public Canvas megjelenit;
     [SerializeField] public bool isOpen = false;
 
@@ -30,18 +29,14 @@ public class TriggerZoneForWindow : MonoBehaviour
 
                 if (playerController != null)
                 {
-                    // Fixáljuk a pozíciót és forgást
                     fixedPosition = player.transform.position;
                     fixedRotation = player.transform.rotation;
 
-                    // Letiltjuk a mozgást
                     playerController.canMove = false;
 
-                    // Egeret láthatóvá tesszük és letiltjuk a kurzor rögzítését
                     Cursor.lockState = CursorLockMode.None;
                     Cursor.visible = true;
 
-                    // Megjelenítjük a Modal Window-t
                     isOpen = true;
                     megjelenit.enabled = true;
                     TriggerZoneEnter++;
@@ -55,7 +50,6 @@ public class TriggerZoneForWindow : MonoBehaviour
     {
         if (playerController != null && !playerController.canMove)
         {
-            // Fixáljuk a pozíciót és forgást amíg a Modal Window aktív
             player.transform.position = fixedPosition;
 
         }

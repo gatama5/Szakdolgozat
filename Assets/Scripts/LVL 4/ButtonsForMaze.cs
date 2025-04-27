@@ -16,45 +16,43 @@ public class ButtonsForMaze : MonoBehaviour
     public GameObject buttonsParent;
 
     [Header("Game State")]
-    public bool isCompleted = false; // Új változó a játék befejezésének követésére
+    public bool isCompleted = false; 
 
     [Header("Trigger")]
-    public MazeTrigger mazeTrigger; // Adjunk hozzá referenciát a triggerre
+    public MazeTrigger mazeTrigger;
 
     [Header("UI Elements")]
-    public TextMeshProUGUI timerText; // Make sure to assign this in the Inspector
+    public TextMeshProUGUI timerText;
 
     [Header("Game Start Notification")]
-    [SerializeField] TextMeshProUGUI gameStartNotificationText; // Játék indításakor megjelenő szöveg
-    [SerializeField] float startNotificationDisplayTime = 3f; // Mennyi ideig jelenjen meg a kezdő szöveg
+    [SerializeField] TextMeshProUGUI gameStartNotificationText;
+    [SerializeField] float startNotificationDisplayTime = 3f;
 
     [Header("Game Over Notification")]
-    [SerializeField] TextMeshProUGUI gameOverNotificationText; // Játék befejezésekor megjelenő szöveg
-    [SerializeField] float notificationDisplayTime = 3f; // Mennyi ideig jelenjen meg a szöveg
+    [SerializeField] TextMeshProUGUI gameOverNotificationText;
+    [SerializeField] float notificationDisplayTime = 3f;
 
     private bool doorstate = false;
-    //private float timeInLabyrinth = 0f;
     private bool timerActive = false;
     public bool playerInMaze = false;
     Stopwatch sw = new Stopwatch();
     public TimeSpan score_time;
 
     private ScoreManager scoreManager;
-    private JSONDataSaver jsonDataSaver; // Added reference to the JSONDataSaver
+    private JSONDataSaver jsonDataSaver;
 
     void Start()
     {
-        // Find ScoreManager
+
         scoreManager = FindObjectOfType<ScoreManager>();
 
-        // Find JSONDataSaver
         jsonDataSaver = FindObjectOfType<JSONDataSaver>();
         if (jsonDataSaver == null)
         {
             UnityEngine.Debug.LogWarning("JSONDataSaver not found in scene. Player data will not be backed up after maze completion.");
         }
 
-        // Find MazeTrigger if not assigned
+
         if (mazeTrigger == null)
         {
             mazeTrigger = FindObjectOfType<MazeTrigger>();
@@ -64,7 +62,6 @@ public class ButtonsForMaze : MonoBehaviour
             }
         }
 
-        // Initialize timer text
         if (timerText != null)
         {
             timerText.text = "Time: 00:00.00";
@@ -74,17 +71,14 @@ public class ButtonsForMaze : MonoBehaviour
             UnityEngine.Debug.LogError("Timer Text is not assigned in ButtonsForMaze!");
         }
 
-        // Kezdetben a gombok és szövegek rejtve
         if (buttonsParent != null)
             buttonsParent.SetActive(false);
 
-        // Elrejtjük a játék vége értesítést
         if (gameOverNotificationText != null)
         {
             gameOverNotificationText.gameObject.SetActive(false);
         }
 
-        // Elrejtjük a kezdő értesítést is
         if (gameStartNotificationText != null)
         {
             gameStartNotificationText.gameObject.SetActive(false);
@@ -92,13 +86,11 @@ public class ButtonsForMaze : MonoBehaviour
 
         SetInitialButtonColors();
 
-        // Alaphelyzetbe állítjuk a befejezés állapotot
         isCompleted = false;
     }
 
     void Update()
     {
-        // Update timer display if active
         if (timerActive && sw.IsRunning)
         {
             score_time = sw.Elapsed;
@@ -130,14 +122,12 @@ public class ButtonsForMaze : MonoBehaviour
 
     public void StartMazeChallenge()
     {
-        // Ha a játék már be van fejezve, nem indulhat újra
         if (isCompleted)
         {
             UnityEngine.Debug.Log("The maze game is already completed and cannot be restarted.");
             return;
         }
 
-        // Ellenőrizzük, hogy aktiválni tudjuk-e a buttonsParent-et
         if (buttonsParent != null)
         {
             buttonsParent.SetActive(true);
@@ -148,24 +138,19 @@ public class ButtonsForMaze : MonoBehaviour
             return;
         }
 
-        // Elrejtjük a játék vége értesítést, ha látható lenne
         if (gameOverNotificationText != null)
         {
             gameOverNotificationText.gameObject.SetActive(false);
         }
 
-        // Megjelenítjük a kezdő értesítést
         ShowGameStartNotification();
 
-        // Reset timer
         sw.Reset();
 
-        // Idõzítõ indítása
         sw.Start();
         timerActive = true;
         UnityEngine.Debug.Log("Maze challenge started! Timer is running.");
 
-        // Make sure the timer display is initialized
         UpdateTimerDisplay();
     }
 
@@ -173,19 +158,15 @@ public class ButtonsForMaze : MonoBehaviour
     {
         if (gameStartNotificationText != null)
         {
-            // Aktiváljuk a gameObject-et, amely tartalmazza a szöveget
             gameStartNotificationText.gameObject.SetActive(true);
 
-            // Csak akkor indítjuk el a coroutine-t, ha a gameObject aktív
             if (gameStartNotificationText.gameObject.activeInHierarchy)
             {
                 StartCoroutine(HideStartNotificationAfterDelay());
             }
             else
             {
-                // Ha nem aktív a hierarchiában, akkor használjunk alternatív megoldást
                 UnityEngine.Debug.LogWarning("A gameStartNotificationText objektum nem aktív a hierarchiában. Közvetlen időzítőt használunk.");
-                // Manuálisan elrejtjük az értesítést a megadott idő után
                 Invoke("HideStartNotification", startNotificationDisplayTime);
             }
         }
@@ -229,44 +210,35 @@ public class ButtonsForMaze : MonoBehaviour
 
     public void GoodButtonPress()
     {
-        // Játék vége állapot beállítása
         isCompleted = true;
 
         sw.Stop();
         timerActive = false;
         score_time = sw.Elapsed;
 
-        // Format time for logging
         string formattedTime = string.Format("{0:mm\\:ss\\.ff}", score_time);
         UnityEngine.Debug.Log($"Gratulálok! Teljesítetted a feladatot! Idõd: {formattedTime}");
 
-        // Final timer update
         UpdateTimerDisplay();
 
-        // Letiltjuk a triggert, hogy ne lehessen újra aktiválni
         if (mazeTrigger != null)
         {
             mazeTrigger.gameObject.GetComponent<Collider>().enabled = false;
             UnityEngine.Debug.Log("Maze trigger collider disabled to prevent reactivation.");
         }
 
-        // Eltüntetjük a rossz gombokat
         StartCoroutine(HideRemainingButtons());
-
-        // Update score in ScoreManager
         if (scoreManager != null)
         {
             scoreManager.RefreshScores();
         }
 
-        // Backup player data after maze completion
         if (jsonDataSaver != null)
         {
             UnityEngine.Debug.Log("Maze completed, backing up player data to JSON...");
             jsonDataSaver.OnMazeGameCompleted();
         }
 
-        // Megjelenítjük a játék vége értesítést
         ShowGameOverNotification();
     }
 
@@ -274,10 +246,8 @@ public class ButtonsForMaze : MonoBehaviour
     {
         if (gameOverNotificationText != null)
         {
-            // Egyszerűen megjelenítjük a szöveget, nem módosítjuk a tartalmát
             gameOverNotificationText.gameObject.SetActive(true);
 
-            // Hide the notification after delay
             StartCoroutine(HideNotificationAfterDelay());
         }
     }
@@ -291,12 +261,10 @@ public class ButtonsForMaze : MonoBehaviour
         }
     }
 
-    // Coroutine a gombok eltüntetésére
     private IEnumerator HideRemainingButtons()
     {
-        yield return new WaitForSeconds(1.0f); // Várunk egy másodpercet a vizuális visszajelzés érdekében
+        yield return new WaitForSeconds(1.0f);
 
-        // Elrejtjük az összes rossz gombot
         foreach (GameObject button in badButtons)
         {
             if (button.activeSelf)
@@ -329,10 +297,8 @@ public class ButtonsForMaze : MonoBehaviour
         return isCompleted;
     }
 
-    // Reset függvény módosítása
     public void ResetMaze()
     {
-        // Ha a játék már be van fejezve, nem állítjuk vissza
         if (isCompleted)
         {
             UnityEngine.Debug.Log("Cannot reset maze - game is already completed.");
@@ -343,7 +309,6 @@ public class ButtonsForMaze : MonoBehaviour
         timerActive = false;
         doorstate = false;
 
-        // Reset timer
         sw.Reset();
         score_time = TimeSpan.Zero;
         if (timerText != null)
@@ -351,7 +316,6 @@ public class ButtonsForMaze : MonoBehaviour
             timerText.text = "Time: 00:00.00";
         }
 
-        // Elrejtjük az értesítéseket, ha láthatóak lennének
         if (gameOverNotificationText != null)
         {
             gameOverNotificationText.gameObject.SetActive(false);
@@ -362,19 +326,16 @@ public class ButtonsForMaze : MonoBehaviour
             gameStartNotificationText.gameObject.SetActive(false);
         }
 
-        // Reset buttons
         SetInitialButtonColors();
         if (buttonsParent != null)
             buttonsParent.SetActive(false);
 
-        // Re-enable all buttons that might have been disabled
         foreach (GameObject button in badButtons)
         {
             button.SetActive(true);
         }
     }
 
-    // Teljesen új játék indításához (pl. újraindítás esetén)
     public void FullReset()
     {
         isCompleted = false;
@@ -382,7 +343,6 @@ public class ButtonsForMaze : MonoBehaviour
         timerActive = false;
         doorstate = false;
 
-        // Reset timer
         sw.Reset();
         score_time = TimeSpan.Zero;
         if (timerText != null)
@@ -390,7 +350,6 @@ public class ButtonsForMaze : MonoBehaviour
             timerText.text = "Time: 00:00.00";
         }
 
-        // Elrejtjük az értesítéseket, ha láthatóak lennének
         if (gameOverNotificationText != null)
         {
             gameOverNotificationText.gameObject.SetActive(false);
@@ -401,18 +360,15 @@ public class ButtonsForMaze : MonoBehaviour
             gameStartNotificationText.gameObject.SetActive(false);
         }
 
-        // Reset buttons
         SetInitialButtonColors();
         if (buttonsParent != null)
             buttonsParent.SetActive(false);
 
-        // Re-enable all buttons
         foreach (GameObject button in badButtons)
         {
             button.SetActive(true);
         }
 
-        // Trigger újra aktiválása, ha létezik
         if (mazeTrigger != null && mazeTrigger.gameObject.GetComponent<Collider>() != null)
         {
             mazeTrigger.gameObject.GetComponent<Collider>().enabled = true;

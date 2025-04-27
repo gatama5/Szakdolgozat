@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using TMPro; // TextMeshPro névtér hozzáadása
+using TMPro;
 
 public class ObjectSpawner : MonoBehaviour
 {
@@ -22,32 +22,25 @@ public class ObjectSpawner : MonoBehaviour
     [Tooltip("Minimбlis tбvolsбg kйt target kцzцtt")]
     public float minDistanceBetweenTargets = 1.0f;
 
-    // Játék befejezésekor megjelenő értesítés
     [SerializeField] TextMeshProUGUI gameOverNotificationText;
     [SerializeField] float notificationDisplayTime = 3f;
 
-    // Talбlatok ideje йs helyei
     public List<double> hit_times = new List<double>();
     public List<string> hitPlace_fromMiddle = new List<string>();
 
-    // Referencia a PickUpGun komponensre
     public PickUpGun pickUpGun;
 
-    // Privбt vбltozуk a target kezelйshez
     private List<GameObject> activeTargets = new List<GameObject>();
 
-    // Mуdosнtva private-rуl public-ra, hogy kнvьlrхl is elйrhetх legyen
     public int destroyedTargets = 0;
 
     private List<float> spawnTimes = new List<float>();
 
     void Start()
     {
-        // Inicializбljuk a listбkat
         hit_times = new List<double>();
         hitPlace_fromMiddle = new List<string>();
 
-        // Hide notification text at start if it exists
         if (gameOverNotificationText != null)
         {
             gameOverNotificationText.gameObject.SetActive(false);
@@ -56,7 +49,6 @@ public class ObjectSpawner : MonoBehaviour
 
     void Update()
     {
-        // Ellenхrizzьk a megsemmisнtett targeteket
         CheckDestroyedTargets();
     }
 
@@ -65,21 +57,18 @@ public class ObjectSpawner : MonoBehaviour
     {
         bool anyDestroyed = false;
 
-        // Végigmegyünk a listán és eltávolítjuk a null elemeket (megsemmisített objektumok)
         for (int i = activeTargets.Count - 1; i >= 0; i--)
         {
             if (activeTargets[i] == null)
             {
-                // Record the hit time (time since spawn) if we can determine it
                 if (i < spawnTimes.Count && spawnTimes[i] > 0)
                 {
                     double hitTime = Math.Round(Time.time - spawnTimes[i], 2);
 
-                    // Ellenőrizzük, hogy ez a találat már benne van-e a listában
                     bool alreadyExists = false;
                     foreach (double time in hit_times)
                     {
-                        if (Math.Abs(time - hitTime) < 0.01) // Kis tolerancia az időbeli eltérésre
+                        if (Math.Abs(time - hitTime) < 0.01)
                         {
                             alreadyExists = true;
                             Debug.Log($"Duplikált találat kihagyva: {hitTime}");
@@ -87,14 +76,11 @@ public class ObjectSpawner : MonoBehaviour
                         }
                     }
 
-                    // Csak akkor mentjük el, ha még nincs a listában
                     if (!alreadyExists)
                     {
                         hit_times.Add(hitTime);
                         Debug.Log("Találat feldolgozva! Idő spawn és találat között: " + hitTime + " mp");
 
-                        // Ez itt a kritikus rész - Ne húzzuk ki kommentbe, tényleg csak akkor mentünk, 
-                        // ha nem duplikált a találat és biztosan új
                     }
                 }
 
@@ -106,7 +92,6 @@ public class ObjectSpawner : MonoBehaviour
             }
         }
 
-        // Ha minden target megsemmisült, akkor ledobjuk a fegyvert és megjelenítjük az értesítést
         if (anyDestroyed && activeTargets.Count == 0 && destroyedTargets >= numberToSpawn)
         {
             if (pickUpGun != null)
@@ -114,10 +99,8 @@ public class ObjectSpawner : MonoBehaviour
                 pickUpGun.DropWeapon();
             }
 
-            // Mentsük az eredményt az adatbázisba
             SaveHitResults();
 
-            // Jelenítsük meg az értesítést
             ShowGameOverNotification();
         }
     }
@@ -126,10 +109,8 @@ public class ObjectSpawner : MonoBehaviour
     {
         if (gameOverNotificationText != null)
         {
-            // Egyszerűen megjelenítjük a szöveget, nem módosítjuk a tartalmát
             gameOverNotificationText.gameObject.SetActive(true);
 
-            // Hide the notification after delay
             StartCoroutine(HideNotificationAfterDelay());
         }
     }
@@ -145,14 +126,12 @@ public class ObjectSpawner : MonoBehaviour
 
     private void SaveHitResults()
     {
-        // Elmentjük az összes találat adatait az adatbázisba
         for (int i = 0; i < hit_times.Count; i++)
         {
             double hitTime = hit_times[i];
             double posX = 0;
             double posY = 0;
 
-            // Ha van pozíció információ, akkor kiolvassuk
             if (i < hitPlace_fromMiddle.Count)
             {
                 string posInfo = hitPlace_fromMiddle[i];
@@ -164,7 +143,6 @@ public class ObjectSpawner : MonoBehaviour
                 }
             }
 
-            // Mentés az adatbázisba
             SaveHitToDatabase(hitTime, posX, posY);
         }
     }
@@ -174,7 +152,6 @@ public class ObjectSpawner : MonoBehaviour
         SQLiteDBScript dbManager = FindObjectOfType<SQLiteDBScript>();
         if (dbManager != null)
         {
-            // Pozíció felülírása, ha szükséges
             if (posX == 0 && posY == 0 && hitPlace_fromMiddle.Count > 0)
             {
                 string lastPos = hitPlace_fromMiddle[hitPlace_fromMiddle.Count - 1];
@@ -187,13 +164,8 @@ public class ObjectSpawner : MonoBehaviour
                 }
             }
 
-            // Eldöntjük, hogy ez a találat szerepel-e már az adatbázisban
-            // Egyszerűbb megoldás - az UpdateTargetScore metódusban kezeljük a duplikáció ellenőrzést
-
-            // Meghatározzuk a lövés számát
             int shotNumber = hit_times.Count;
 
-            // Mentés az adatbázisba
             dbManager.UpdateTargetScore(shotNumber, hitTime, posX, posY);
             Debug.Log($"Target adat elmentve az adatbázisba: idő={hitTime}, pozíció=({posX},{posY}), sorszám={shotNumber}");
         }
@@ -204,32 +176,28 @@ public class ObjectSpawner : MonoBehaviour
     }
     public IEnumerator spawnObject(GameObject targetObject)
     {
-        // Ellenőrizzük, hogy van-e targetObject
         if (targetObject == null)
         {
             yield break;
         }
 
-        // Ellenőrizzük, hogy van-e quad
         if (quad == null)
         {
             yield break;
         }
 
-        // Ellenőrizzük, hogy a quadnak van-e MeshCollider komponense
         MeshCollider meshCollider = quad.GetComponent<MeshCollider>();
         if (meshCollider == null)
         {
             yield break;
         }
 
-        // Reseteljük a számlálókat
         destroyedTargets = 0;
         activeTargets.Clear();
-        spawnTimes.Clear(); // Clear the spawn times list
-        hit_times.Clear(); // Clear the hit times
+        spawnTimes.Clear();
+        hit_times.Clear(); 
 
-        // Elrejtjük az értesítést, ha látható lenne
+
         if (gameOverNotificationText != null)
         {
             gameOverNotificationText.gameObject.SetActive(false);
@@ -263,17 +231,14 @@ public class ObjectSpawner : MonoBehaviour
         int attempts = 0;
         const int maxAttempts = 30;
 
-        // Alapйrtelmezett йrtйk az unassigned vбltozу hibбnak elkerьlйsйre
         position = new Vector3(quad.transform.position.x, quad.transform.position.y, quad.transform.position.z);
 
         while (!positionValid && attempts < maxAttempts)
         {
-            // Generбlunk egy vйletlen pozнciуt a Quad hatбrain belьl
             quadX = UnityEngine.Random.Range(collider.bounds.min.x, collider.bounds.max.x);
             quadY = UnityEngine.Random.Range(collider.bounds.min.y, collider.bounds.max.y);
             position = new Vector3(quadX, quadY, quad.transform.position.z);
 
-            // Ellenхrizzьk, hogy elйg tбvol van-e minden mбs aktнv targettхl
             positionValid = IsPositionValid(position);
             attempts++;
         }

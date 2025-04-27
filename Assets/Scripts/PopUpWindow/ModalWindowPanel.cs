@@ -7,7 +7,7 @@ public class ModalWindowPanel : MonoBehaviour
 {
 
     [SerializeField] public Button apply_btn;
-    [SerializeField] public GameObject modalWindow; // A bezárandó ablak GameObject-je
+    [SerializeField] public GameObject modalWindow;
     [SerializeField] public TriggerZoneForWindow trg_zone;
 
 

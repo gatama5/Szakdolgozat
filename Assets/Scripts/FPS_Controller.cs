@@ -26,7 +26,6 @@ public class FPS_Controller : MonoBehaviour
 
     void Start()
     {
-        //Debug.Log(Application.persistentDataPath); DB path
         characterController = GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -42,59 +41,47 @@ public class FPS_Controller : MonoBehaviour
         float curSpeedX = canMove ? (isRunning ? runSpeed : walkSpeed) * Input.GetAxis("Vertical") : 0;
         float curSpeedY = canMove ? (isRunning ? runSpeed : walkSpeed) * Input.GetAxis("Horizontal") : 0;
 
-        // Gravitáció kezelése
         float movementDirectionY = moveDirection.y;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
-        // Ütközésvizsgálat elõre és oldal irányokban
         RaycastHit hit;
-        float rayDistance = 0.5f; // A sugár távolsága
-        int layerMask = ~LayerMask.GetMask("Ignore Raycast"); // Minden layer kivéve az Ignore Raycast
+        float rayDistance = 0.5f;
+        int layerMask = ~LayerMask.GetMask("Ignore Raycast"); 
 
-        // Elõre irányú ütközés ellenõrzése
         if (curSpeedX > 0 && Physics.Raycast(transform.position, forward, out hit, rayDistance, layerMask))
         {
-            // Ha nem trigger, akkor blokkoljuk a mozgást
             if (hit.collider != null && !hit.collider.isTrigger)
             {
                 curSpeedX = 0;
             }
         }
 
-        // Hátra irányú ütközés ellenõrzése
         if (curSpeedX < 0 && Physics.Raycast(transform.position, -forward, out hit, rayDistance, layerMask))
         {
-            // Ha nem trigger, akkor blokkoljuk a mozgást
             if (hit.collider != null && !hit.collider.isTrigger)
             {
                 curSpeedX = 0;
             }
         }
 
-        // Jobb oldali ütközés ellenõrzése
         if (curSpeedY > 0 && Physics.Raycast(transform.position, right, out hit, rayDistance, layerMask))
         {
-            // Ha nem trigger, akkor blokkoljuk a mozgást
             if (hit.collider != null && !hit.collider.isTrigger)
             {
                 curSpeedY = 0;
             }
         }
 
-        // Bal oldali ütközés ellenõrzése
         if (curSpeedY < 0 && Physics.Raycast(transform.position, -right, out hit, rayDistance, layerMask))
         {
-            // Ha nem trigger, akkor blokkoljuk a mozgást
             if (hit.collider != null && !hit.collider.isTrigger)
             {
                 curSpeedY = 0;
             }
         }
 
-        // Mozgási irányt frissítjük a potenciálisan módosított sebességek alapján
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
-        // Gravitáció alkalmazása
         if (characterController.isGrounded)
         {
             moveDirection.y = 0;
@@ -106,7 +93,6 @@ public class FPS_Controller : MonoBehaviour
         #endregion
 
         #region Handles Rotation
-        // Mozgás alkalmazása a CharacterController-re
         characterController.Move(moveDirection * Time.deltaTime);
 
         if (canMove)

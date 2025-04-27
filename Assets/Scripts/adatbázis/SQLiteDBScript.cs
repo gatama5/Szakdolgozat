@@ -19,17 +19,15 @@ public class SQLiteDBScript : MonoBehaviour
 
     void Awake()
     {
-        // Az adatbázis keresztül vitelének biztosítása
         DontDestroyOnLoad(this.gameObject);
 
-        // Az adatbázis fájl elérési útja
+
         string dbPath = Application.persistentDataPath + "/game_scores.db";
         connectionString = "URI=file:" + dbPath;
 
-        // Adatbázis inicializálása
+
         InitializeDatabase();
 
-        // PlayerPrefs-ből az azonosító visszaállítása, ha van
         if (PlayerPrefs.HasKey("CurrentPlayerID"))
         {
             int savedPlayerID = PlayerPrefs.GetInt("CurrentPlayerID");
@@ -39,7 +37,6 @@ public class SQLiteDBScript : MonoBehaviour
             }
         }
 
-        // HOZZÁADNI: Frissítsük a TextMeshPro mezőt az aktuális ID-vel
         UpdatePlayerIdText();
     }
 
@@ -47,7 +44,7 @@ public class SQLiteDBScript : MonoBehaviour
     {
         try
         {
-            // Kapcsolat létrehozása
+
             using (IDbConnection dbConnection = new SqliteConnection(connectionString))
             {
                 dbConnection.Open();
@@ -65,7 +62,7 @@ public class SQLiteDBScript : MonoBehaviour
                     dbCmd.ExecuteNonQuery();
                 }
 
-                // PlayerDetails tábla létrehozása - csak kor és generáció
+
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
                 {
                     string createPlayerDetailsTable = @"
@@ -80,7 +77,7 @@ public class SQLiteDBScript : MonoBehaviour
                     dbCmd.ExecuteNonQuery();
                 }
 
-                // SimonScores tбbla lйtrehozбsa
+
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
                 {
                     string createSimonTable = @"
@@ -96,7 +93,6 @@ public class SQLiteDBScript : MonoBehaviour
                     dbCmd.ExecuteNonQuery();
                 }
 
-                // MazeScores tбbla lйtrehozбsa
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
                 {
                     string createMazeTable = @"
@@ -113,7 +109,6 @@ public class SQLiteDBScript : MonoBehaviour
                     dbCmd.ExecuteNonQuery();
                 }
 
-                // ShootingSessions tбbla lйtrehozбsa (ъj)
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
                 {
                     string createSessionsTable = @"
@@ -128,7 +123,7 @@ public class SQLiteDBScript : MonoBehaviour
                     dbCmd.ExecuteNonQuery();
                 }
 
-                // ShootingScores tбbla lйtrehozбsa (mуdosнtott)
+
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
                 {
                     string createShootingTable = @"
@@ -148,10 +143,10 @@ public class SQLiteDBScript : MonoBehaviour
                     dbCmd.ExecuteNonQuery();
                 }
 
-                // Ha a GameType oszlop mйg nem lйtezik, adjuk hozzб
+
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
                 {
-                    // Ellenхrizzьk, hogy a GameType oszlop mбr lйtezik-e
+
                     bool gameTypeColumnExists = false;
 
                     try
@@ -164,11 +159,11 @@ public class SQLiteDBScript : MonoBehaviour
                     }
                     catch (SqliteException)
                     {
-                        // Az oszlop nem lйtezik, ez vбrhatу
+
                         gameTypeColumnExists = false;
                     }
 
-                    // Ha nem lйtezik, adjuk hozzб
+
                     if (!gameTypeColumnExists)
                     {
                         try
@@ -195,7 +190,7 @@ public class SQLiteDBScript : MonoBehaviour
         }
     }
 
-    // A hiбnyzу InsertPlayerData metуdus implementбciуja
+
     public int InsertPlayerData(int playerAge, string generation, int simonScore, double mazeTime, int shootingScore)
     {
         if (!isDatabaseInitialized)
@@ -209,10 +204,10 @@ public class SQLiteDBScript : MonoBehaviour
             {
                 dbConnection.Open();
 
-                // ID generálás új formátumban: MMDDHHMM
-                string dateStr = DateTime.Now.ToString("MMdd");  // Hónap és nap (4 számjegy)
-                string timeStr = DateTime.Now.ToString("HHmm");  // Óra és perc (4 számjegy)
-                string idStr = dateStr + timeStr;  // MMDDHHMM (8 számjegy)
+
+                string dateStr = DateTime.Now.ToString("MMdd"); 
+                string timeStr = DateTime.Now.ToString("HHmm");
+                string idStr = dateStr + timeStr;
 
                 Debug.Log($"Generated ID string: {idStr}");
 
@@ -221,13 +216,11 @@ public class SQLiteDBScript : MonoBehaviour
                 if (!parseSuccess)
                 {
                     Debug.LogWarning($"Failed to parse '{idStr}' to int, using fallback");
-                    // Fallback megoldás
-                    dateTimeID = (int)(DateTime.Now.Ticks % 1000000000);  // 9 számjegyű maximum
+                    dateTimeID = (int)(DateTime.Now.Ticks % 1000000000);
                 }
 
                 Debug.Log($"Final ID: {dateTimeID}");
 
-                // Játékos hozzáadása név nélkül
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
                 {
                     dbCmd.CommandText = "INSERT INTO Players (PlayerID) VALUES (@id)";
@@ -241,7 +234,6 @@ public class SQLiteDBScript : MonoBehaviour
                     currentPlayerID = dateTimeID;
                 }
 
-                // Játékos részleteinek hozzáadása - csak kor és generáció
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
                 {
                     dbCmd.CommandText = "INSERT INTO PlayerDetails (PlayerID, Age, Generation) VALUES (@id, @age, @gen)";
@@ -264,7 +256,6 @@ public class SQLiteDBScript : MonoBehaviour
                     dbCmd.ExecuteNonQuery();
                 }
 
-                // Simon játék inicializáló pontszám - ONLY IF NOT ZERO
                 if (simonScore > 0)
                 {
                     using (IDbCommand dbCmd = dbConnection.CreateCommand())
@@ -285,7 +276,6 @@ public class SQLiteDBScript : MonoBehaviour
                     }
                 }
 
-                // Labirintus játék inicializáló idő - ONLY IF NOT ZERO
                 if (mazeTime > 0)
                 {
                     string formattedTime = string.Format("{0:mm\\:ss\\.ff}", TimeSpan.FromMinutes(mazeTime));
@@ -312,10 +302,8 @@ public class SQLiteDBScript : MonoBehaviour
                     }
                 }
 
-                // Lövöldözős játék session létrehozása
                 currentShootingSessionID = StartNewShootingSession(currentPlayerID);
 
-                // Az új ID mentése a PlayerPrefs-be is
                 PlayerPrefs.SetInt("CurrentPlayerID", currentPlayerID);
                 PlayerPrefs.Save();
 
@@ -342,16 +330,14 @@ public class SQLiteDBScript : MonoBehaviour
             {
                 dbConnection.Open();
 
-                // ID generálás új formátumban: MMDDHHMM
-                string dateStr = DateTime.Now.ToString("MMdd");  // Hónap és nap (4 számjegy)
-                string timeStr = DateTime.Now.ToString("HHmm");  // Óra és perc (4 számjegy)
-                string idStr = dateStr + timeStr;  // MMDDHHMM (8 számjegy)
+                string dateStr = DateTime.Now.ToString("MMdd");
+                string timeStr = DateTime.Now.ToString("HHmm"); 
+                string idStr = dateStr + timeStr;
 
                 int dateTimeID;
                 if (!int.TryParse(idStr, out dateTimeID))
                 {
-                    // Fallback megoldás
-                    dateTimeID = (int)(DateTime.Now.Ticks % 1000000000);  // 9 számjegyű maximum
+                    dateTimeID = (int)(DateTime.Now.Ticks % 1000000000);
                 }
 
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
@@ -366,11 +352,9 @@ public class SQLiteDBScript : MonoBehaviour
                     dbCmd.ExecuteNonQuery();
                     currentPlayerID = dateTimeID;
 
-                    // Mentsük a PlayerPrefs-be is
                     PlayerPrefs.SetInt("CurrentPlayerID", currentPlayerID);
                     PlayerPrefs.Save();
 
-                    // Új lövési session létrehozása az új játékoshoz
                     if (currentShootingSessionID <= 0)
                     {
                         currentShootingSessionID = StartNewShootingSession(currentPlayerID);
@@ -395,7 +379,7 @@ public class SQLiteDBScript : MonoBehaviour
         }
     }
 
-    // SQLiteDBScript osztályba:
+
     private void RemoveUnneededColumns()
     {
         try
@@ -404,7 +388,7 @@ public class SQLiteDBScript : MonoBehaviour
             {
                 dbConnection.Open();
 
-                // Ellenőrizzük, hogy létezik-e a Players tábla
+
                 bool tableExists = false;
                 using (IDbCommand checkCmd = dbConnection.CreateCommand())
                 {
@@ -415,7 +399,7 @@ public class SQLiteDBScript : MonoBehaviour
 
                 if (tableExists)
                 {
-                    // Ellenőrizzük, hogy létezik-e Name oszlop
+
                     bool nameColumnExists = false;
                     try
                     {
@@ -433,15 +417,14 @@ public class SQLiteDBScript : MonoBehaviour
                         nameColumnExists = false;
                     }
 
-                    // Ha létezik a Name oszlop, eltávolítjuk
                     if (nameColumnExists)
                     {
                         Debug.Log("Removing Name column from Players table...");
 
-                        // SQLite nem támogatja közvetlenül az oszlopok törlését, ezért ideiglenes táblát kell használnunk
+
                         using (IDbCommand dbCmd = dbConnection.CreateCommand())
                         {
-                            // 1. Ideiglenes tábla létrehozása a kívánt struktúrával
+
                             dbCmd.CommandText = @"
                         CREATE TABLE Players_temp (
                             PlayerID INTEGER PRIMARY KEY,
@@ -449,17 +432,15 @@ public class SQLiteDBScript : MonoBehaviour
                         )";
                             dbCmd.ExecuteNonQuery();
 
-                            // 2. Adatok átmásolása az új struktúrába
+
                             dbCmd.CommandText = @"
                         INSERT INTO Players_temp (PlayerID, CreatedAt)
                         SELECT PlayerID, CreatedAt FROM Players";
                             dbCmd.ExecuteNonQuery();
 
-                            // 3. Régi tábla eldobása
                             dbCmd.CommandText = "DROP TABLE Players";
                             dbCmd.ExecuteNonQuery();
 
-                            // 4. Ideiglenes tábla átnevezése
                             dbCmd.CommandText = "ALTER TABLE Players_temp RENAME TO Players";
                             dbCmd.ExecuteNonQuery();
 
@@ -467,7 +448,6 @@ public class SQLiteDBScript : MonoBehaviour
                         }
                     }
 
-                    // Hasonló ellenőrzés és módosítás a PlayerDetails táblában az Email oszlopra
                     bool emailColumnExists = false;
                     try
                     {
@@ -491,7 +471,7 @@ public class SQLiteDBScript : MonoBehaviour
 
                         using (IDbCommand dbCmd = dbConnection.CreateCommand())
                         {
-                            // 1. Ideiglenes tábla létrehozása a kívánt struktúrával
+
                             dbCmd.CommandText = @"
                         CREATE TABLE PlayerDetails_temp (
                             PlayerID INTEGER PRIMARY KEY,
@@ -501,17 +481,17 @@ public class SQLiteDBScript : MonoBehaviour
                         )";
                             dbCmd.ExecuteNonQuery();
 
-                            // 2. Adatok átmásolása az új struktúrába
+
                             dbCmd.CommandText = @"
                         INSERT INTO PlayerDetails_temp (PlayerID, Age, Generation)
                         SELECT PlayerID, Age, Generation FROM PlayerDetails";
                             dbCmd.ExecuteNonQuery();
 
-                            // 3. Régi tábla eldobása
+
                             dbCmd.CommandText = "DROP TABLE PlayerDetails";
                             dbCmd.ExecuteNonQuery();
 
-                            // 4. Ideiglenes tábla átnevezése
+
                             dbCmd.CommandText = "ALTER TABLE PlayerDetails_temp RENAME TO PlayerDetails";
                             dbCmd.ExecuteNonQuery();
 
@@ -531,7 +511,7 @@ public class SQLiteDBScript : MonoBehaviour
 
     public int StartNewShootingSession(int playerID)
     {
-        // Ellenőrizzük a paramétereket
+
         if (!isDatabaseInitialized || playerID <= 0)
         {
             Debug.LogError("Nem lehet új session-t indítani: érvénytelen paraméterek");
@@ -540,17 +520,17 @@ public class SQLiteDBScript : MonoBehaviour
 
         try
         {
-            // Debug infó
+
             Debug.Log($"StartNewShootingSession hívva: játékos ID = {playerID}, jelenlegi session = {currentShootingSessionID}");
 
-            // Ellenőrizzük, hogy van-e már aktív session ehhez a játékoshoz
+
             if (currentShootingSessionID > 0)
             {
                 using (IDbConnection dbConnection = new SqliteConnection(connectionString))
                 {
                     dbConnection.Open();
 
-                    // Ellenőrizzük a meglévő session-t
+
                     using (IDbCommand checkCmd = dbConnection.CreateCommand())
                     {
                         checkCmd.CommandText = "SELECT COUNT(*) FROM ShootingSessions WHERE SessionID = @sessionID AND PlayerID = @playerID";
@@ -567,7 +547,6 @@ public class SQLiteDBScript : MonoBehaviour
 
                         int count = Convert.ToInt32(checkCmd.ExecuteScalar());
 
-                        // Ha a session a jelenlegi játékoshoz tartozik és érvényes, használjuk azt
                         if (count > 0)
                         {
                             Debug.Log($"Meglévő session újrafelhasználása: ID={currentShootingSessionID}");
@@ -577,8 +556,7 @@ public class SQLiteDBScript : MonoBehaviour
                 }
             }
 
-            // Új session létrehozása egy játékos számára
-            // Ellenőrizzük, hogy van-e már session a jelenlegi játékoshoz, amit újra lehet használni
+
             using (IDbConnection dbConnection = new SqliteConnection(connectionString))
             {
                 dbConnection.Open();
@@ -602,7 +580,7 @@ public class SQLiteDBScript : MonoBehaviour
                     }
                 }
 
-                // Ha nincs meglévő session, hozzunk létre újat
+
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
                 {
                     dbCmd.CommandText = "INSERT INTO ShootingSessions (PlayerID) VALUES (@playerID); SELECT last_insert_rowid();";
@@ -625,7 +603,6 @@ public class SQLiteDBScript : MonoBehaviour
         }
     }
 
-    // Simon jбtйk pontszбmбnak frissнtйse
     public bool UpdateSimonScore(int score)
     {
         if (!isDatabaseInitialized)
@@ -644,7 +621,7 @@ public class SQLiteDBScript : MonoBehaviour
             {
                 dbConnection.Open();
 
-                // ELLENХRIZZЬK, HOGY LЙTEZIK-E MБR UGYANILYEN PONTSZБM
+
                 using (IDbCommand checkCmd = dbConnection.CreateCommand())
                 {
                     checkCmd.CommandText = "SELECT COUNT(*) FROM SimonScores WHERE PlayerID = @playerID AND Score = @score";
@@ -661,7 +638,7 @@ public class SQLiteDBScript : MonoBehaviour
 
                     int count = Convert.ToInt32(checkCmd.ExecuteScalar());
 
-                    // Ha mбr lйtezik ilyen pontszбm, ne adjunk hozzб ъjat
+
                     if (count > 0)
                     {
                         return false;
@@ -694,7 +671,7 @@ public class SQLiteDBScript : MonoBehaviour
         }
     }
 
-    // Labirintus idejйnek frissнtйse
+
     public bool UpdateMazeTime(double completionTime, string formattedTime)
     {
         if (!isDatabaseInitialized)
@@ -707,7 +684,7 @@ public class SQLiteDBScript : MonoBehaviour
             return false;
         }
 
-        // NE ENGEDЙLYEZZЬK A NULLБS IDХKET
+
         if (completionTime <= 0)
         {
             return false;
@@ -719,7 +696,7 @@ public class SQLiteDBScript : MonoBehaviour
             {
                 dbConnection.Open();
 
-                // ELLENХRIZZЬK, HOGY LЙTEZIK-E MБR UGYANILYEN IDХ
+
                 using (IDbCommand checkCmd = dbConnection.CreateCommand())
                 {
                     checkCmd.CommandText = "SELECT COUNT(*) FROM MazeScores WHERE PlayerID = @playerID AND CompletionTime = @time";
@@ -736,7 +713,7 @@ public class SQLiteDBScript : MonoBehaviour
 
                     int count = Convert.ToInt32(checkCmd.ExecuteScalar());
 
-                    // Ha mбr lйtezik ilyen idх, ne adjunk hozzб ъjat
+
                     if (count > 0)
                     {
                         return false;
@@ -783,7 +760,7 @@ public class SQLiteDBScript : MonoBehaviour
 
         if (currentShootingSessionID <= 0)
         {
-            // Attempt to restart a shooting session if we have a valid player
+
             if (currentPlayerID > 0)
             {
                 currentShootingSessionID = StartNewShootingSession(currentPlayerID);
@@ -800,7 +777,6 @@ public class SQLiteDBScript : MonoBehaviour
             }
         }
 
-        // Ellenőrizzük, hogy ez a lövés már mentve van-e
         if (IsAlreadySaved(shotNumber, reactionTime, gameType))
         {
             Debug.Log($"Duplikált lövés kihagyása: Session={currentShootingSessionID}, Shot={shotNumber}, Type={gameType}");
@@ -815,7 +791,7 @@ public class SQLiteDBScript : MonoBehaviour
             {
                 dbConnection.Open();
 
-                // Ha még nem létezik, akkor adjuk hozzá
+
                 using (IDbCommand dbCmd = dbConnection.CreateCommand())
                 {
                     dbCmd.CommandText = @"
@@ -869,31 +845,29 @@ public class SQLiteDBScript : MonoBehaviour
 
     public bool UpdateTargetScore(int shotNumber, double reactionTime, double posX, double posY)
     {
-        // Ne ellenőrizzük a szintet, csak a típust használjuk megfelelően
-        // Minden target játék adatot a GAME_TYPE_TARGET típussal mentünk el
+
         return UpdateShootingScore(shotNumber, reactionTime, posX, posY, GAME_TYPE_TARGET);
     }
 
     public bool UpdateShootingScore(int shotNumber, double reactionTime, double posX, double posY)
     {
-        // Ne ellenőrizzük a szintet, csak a típust használjuk megfelelően
-        // Minden shooting játék adatot a GAME_TYPE_SHOOTING típussal mentünk el
+
         return UpdateShootingScore(shotNumber, reactionTime, posX, posY, GAME_TYPE_SHOOTING);
     }
 
-    // Aktuбlis jбtйkos ID lekйrйse
+
     public int GetCurrentPlayerID()
     {
         return currentPlayerID;
     }
 
-    // Aktuбlis lцvйsi session ID lekйrйse
+
     public int GetCurrentShootingSessionID()
     {
         return currentShootingSessionID;
     }
 
-    // Jбtйkos ID beбllнtбsa (pl. meglйvх jбtйkoshoz valу csatlakozбskor)
+
     public void SetCurrentPlayerID(int playerID)
     {
         if (playerID <= 0)
@@ -906,7 +880,6 @@ public class SQLiteDBScript : MonoBehaviour
         PlayerPrefs.SetInt("CurrentPlayerID", playerID);
         PlayerPrefs.Save();
 
-        // Ъj lцvйsi session indнtбsa a beбllнtott jбtйkoshoz
         int sessionID = StartNewShootingSession(currentPlayerID);
         if (sessionID > 0)
         {
